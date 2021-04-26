@@ -3,6 +3,7 @@ import express, {Request, Response} from "express";
 import cors from "cors";
 import helmet from "helmet";
 import http from "http";
+import {Server as IOServer, Socket} from "socket.io";
 
 dotenv.config();
 
@@ -38,3 +39,16 @@ const server = http.createServer(app);
 server.listen(PORT, () => {
     console.log(`Listening on port ${PORT}`);
 });
+
+
+// Setup Socket.IO
+const io = new IOServer(server, {
+    cors: {
+        origin: true
+    }
+});
+
+io.on("connection", async (socket: Socket) => {
+    console.log("client connected!");
+    socket.emit("hello", "world!");
+})
