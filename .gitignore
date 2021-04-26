@@ -1,3 +1,7 @@
+### Manually-added stuff
+
+.idea/
+.husky/
 
 # Created by https://www.toptal.com/developers/gitignore/api/webstorm,jetbrains+iml,node,react,macos,windows
 # Edit at https://www.toptal.com/developers/gitignore?templates=webstorm,jetbrains+iml,node,react,macos,windows
@@ -5,8 +9,6 @@
 ### JetBrains+iml ###
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio, WebStorm and Rider
 # Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
-
-.idea/
 
 # User-specific stuff
 .idea/**/workspace.xml
