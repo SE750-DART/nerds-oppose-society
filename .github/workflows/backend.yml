@@ -2,9 +2,9 @@ name: Backend CI
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
   push:
-    branches: [ main ]
+    branches: [main]
 
 defaults:
   run:
@@ -32,5 +32,5 @@ jobs:
 
       - name: Run tests
         run: |
-            npm run build --if-present
-            npm test
+          npm run build --if-present
+          npm test
