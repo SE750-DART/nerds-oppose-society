@@ -6,6 +6,9 @@
     "start": "ts-node-dev --respawn --pretty --transpile-only src/index.ts",
     "build": "tsc --project ./",
     "test": "jest",
+    "lint": "eslint src/ --ext .ts",
+    "lint:fix": "npm run lint -- --fix",
+    "format": "prettier --write .",
     "prepare": "cd .. && husky install backend/.husky"
   },
   "dependencies": {
@@ -39,6 +42,7 @@
     "typescript": "^4.2.4"
   },
   "lint-staged": {
+    "src/*.ts": "npm run lint:fix",
     "**/*": "prettier --write --ignore-unknown"
   }
 }
