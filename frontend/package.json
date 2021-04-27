@@ -19,7 +19,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test",
+    "test": "react-scripts test --coverage --watchAll=false",
     "lint": "eslint src/ --ext .ts,.tsx",
     "lint:fix": "npm run lint -- --fix",
     "format": "prettier --write .",

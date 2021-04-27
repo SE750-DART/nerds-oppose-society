@@ -5,7 +5,7 @@
   "scripts": {
     "start": "ts-node-dev --respawn --pretty --transpile-only src/index.ts",
     "build": "tsc --project ./",
-    "test": "jest",
+    "test": "jest --coverage",
     "lint": "eslint src/ --ext .ts",
     "lint:fix": "npm run lint -- --fix",
     "format": "prettier --write .",
