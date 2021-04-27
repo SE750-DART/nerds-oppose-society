@@ -1,24 +1,19 @@
-import dotenv from "dotenv";
 import express, { Request, Response } from "express";
 import cors from "cors";
 import helmet from "helmet";
 import http from "http";
 import { Server as IOServer, Socket } from "socket.io";
-
-dotenv.config();
-
-// Setup Environment Variables
-if (!process.env.PORT) {
-  console.error('ERROR: Environment variable "PORT" not set');
-  process.exit(1);
-}
-const PORT: number = parseInt(process.env.PORT as string, 10);
+import config from "./config";
 
 // Setup Express
 const app = express();
 
 app.use(helmet());
-app.use(cors());
+app.use(
+  cors({
+    origin: config.origin,
+  })
+);
 
 app.get("/", async (req: Request, res: Response) => {
   try {
@@ -33,14 +28,14 @@ app.get("/", async (req: Request, res: Response) => {
 // Activate Server
 const server = http.createServer(app);
 
-server.listen(PORT, () => {
-  console.log(`Listening on port ${PORT}`);
+server.listen(config.port, () => {
+  console.log(`Listening on port ${config.port}`);
 });
 
 // Setup Socket.IO
 const io = new IOServer(server, {
   cors: {
-    origin: true,
+    origin: config.origin,
   },
 });
 
