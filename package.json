@@ -26,6 +26,7 @@
     "frontend/**/*": [
       "eslint frontend/src --ext .ts,.tsx --fix",
       "prettier --write"
-    ]
+    ],
+    "!((backend|frontend)/**/*)": "prettier --write"
   }
 }
