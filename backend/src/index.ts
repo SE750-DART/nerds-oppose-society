@@ -4,6 +4,7 @@ import helmet from "helmet";
 import http from "http";
 import { Server as IOServer, Socket } from "socket.io";
 import config from "./config";
+import routes from "./routes";
 
 // Setup Express
 const app = express();
@@ -14,6 +15,7 @@ app.use(
     origin: config.origin,
   })
 );
+app.use(routes);
 
 app.get("/", async (req: Request, res: Response) => {
   try {
