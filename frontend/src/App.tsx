@@ -1,10 +1,12 @@
 import React from "react";
 import "./App.css";
-import { Switch, Route, Redirect } from "react-router-dom";
+import { Switch, Route, Redirect, useHistory } from "react-router-dom";
 import HomePage from "./HomePage";
 import GameRouter from "./GameRouter";
 
 function App() {
+  const browserHistory = useHistory();
+
   return (
     <Switch>
       <Route exact path="/">
@@ -12,7 +14,7 @@ function App() {
       </Route>
 
       <Route path="/:gameCode">
-        <GameRouter />
+        <GameRouter browserHistory={browserHistory} />
       </Route>
 
       <Route path="*">

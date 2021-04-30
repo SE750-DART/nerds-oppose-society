@@ -4,9 +4,10 @@ import { useHistory } from "react-router-dom";
 type Props = {
   path: string;
   gameCode: string;
+  browserHistory: any;
 };
 
-const BasicPage = ({ path, gameCode }: Props) => {
+const BasicPage = ({ path, gameCode, browserHistory }: Props) => {
   const history = useHistory();
 
   return (
@@ -33,6 +34,9 @@ const BasicPage = ({ path, gameCode }: Props) => {
       </button>
       <button type="button" onClick={() => history.push("/scoreboard")}>
         scoreboard
+      </button>
+      <button type="button" onClick={() => browserHistory.push("/")}>
+        home
       </button>
     </>
   );
