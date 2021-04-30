@@ -2,31 +2,31 @@ import React from "react";
 import styles from "./style.module.css";
 
 interface ButtonProps {
-  buttonType: "primary" | "secondary";
-  buttonSize?: "big" | "small";
+  variant: "primary" | "secondary";
+  size?: "big" | "small";
   text: string;
   handleOnClick: React.MouseEventHandler;
   disabled?: boolean;
 }
 
 const Button = ({
-  buttonType,
-  buttonSize = "big",
+  variant,
+  size = "big",
   text,
   handleOnClick,
   disabled = false,
 }: ButtonProps) => {
   let buttonTypeStyle: string = "";
-  if (buttonType === "primary") {
+  if (variant === "primary") {
     buttonTypeStyle = styles.button__primary;
-  } else if (buttonType === "secondary") {
+  } else if (variant === "secondary") {
     buttonTypeStyle = styles.button__secondary;
   }
 
   let buttonSizeStyle: string = "";
-  if (buttonSize === "big") {
+  if (size === "big") {
     buttonSizeStyle = styles.button__big;
-  } else if (buttonSize === "small") {
+  } else if (size === "small") {
     buttonSizeStyle = styles.button__small;
   }
 
