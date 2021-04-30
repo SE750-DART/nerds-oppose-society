@@ -3,16 +3,18 @@ import styles from "./style.module.css";
 
 interface ButtonProps {
   buttonType: "primary" | "secondary";
-  buttonSize: "big" | "small";
+  buttonSize?: "big" | "small";
   text: string;
   handleOnClick: React.MouseEventHandler;
+  disabled?: boolean;
 }
 
 const Button = ({
   buttonType,
-  buttonSize,
+  buttonSize = "big",
   text,
   handleOnClick,
+  disabled = false,
 }: ButtonProps) => {
   let buttonTypeStyle: string = "";
   if (buttonType === "primary") {
@@ -28,9 +30,14 @@ const Button = ({
     buttonSizeStyle = styles.button__small;
   }
 
+  let buttonDisabledStyle: string = "";
+  if (disabled) {
+    buttonDisabledStyle = styles.button__disabled;
+  }
+
   return (
     <button
-      className={`${styles.button} ${buttonTypeStyle} ${buttonSizeStyle}`}
+      className={`${styles.button} ${buttonTypeStyle} ${buttonSizeStyle} ${buttonDisabledStyle}`}
       type="button"
       onClick={handleOnClick}
     >

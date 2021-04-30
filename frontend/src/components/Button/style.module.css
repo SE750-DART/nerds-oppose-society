@@ -6,7 +6,12 @@
   font-weight: bold;
   overflow: hidden;
   text-overflow: ellipsis;
+  transition: 0.3s;
   white-space: nowrap;
+}
+
+.button:hover {
+  transition: 0.3s;
 }
 
 .button__primary {
@@ -15,10 +20,18 @@
   color: #eeffff;
 }
 
+.button__primary:hover {
+  box-shadow: 0px 10px 50px rgba(0, 0, 0, 0.6);
+}
+
 .button__secondary {
   background-color: #eeffff;
   box-shadow: 0px 10px 40px rgba(0, 0, 0, 0.25);
   color: #000000;
+}
+
+.button__secondary:hover {
+  box-shadow: 0px 10px 50px rgba(0, 0, 0, 0.4);
 }
 
 .button__big {
@@ -32,4 +45,19 @@
   font-size: 24px;
   height: 48px;
   padding: 0 24px;
+}
+
+.button__small:hover {
+  box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+.button__disabled {
+  background-color: #cfcfcf;
+  box-shadow: none;
+  color: #000000;
+  cursor: not-allowed;
+}
+
+.button__disabled:hover {
+  box-shadow: none;
 }
