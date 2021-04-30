@@ -1,28 +1,40 @@
 import React from "react";
-import { useParams } from "react-router-dom";
-import logo from "./logo.svg";
+import { useHistory } from "react-router-dom";
 
-const BasicPage = () => {
-  const { gameCode } = useParams<{ gameCode: string }>();
+type Props = {
+  path: string;
+  gameCode: string;
+};
+
+const BasicPage = ({ path, gameCode }: Props) => {
+  const history = useHistory();
 
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-        <p>Gamecode: {gameCode}</p>
-      </header>
-    </div>
+    <>
+      <p>Gamecode: {gameCode}</p>
+      <p>Path: {path}</p>
+      <button type="button" onClick={() => history.push("/nickname")}>
+        nickname
+      </button>
+      <button type="button" onClick={() => history.push("/lobby")}>
+        lobby
+      </button>
+      <button type="button" onClick={() => history.push("/preRound")}>
+        preRound
+      </button>
+      <button type="button" onClick={() => history.push("/submitPunchline")}>
+        submitPunchline
+      </button>
+      <button type="button" onClick={() => history.push("/selectPunchline")}>
+        selectPunchline
+      </button>
+      <button type="button" onClick={() => history.push("/postRound")}>
+        postRound
+      </button>
+      <button type="button" onClick={() => history.push("/scoreboard")}>
+        scoreboard
+      </button>
+    </>
   );
 };
 

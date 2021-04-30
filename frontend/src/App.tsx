@@ -1,17 +1,22 @@
 import React from "react";
 import "./App.css";
-import { Switch, Route } from "react-router-dom";
-import BasicPage from "./BasicPage";
+import { Switch, Route, Redirect } from "react-router-dom";
+import HomePage from "./HomePage";
+import GameRouter from "./GameRouter";
 
 function App() {
   return (
     <Switch>
-      <Route path="/:gameCode">
-        <BasicPage />
+      <Route exact path="/">
+        <HomePage />
       </Route>
 
-      <Route path="/">
-        <p>Home</p>
+      <Route path="/:gameCode">
+        <GameRouter />
+      </Route>
+
+      <Route path="*">
+        <Redirect to="/" />
       </Route>
     </Switch>
   );
