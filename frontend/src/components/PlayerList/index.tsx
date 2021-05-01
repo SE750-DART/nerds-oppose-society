@@ -14,6 +14,8 @@ const PlayerList = ({ gameState }: PlayerListProps) => {
   }
 
   // TODO: Retrieve players from backend
+  const me: string = "AlexVerkerk";
+
   const dummyPlayers: { id: string; nickname: string; score: number }[] = [
     {
       id: "94fb6b63-754d-4674-952a-014e6ac95803",
@@ -41,11 +43,13 @@ const PlayerList = ({ gameState }: PlayerListProps) => {
 
   return (
     <div className={styles.playerlist}>
-      {dummyPlayers.map((player) => (
+      {dummyPlayers.map((player, index) => (
         <Player
           key={player.id}
           nickname={player.nickname}
           score={showScores ? player.score : undefined}
+          highlight={me === player.nickname}
+          last={index + 1 !== dummyPlayers.length}
         />
       ))}
     </div>
