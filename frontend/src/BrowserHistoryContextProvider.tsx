@@ -2,6 +2,7 @@ import React, { useState } from "react";
 
 type Context = {
   browserHistory: any;
+  // eslint-disable-next-line no-unused-vars
   setBrowserHistory: (history: any) => void;
 };
 
