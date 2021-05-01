@@ -1,0 +1,36 @@
+{
+  "name": "nerds-oppose-society",
+  "version": "0.1.0",
+  "scripts": {
+    "test": "(cd backend && npm run test); (cd frontend && npm run test)",
+    "lint": "(cd backend && npm run lint); (cd frontend && npm run lint)",
+    "lint:fix": "(cd backend && npm run lint:fix); (cd frontend && npm run lint:fix)",
+    "format": "prettier . --write",
+    "prepare": "husky install"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/taitfuller/nerds-oppose-society.git"
+  },
+  "bugs": {
+    "url": "https://github.com/taitfuller/nerds-oppose-society/issues"
+  },
+  "homepage": "https://github.com/taitfuller/nerds-oppose-society#readme",
+  "devDependencies": {
+    "eslint": "^7.25.0",
+    "husky": "^6.0.0",
+    "lint-staged": "^10.5.4",
+    "prettier": "^2.2.1"
+  },
+  "lint-staged": {
+    "backend/**/*": [
+      "eslint backend/src --ext .ts --fix",
+      "prettier --write"
+    ],
+    "frontend/**/*": [
+      "eslint frontend/src --ext .ts,.tsx --fix",
+      "prettier --write"
+    ],
+    "!((backend|frontend)/**/*)": "prettier --write"
+  }
+}
