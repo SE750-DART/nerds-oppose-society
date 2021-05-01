@@ -1,17 +1,16 @@
-import React, { useContext, useEffect } from "react";
-import { Switch, Route, Redirect, useHistory } from "react-router-dom";
-import { BrowserHistoryContext } from "./BrowserHistoryContextProvider";
+import React, { createContext } from "react";
+import { Router, Switch, Route, Redirect } from "react-router-dom";
+import { createBrowserHistory } from "history";
 import HomePage from "./HomePage";
 import GameRouter from "./GameRouter";
 import "./App.css";
 
-function App() {
-  const browserHistory = useHistory();
-  const { setBrowserHistory } = useContext(BrowserHistoryContext);
-  useEffect(() => setBrowserHistory(browserHistory), []);
+const browserHistory = createBrowserHistory();
+export const BrowserHistoryContext = createContext(browserHistory);
 
+function App() {
   return (
-    <>
+    <Router history={browserHistory}>
       <Switch>
         <Route exact path="/">
           <HomePage />
@@ -29,7 +28,7 @@ function App() {
       <p data-testid="test" style={{ display: "none" }}>
         test
       </p>
-    </>
+    </Router>
   );
 }
 

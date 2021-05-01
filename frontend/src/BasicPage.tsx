@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 import { useHistory } from "react-router-dom";
-import { BrowserHistoryContext } from "./BrowserHistoryContextProvider";
+import { BrowserHistoryContext } from "./App";
 
 type Props = {
   path: string;
@@ -9,7 +9,7 @@ type Props = {
 
 const BasicPage = ({ path, gameCode }: Props) => {
   const memoryHistory = useHistory();
-  const { browserHistory } = useContext(BrowserHistoryContext);
+  const browserHistory = useContext(BrowserHistoryContext);
 
   return (
     <>
