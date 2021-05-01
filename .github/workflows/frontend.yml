@@ -11,8 +11,8 @@ defaults:
     working-directory: frontend
 
 jobs:
-  backend-ci:
-    name: Run Backend Tests and Linter
+  frontend-ci:
+    name: Run Frontend Tests and Linter
     runs-on: ubuntu-latest
 
     steps:
