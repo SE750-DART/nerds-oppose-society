@@ -7,6 +7,7 @@ interface TextFieldProps {
   size?: "big" | "small";
   // eslint-disable-next-line no-unused-vars
   onChangeHandler: (arg0: string) => void;
+  disabled?: boolean;
 }
 
 const TextField = ({
@@ -14,6 +15,7 @@ const TextField = ({
   textValue,
   size = "big",
   onChangeHandler,
+  disabled = false,
 }: TextFieldProps) => {
   let sizeStyle: string = "";
   if (size === "big") {
@@ -29,6 +31,7 @@ const TextField = ({
       value={textValue}
       type="text"
       onChange={(e) => onChangeHandler(e.target.value)}
+      disabled={disabled}
     />
   );
 };
