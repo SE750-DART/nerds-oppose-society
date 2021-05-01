@@ -1,0 +1,17 @@
+.textfield {
+  align-items: center;
+  border: none;
+  border-radius: 16px;
+  box-shadow: inset 0px 0px 10px rgba(0, 0, 0, 0.25);
+  display: flex;
+  font-family: "DM Sans", sans-serif;
+  font-size: 32px;
+  font-weight: bold;
+  justify-content: center;
+  padding: 0 24px;
+  text-align: center;
+  transition: 0.3s;
+
+  height: 64px;
+  width: 100%;
+}
