@@ -3,7 +3,7 @@ import styles from "./style.module.css";
 
 interface PlayerProps {
   nickname: string;
-  score: number;
+  score?: number;
   highlight?: boolean;
 }
 

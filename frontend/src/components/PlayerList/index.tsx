@@ -7,15 +7,11 @@ interface PlayerListProps {
 }
 
 const PlayerList = ({ gameState }: PlayerListProps) => {
-  // let showScores: boolean = false;
-  // let showIndicators: boolean = false;
-  //
-  // if (gameState === "midround") {
-  //   showScores = true;
-  // } else if (gameState === "endround") {
-  //   showScores: true;
-  //   showIndicators: true;
-  // }
+  let showScores: boolean = true;
+
+  if (gameState === "lobby") {
+    showScores = true;
+  }
 
   // TODO: Retrieve players from backend
   const dummyPlayers: { id: string; nickname: string; score: number }[] = [
@@ -49,7 +45,7 @@ const PlayerList = ({ gameState }: PlayerListProps) => {
         <Player
           key={player.id}
           nickname={player.nickname}
-          score={player.score}
+          score={showScores ? player.score : undefined}
         />
       ))}
     </div>
