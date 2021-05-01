@@ -1,38 +1,45 @@
-import React from "react";
+import React, { useContext } from "react";
 import { useHistory } from "react-router-dom";
+import { BrowserHistoryContext } from "./BrowserHistoryContextProvider";
 
 type Props = {
   path: string;
   gameCode: string;
-  browserHistory: any;
 };
 
-const BasicPage = ({ path, gameCode, browserHistory }: Props) => {
-  const history = useHistory();
+const BasicPage = ({ path, gameCode }: Props) => {
+  const memoryHistory = useHistory();
+  const { browserHistory } = useContext(BrowserHistoryContext);
 
   return (
     <>
       <p>Gamecode: {gameCode}</p>
       <p>Path: {path}</p>
-      <button type="button" onClick={() => history.push("/nickname")}>
+      <button type="button" onClick={() => memoryHistory.push("/nickname")}>
         nickname
       </button>
-      <button type="button" onClick={() => history.push("/lobby")}>
+      <button type="button" onClick={() => memoryHistory.push("/lobby")}>
         lobby
       </button>
-      <button type="button" onClick={() => history.push("/preRound")}>
+      <button type="button" onClick={() => memoryHistory.push("/preRound")}>
         preRound
       </button>
-      <button type="button" onClick={() => history.push("/submitPunchline")}>
+      <button
+        type="button"
+        onClick={() => memoryHistory.push("/submitPunchline")}
+      >
         submitPunchline
       </button>
-      <button type="button" onClick={() => history.push("/selectPunchline")}>
+      <button
+        type="button"
+        onClick={() => memoryHistory.push("/selectPunchline")}
+      >
         selectPunchline
       </button>
-      <button type="button" onClick={() => history.push("/postRound")}>
+      <button type="button" onClick={() => memoryHistory.push("/postRound")}>
         postRound
       </button>
-      <button type="button" onClick={() => history.push("/scoreboard")}>
+      <button type="button" onClick={() => memoryHistory.push("/scoreboard")}>
         scoreboard
       </button>
       <button type="button" onClick={() => browserHistory.push("/")}>

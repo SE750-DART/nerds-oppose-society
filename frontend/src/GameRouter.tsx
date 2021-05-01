@@ -12,66 +12,38 @@ type PathParams = {
   gameCode: string;
 };
 
-const GameRouter = ({ browserHistory }: { browserHistory: any }) => {
+const GameRouter = () => {
   const { gameCode } = useParams<PathParams>();
 
   return (
     <MemoryRouter>
       <Switch>
         <Route path="/nickname">
-          <BasicPage
-            gameCode={gameCode}
-            browserHistory={browserHistory}
-            path="nickname"
-          />
+          <BasicPage gameCode={gameCode} path="nickname" />
         </Route>
 
         <Route path="/lobby">
-          <BasicPage
-            gameCode={gameCode}
-            browserHistory={browserHistory}
-            path="lobby"
-          />
+          <BasicPage gameCode={gameCode} path="lobby" />
         </Route>
 
         <Route path="/preRound">
-          <BasicPage
-            gameCode={gameCode}
-            browserHistory={browserHistory}
-            path="preRound"
-          />
+          <BasicPage gameCode={gameCode} path="preRound" />
         </Route>
 
         <Route path="/submitPunchline">
-          <BasicPage
-            gameCode={gameCode}
-            browserHistory={browserHistory}
-            path="submitPunchline"
-          />
+          <BasicPage gameCode={gameCode} path="submitPunchline" />
         </Route>
 
         <Route path="/selectPunchline">
-          <BasicPage
-            gameCode={gameCode}
-            browserHistory={browserHistory}
-            path="selectPunchline"
-          />
+          <BasicPage gameCode={gameCode} path="selectPunchline" />
         </Route>
 
         <Route path="/postRound">
-          <BasicPage
-            gameCode={gameCode}
-            browserHistory={browserHistory}
-            path="postRound"
-          />
+          <BasicPage gameCode={gameCode} path="postRound" />
         </Route>
 
         <Route path="/scoreboard">
-          <BasicPage
-            gameCode={gameCode}
-            browserHistory={browserHistory}
-            path="scoreboard"
-          />
+          <BasicPage gameCode={gameCode} path="scoreboard" />
         </Route>
 
         <Route path="*">

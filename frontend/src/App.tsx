@@ -1,11 +1,14 @@
-import React from "react";
-import "./App.css";
+import React, { useContext, useEffect } from "react";
 import { Switch, Route, Redirect, useHistory } from "react-router-dom";
+import { BrowserHistoryContext } from "./BrowserHistoryContextProvider";
 import HomePage from "./HomePage";
 import GameRouter from "./GameRouter";
+import "./App.css";
 
 function App() {
   const browserHistory = useHistory();
+  const { setBrowserHistory } = useContext(BrowserHistoryContext);
+  useEffect(() => setBrowserHistory(browserHistory), []);
 
   return (
     <Switch>
@@ -14,7 +17,7 @@ function App() {
       </Route>
 
       <Route path="/:gameCode">
-        <GameRouter browserHistory={browserHistory} />
+        <GameRouter />
       </Route>
 
       <Route path="*">
