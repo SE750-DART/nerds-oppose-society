@@ -11,19 +11,25 @@ function App() {
   useEffect(() => setBrowserHistory(browserHistory), []);
 
   return (
-    <Switch>
-      <Route exact path="/">
-        <HomePage />
-      </Route>
+    <>
+      <Switch>
+        <Route exact path="/">
+          <HomePage />
+        </Route>
 
-      <Route path="/:gameCode">
-        <GameRouter />
-      </Route>
+        <Route path="/:gameCode">
+          <GameRouter />
+        </Route>
 
-      <Route path="*">
-        <Redirect to="/" />
-      </Route>
-    </Switch>
+        <Route path="*">
+          <Redirect to="/" />
+        </Route>
+      </Switch>
+
+      <p data-testid="test" style={{ display: "none" }}>
+        test
+      </p>
+    </>
   );
 }
 
