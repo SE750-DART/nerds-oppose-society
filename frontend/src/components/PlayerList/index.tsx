@@ -10,7 +10,7 @@ const PlayerList = ({ gameState }: PlayerListProps) => {
   let showScores: boolean = true;
 
   if (gameState === "lobby") {
-    showScores = true;
+    showScores = false;
   }
 
   // TODO: Retrieve players from backend
@@ -39,8 +39,6 @@ const PlayerList = ({ gameState }: PlayerListProps) => {
     },
   ];
 
-  console.log(gameState);
-
   return (
     <div className={styles.playerlist}>
       {dummyPlayers.map((player, index) => (
@@ -49,7 +47,11 @@ const PlayerList = ({ gameState }: PlayerListProps) => {
           nickname={player.nickname}
           score={showScores ? player.score : undefined}
           highlight={me === player.nickname}
-          last={index + 1 !== dummyPlayers.length}
+          divider={
+            index + 1 < dummyPlayers.length && // player not last
+            me !== player.nickname && // player not me
+            dummyPlayers[index + 1].nickname !== me // next player not me
+          }
         />
       ))}
     </div>

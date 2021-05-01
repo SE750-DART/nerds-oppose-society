@@ -5,10 +5,15 @@ interface PlayerProps {
   nickname: string;
   score?: number;
   highlight?: boolean;
-  last: boolean;
+  divider: boolean;
 }
 
-const Player = ({ nickname, score, highlight = false, last }: PlayerProps) => {
+const Player = ({
+  nickname,
+  score,
+  highlight = false,
+  divider,
+}: PlayerProps) => {
   let highlightStyle = "";
   if (highlight) {
     highlightStyle = styles.playerMe;
@@ -18,7 +23,7 @@ const Player = ({ nickname, score, highlight = false, last }: PlayerProps) => {
     <div className={`${styles.player} ${highlightStyle}`}>
       <div className={styles.playerText}>{nickname}</div>
       <div className={styles.playerScore}>{score}</div>
-      {last && !highlight && <div className={styles.playerDivider} />}
+      {divider && <div className={styles.playerDivider} />}
     </div>
   );
 };
