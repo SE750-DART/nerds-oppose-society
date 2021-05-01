@@ -16,10 +16,15 @@ const PlayerList = ({ gameState }: PlayerListProps) => {
   // TODO: Retrieve players from backend
   const me: string = "AlexVerkerk";
 
-  const dummyPlayers: { id: string; nickname: string; score: number }[] = [
+  const dummyPlayers: {
+    id: string;
+    nickname: string;
+    score: number;
+    host?: boolean;
+  }[] = [
     {
       id: "94fb6b63-754d-4674-952a-014e6ac95803",
-      nickname: "DonkeyKong",
+      nickname: "DonkeyKongDonkeyKongDonkeyKong",
       score: 3,
     },
     {
@@ -36,6 +41,7 @@ const PlayerList = ({ gameState }: PlayerListProps) => {
       id: "85d22d4c-3fff-49f3-bdbf-480f08cdab5a",
       nickname: "TaitFuller",
       score: 0,
+      host: true,
     },
   ];
 
@@ -52,6 +58,7 @@ const PlayerList = ({ gameState }: PlayerListProps) => {
             me !== player.nickname && // player not me
             dummyPlayers[index + 1].nickname !== me // next player not me
           }
+          isHost={player.host}
         />
       ))}
     </div>
