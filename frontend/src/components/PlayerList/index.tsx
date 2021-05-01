@@ -1,4 +1,5 @@
 import React from "react";
+import Player from "./Player";
 import styles from "./style.module.css";
 
 interface PlayerListProps {
@@ -45,7 +46,11 @@ const PlayerList = ({ gameState }: PlayerListProps) => {
   return (
     <div className={styles.playerlist}>
       {dummyPlayers.map((player) => (
-        <div key={player.id}>{player.nickname}</div>
+        <Player
+          key={player.id}
+          nickname={player.nickname}
+          score={player.score}
+        />
       ))}
     </div>
   );

@@ -1,0 +1,30 @@
+.player {
+  align-items: center;
+  display: grid;
+  font-size: 24px;
+  grid-template-columns: auto 56px 56px;
+  grid-template-rows: 54px 2px;
+  height: 56px;
+  width: 100%;
+}
+
+/*
+ * I'm not sure why, but CSS Modules snake-case selection seems to have broken in here. Grr
+ */
+
+.playerText {
+  margin-left: 17px;
+  text-align: left;
+}
+
+.playerScore {
+  grid-column: 3;
+}
+
+.playerDivider {
+  background-color: #84b5de;
+  grid-column: 1 / 4;
+  grid-row: 2;
+  height: 2px;
+  width: 100%;
+}
