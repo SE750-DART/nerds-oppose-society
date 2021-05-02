@@ -15,10 +15,12 @@ function App() {
   const [testText, setTestText] = useState("");
 
   const clickBtn = () => {
+    // eslint-disable-next-line
     console.log("Beep, boop");
   };
 
   const logTextField = () => {
+    // eslint-disable-next-line
     console.log(testText);
   };
 
@@ -49,11 +51,7 @@ function App() {
           onChangeHandler={setTestText}
         />
         <br />
-        <Button
-          variant="primary"
-          text="Join game"
-          handleOnClick={logTextField}
-        />
+        <Button text="Join game" handleOnClick={logTextField} />
         <br />
         <Button
           variant="secondary"

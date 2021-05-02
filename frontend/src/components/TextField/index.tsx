@@ -5,7 +5,6 @@ interface TextFieldProps {
   label: string;
   textValue: string;
   size?: "big" | "small";
-  // eslint-disable-next-line no-unused-vars
   onChangeHandler: (arg0: string) => void;
   disabled?: boolean;
 }

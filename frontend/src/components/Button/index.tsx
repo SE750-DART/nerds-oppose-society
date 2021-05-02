@@ -2,7 +2,7 @@ import React from "react";
 import styles from "./style.module.css";
 
 interface ButtonProps {
-  variant: "primary" | "secondary";
+  variant?: "primary" | "secondary";
   size?: "big" | "small";
   text: string;
   handleOnClick: React.MouseEventHandler;
@@ -10,7 +10,7 @@ interface ButtonProps {
 }
 
 const Button = ({
-  variant,
+  variant = "primary",
   size = "big",
   text,
   handleOnClick,
