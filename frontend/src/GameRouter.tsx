@@ -6,7 +6,7 @@ import {
   Redirect,
   useParams,
 } from "react-router-dom";
-import BasicPage from "./BasicPage";
+import BasicPage from "./pages/BasicPage";
 
 type PathParams = {
   gameCode: string;

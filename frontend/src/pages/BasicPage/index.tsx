@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 import { useHistory } from "react-router-dom";
-import { BrowserHistoryContext } from "./App";
+import { BrowserHistoryContext } from "../../App";
 
 type Props = {
   path: string;
