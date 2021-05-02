@@ -1,7 +1,7 @@
 import { Router } from "express";
 
-import game from "./game";
-import player from "./player";
+import game from "./game.route";
+import player from "./player.route";
 
 const routes = Router();
 
