@@ -15,7 +15,6 @@ describe("Test digitShortCode", () => {
     spy.mockReturnValue(0.0);
 
     const code = digitShortCode(6);
-    console.log(code);
 
     expect(`${code}`).toHaveLength(6);
   });
