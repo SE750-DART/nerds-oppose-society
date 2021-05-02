@@ -1,4 +1,4 @@
-import { Schema } from "mongoose";
+import { Document, Schema } from "mongoose";
 
 export enum SetupType {
   pickOne = "PICK_ONE",
@@ -6,7 +6,7 @@ export enum SetupType {
   drawTwoPickThree = "DRAW_TWO_PICK_THREE",
 }
 
-export interface Setup {
+export interface Setup extends Document {
   setup: string;
   type: SetupType;
 }

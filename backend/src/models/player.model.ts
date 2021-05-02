@@ -1,6 +1,6 @@
-import { Schema } from "mongoose";
+import { Document, Schema } from "mongoose";
 
-export interface Player {
+export interface Player extends Document {
   nickname: string;
   punchlines?: string[];
   score?: number;
