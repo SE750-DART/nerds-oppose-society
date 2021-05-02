@@ -1,2 +1,5 @@
 # production
 build/
+
+# mongodb-memory-server
+globalConfig.json
