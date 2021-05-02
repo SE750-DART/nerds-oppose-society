@@ -1,4 +1,4 @@
-import { GameModel, Setup } from "../models";
+import { Game, GameModel, Setup } from "../models";
 import { digitShortCode, shuffle } from "../util";
 import { PUNCHLINES, SETUPS } from "../resources";
 
@@ -15,6 +15,18 @@ export const createGame = async (): Promise<string> => {
   await game.save();
 
   return String(gameCode);
+};
+
+export const getGame = async (
+  gameCode: string,
+  projection?: string
+): Promise<Game> => {
+  const game: Game | null = await GameModel.findOne(
+    { gameCode: gameCode },
+    projection
+  ).exec();
+  if (game) return game;
+  throw new Error("Could not get game");
 };
 
 export const validateGameCode = async (gameCode: string): Promise<boolean> => {

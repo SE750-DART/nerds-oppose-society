@@ -1,21 +1,20 @@
-import { createGame, validateGameCode } from "../game.service";
+import { createGame, getGame, validateGameCode } from "../game.service";
 import { Game, GameModel, Setup } from "../../models";
 import mongoose from "mongoose";
 import { PUNCHLINES, SETUPS } from "../../resources";
-import { create } from "domain";
+
+beforeAll(async () => {
+  await mongoose.connect(global.__MONGO_URI__, {
+    useNewUrlParser: true,
+  });
+});
+
+afterAll(async () => {
+  await mongoose.connection.close();
+});
 
 describe("createGame Service", () => {
   let spy: jest.SpyInstance;
-
-  beforeAll(async () => {
-    await mongoose.connect(global.__MONGO_URI__, {
-      useNewUrlParser: true,
-    });
-  });
-
-  afterAll(async () => {
-    await mongoose.connection.close();
-  });
 
   beforeEach(() => {
     spy = jest.spyOn(GameModel.prototype, "save");
@@ -53,17 +52,21 @@ describe("createGame Service", () => {
   });
 });
 
+describe("getGame Service", () => {
+  it("Game does not exist", async () => {
+    await expect(getGame("123456")).rejects.toThrow("Could not get game");
+  });
+
+  it("Game exists", async () => {
+    const gameCode = await createGame();
+
+    const game = await getGame(gameCode);
+
+    expect(game._id).toBeDefined();
+  });
+});
+
 describe("validateGameCode Service", () => {
-  beforeAll(async () => {
-    await mongoose.connect(global.__MONGO_URI__, {
-      useNewUrlParser: true,
-    });
-  });
-
-  afterAll(async () => {
-    await mongoose.connection.close();
-  });
-
   it("Invalid code", async () => {
     const result = await validateGameCode("42069");
 
