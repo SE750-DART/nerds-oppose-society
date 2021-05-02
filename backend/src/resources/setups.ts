@@ -170,7 +170,7 @@ export default <Setup[]>[
   },
   {
     setup:
-      "In M. Night Shyamalan's new movie, Bruce Willis discovers that __________had really been _______________ all along.",
+      "In M. Night Shyamalan's new movie, Bruce Willis discovers that __________ had really been _______________ all along.",
     type: SetupType.pickTwo,
   },
   {
@@ -258,7 +258,7 @@ export default <Setup[]>[
   },
   {
     setup:
-      "This is the way the world ends This is the way the world ends Not with a bang but with __________________.",
+      "This is the way the world ends. This is the way the world ends. Not with a bang but with __________________.",
     type: SetupType.pickOne,
   },
   {
