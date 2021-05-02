@@ -1,4 +1,4 @@
-import { digitShortCode } from "../index";
+import { digitShortCode, shuffle } from "../index";
 
 describe("Test digitShortCode", () => {
   let spy: jest.SpyInstance;
@@ -27,5 +27,28 @@ describe("Test digitShortCode", () => {
     console.log(code);
 
     expect(`${code}`.length).toBe(6);
+  });
+});
+
+describe("Test shuffle", () => {
+  let spy: jest.SpyInstance;
+
+  beforeEach(() => {
+    spy = jest.spyOn(Math, "random");
+  });
+
+  afterEach(() => {
+    spy.mockRestore();
+  });
+
+  it("Shuffle strings", () => {
+    const before = ["a", "b", "c", "d", "e"];
+
+    const after = shuffle(before);
+
+    expect(after.length).toBe(before.length);
+    expect(after).not.toBe(before);
+    expect(new Set(after)).toEqual(new Set(before));
+    expect(spy.mock.calls.length).toBe(before.length);
   });
 });
