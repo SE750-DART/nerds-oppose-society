@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
-import Game from "../game.model";
-import { SetupType } from "../setup.model";
+import { GameModel, SetupType } from "../../models";
 
 describe("Create game", () => {
   beforeAll(async () => {
@@ -25,7 +24,7 @@ describe("Create game", () => {
       punchlines: ["To get to the other side"],
     };
 
-    const game = new Game(gameData);
+    const game = new GameModel(gameData);
     const savedGame = await game.save();
 
     expect(savedGame._id).toBeDefined();
@@ -35,7 +34,7 @@ describe("Create game", () => {
   });
 
   it("Invalid: Missing gameCode", async () => {
-    const game = new Game({
+    const game = new GameModel({
       setups: [
         {
           setup: "Why did the chicken cross the road?",
@@ -55,7 +54,7 @@ describe("Create game", () => {
   });
 
   it("Invalid: Missing setups", async () => {
-    const game = new Game({
+    const game = new GameModel({
       gameCode: "42069",
       punchlines: ["To get to the other side"],
     });
@@ -70,7 +69,7 @@ describe("Create game", () => {
   });
 
   it("Invalid: Missing punchlines", async () => {
-    const game = new Game({
+    const game = new GameModel({
       gameCode: "42069",
       setups: [
         {
