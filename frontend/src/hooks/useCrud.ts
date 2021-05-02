@@ -1,6 +1,21 @@
 import { useState } from "react";
 
-function useCrud<Type>(initialState: Type[] = []) {
+export type CrudHookType<Type> = {
+  items: Type[];
+  initialiseItems: (initialItems: Type[]) => void;
+  addItem: (item: Type) => void;
+  removeItem: (
+    itemToRemove: Type,
+    equals: (item1: Type, item2: Type) => boolean
+  ) => void;
+  updateItem: (
+    updatedItem: Type,
+    equals: (item1: Type, item2: Type) => boolean
+  ) => void;
+};
+
+// Can't use const format since generic Type is only available for functions
+export default function useCrud<Type>(initialState: Type[] = []) {
   const [items, setItems] = useState<Type[]>(initialState);
 
   const initialiseItems = (initialItems: Type[]) => {
@@ -24,7 +39,7 @@ function useCrud<Type>(initialState: Type[] = []) {
       items.map((item) =>
         equals(item, updatedItem)
           ? {
-              item,
+              ...item,
               ...updatedItem,
             }
           : item
@@ -40,4 +55,4 @@ function useCrud<Type>(initialState: Type[] = []) {
   };
 }
 
-export default useCrud;
+// export default useCrud;
