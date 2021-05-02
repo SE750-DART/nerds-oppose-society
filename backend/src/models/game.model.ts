@@ -4,7 +4,7 @@ import { SettingsSchema, Settings } from "./settings.model";
 import { PlayerSchema, Player } from "./player.model";
 import { RoundSchema, Round } from "./round.model";
 
-enum GameState {
+export enum GameState {
   lobby = "LOBBY",
   roundBefore = "ROUND_BEFORE",
   roundPlayers = "ROUND_PLAYERS_CHOOSE",
