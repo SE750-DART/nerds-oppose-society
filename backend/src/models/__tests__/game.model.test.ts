@@ -14,7 +14,7 @@ describe("Create game", () => {
   });
 
   it("Valid", async () => {
-    const game = new Game({
+    const gameData = {
       gameCode: "42069",
       setups: [
         {
@@ -23,9 +23,15 @@ describe("Create game", () => {
         },
       ],
       punchlines: ["To get to the other side"],
-    });
+    };
 
-    await expect(game.validate()).resolves.toBe(undefined);
+    const game = new Game(gameData);
+    const savedGame = await game.save();
+
+    expect(savedGame._id).toBeDefined();
+    expect(savedGame.gameCode).toBe(gameData.gameCode);
+    expect([...savedGame.setups]).toMatchObject(gameData.setups);
+    expect([...savedGame.punchlines]).toMatchObject(gameData.punchlines);
   });
 
   it("Invalid: Missing gameCode", async () => {
@@ -39,7 +45,13 @@ describe("Create game", () => {
       punchlines: ["To get to the other side"],
     });
 
-    await expect(game.validate()).rejects.toThrow();
+    try {
+      await game.save();
+      fail("gameCode is required");
+    } catch (e) {
+      expect(e).toBeInstanceOf(mongoose.Error.ValidationError);
+      expect(e.errors.gameCode).toBeDefined();
+    }
   });
 
   it("Invalid: Missing setups", async () => {
@@ -48,7 +60,13 @@ describe("Create game", () => {
       punchlines: ["To get to the other side"],
     });
 
-    await expect(game.validate()).rejects.toThrow();
+    try {
+      await game.save();
+      fail("setups are required");
+    } catch (e) {
+      expect(e).toBeInstanceOf(mongoose.Error.ValidationError);
+      expect(e.errors.setups).toBeDefined();
+    }
   });
 
   it("Invalid: Missing punchlines", async () => {
@@ -62,6 +80,12 @@ describe("Create game", () => {
       ],
     });
 
-    await expect(game.validate()).rejects.toThrow();
+    try {
+      await game.save();
+      fail("punchlines are required");
+    } catch (e) {
+      expect(e).toBeInstanceOf(mongoose.Error.ValidationError);
+      expect(e.errors.punchlines).toBeDefined();
+    }
   });
 });

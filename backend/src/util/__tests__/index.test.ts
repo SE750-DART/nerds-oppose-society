@@ -17,7 +17,7 @@ describe("Test digitShortCode", () => {
     const code = digitShortCode(6);
     console.log(code);
 
-    expect(`${code}`.length).toBe(6);
+    expect(`${code}`).toHaveLength(6);
   });
 
   it("Upper bound", () => {
@@ -26,7 +26,7 @@ describe("Test digitShortCode", () => {
     const code = digitShortCode(6);
     console.log(code);
 
-    expect(`${code}`.length).toBe(6);
+    expect(`${code}`).toHaveLength(6);
   });
 });
 
@@ -46,9 +46,9 @@ describe("Test shuffle", () => {
 
     const after = shuffle(before);
 
-    expect(after.length).toBe(before.length);
+    expect(after).toHaveLength(before.length);
     expect(after).not.toBe(before);
-    expect(new Set(after)).toEqual(new Set(before));
-    expect(spy.mock.calls.length).toBe(before.length);
+    expect(after).toEqual(expect.arrayContaining(before));
+    expect(spy.mock.calls).toHaveLength(before.length);
   });
 });
