@@ -7,6 +7,7 @@ import {
   useParams,
 } from "react-router-dom";
 import BasicPage from "./pages/BasicPage";
+import NicknamePage from "./pages/NicknamePage";
 
 type PathParams = {
   gameCode: string;
@@ -19,7 +20,7 @@ const GameRouter = () => {
     <MemoryRouter>
       <Switch>
         <Route path="/nickname">
-          <BasicPage gameCode={gameCode} path="nickname" />
+          <NicknamePage />
         </Route>
 
         <Route path="/lobby">

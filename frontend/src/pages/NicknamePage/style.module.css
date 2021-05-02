@@ -1,0 +1,12 @@
+.container {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin: auto 0;
+}
+
+.spacer {
+  margin: 12px 0;
+  width: 100%;
+}
