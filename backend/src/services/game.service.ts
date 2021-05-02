@@ -25,6 +25,7 @@ export const getGame = async (
     { gameCode: gameCode },
     projection
   ).exec();
+
   if (game) return game;
   throw new Error("Could not get game");
 };

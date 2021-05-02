@@ -68,7 +68,7 @@ describe("getGame Service", () => {
 
 describe("validateGameCode Service", () => {
   it("Invalid code", async () => {
-    const result = await validateGameCode("42069");
+    const result = await validateGameCode("69420");
 
     expect(result).toBe(false);
   });
