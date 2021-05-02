@@ -10,13 +10,53 @@ body {
   font-family: "DM Sans", sans-serif;
 }
 
-.main {
+main {
   background-color: #bbdefb;
   color: black;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
   padding: 24px;
-  text-align: center;
   width: 100%;
+}
+
+h1 {
+  font-size: 72px;
+  font-weight: bold;
+  line-height: 80px;
+  margin: 0;
+}
+
+h2 {
+  font-size: 40px;
+  font-weight: bold;
+  margin: 0;
+}
+
+h3 {
+  font-size: 32px;
+  font-weight: bold;
+  margin: 0;
+}
+
+h4 {
+  font-size: 24px;
+  font-weight: bold;
+  margin: 0;
+}
+
+h5 {
+  font-size: 16px;
+  font-weight: bold;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+p {
+  font-size: 24px;
+  margin: 0;
+}
+
+a {
+  color: #000000;
 }

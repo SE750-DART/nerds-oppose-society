@@ -11,23 +11,25 @@ export const BrowserHistoryContext = createContext(browserHistory);
 function App() {
   return (
     <Router history={browserHistory}>
-      <Switch>
-        <Route exact path="/">
-          <HomePage />
-        </Route>
+      <main>
+        <Switch>
+          <Route exact path="/">
+            <HomePage />
+          </Route>
 
-        <Route path="/:gameCode">
-          <GameRouter />
-        </Route>
+          <Route path="/:gameCode">
+            <GameRouter />
+          </Route>
 
-        <Route path="*">
-          <Redirect to="/" />
-        </Route>
-      </Switch>
+          <Route path="*">
+            <Redirect to="/" />
+          </Route>
+        </Switch>
 
-      <p data-testid="test" style={{ display: "none" }}>
-        test
-      </p>
+        <p data-testid="test" style={{ display: "none" }}>
+          test
+        </p>
+      </main>
     </Router>
   );
 }
