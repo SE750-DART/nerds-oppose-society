@@ -18,12 +18,14 @@
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "helmet": "^4.5.0",
+    "mongoose": "^5.12.7",
     "socket.io": "^4.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.13.16",
     "@babel/preset-env": "^7.13.15",
     "@babel/preset-typescript": "^7.13.0",
+    "@shelf/jest-mongodb": "^1.2.4",
     "@types/convict": "^6.0.1",
     "@types/convict-format-with-validator": "^6.0.2",
     "@types/cors": "^2.8.10",
