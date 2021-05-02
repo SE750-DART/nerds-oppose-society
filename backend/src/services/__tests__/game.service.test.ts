@@ -2,6 +2,8 @@ import { createGame, getGame, validateGameCode } from "../game.service";
 import { Game, GameModel, Setup } from "../../models";
 import mongoose from "mongoose";
 import { PUNCHLINES, SETUPS } from "../../resources";
+import * as Util from "../../util";
+import { create } from "domain";
 
 beforeAll(async () => {
   await mongoose.connect(global.__MONGO_URI__, {
@@ -14,21 +16,24 @@ afterAll(async () => {
 });
 
 describe("createGame Service", () => {
-  let spy: jest.SpyInstance;
+  let modelSpy: jest.SpyInstance;
+  let codeSpy: jest.SpyInstance;
 
   beforeEach(() => {
-    spy = jest.spyOn(GameModel.prototype, "save");
+    modelSpy = jest.spyOn(GameModel.prototype, "save");
+    codeSpy = jest.spyOn(Util, "digitShortCode");
   });
 
   afterEach(() => {
-    spy.mockRestore();
+    modelSpy.mockRestore();
+    codeSpy.mockRestore();
   });
 
   it("Creates game", async () => {
     const gameCode = await createGame();
 
-    expect(spy).toHaveBeenCalledTimes(1);
-    const savedGame: Game = spy.mock.instances[0];
+    expect(modelSpy).toHaveBeenCalledTimes(1);
+    const savedGame: Game = modelSpy.mock.instances[0];
     expect(savedGame.gameCode).toBe(gameCode);
 
     const setupSort = (a: Setup, b: Setup): number =>
@@ -45,10 +50,18 @@ describe("createGame Service", () => {
     expect([...savedGame.setups]).not.toEqual(SETUPS);
   });
 
-  it("Throws error", async () => {
-    spy.mockRejectedValue(new mongoose.Error("Throws error"));
+  it("Mongoose error", async () => {
+    modelSpy.mockRejectedValue(new mongoose.Error("Mongoose error"));
 
-    await expect(createGame()).rejects.toThrow("Throws error");
+    await expect(createGame()).rejects.toThrow("Mongoose error");
+  });
+
+  it("Duplicate gameCode", async () => {
+    codeSpy.mockReturnValue(42069420);
+
+    await expect(createGame()).resolves.toBeDefined();
+
+    await expect(createGame()).rejects.toThrow();
   });
 });
 
