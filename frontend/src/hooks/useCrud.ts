@@ -54,5 +54,3 @@ export default function useCrud<Type>(initialState: Type[] = []) {
     updateItem,
   };
 }
-
-// export default useCrud;
