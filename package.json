@@ -24,11 +24,11 @@
   },
   "lint-staged": {
     "backend/**/*": [
-      "eslint backend/src --ext .ts --fix",
+      "eslint --fix",
       "prettier --write --ignore-unknown"
     ],
     "frontend/**/*": [
-      "eslint frontend/src --ext .ts,.tsx --fix",
+      "eslint --fix",
       "prettier --write --ignore-unknown"
     ],
     "!((backend|frontend)/**/*)": "prettier --write"

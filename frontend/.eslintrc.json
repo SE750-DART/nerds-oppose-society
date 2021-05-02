@@ -14,9 +14,12 @@
     "sourceType": "module"
   },
   "plugins": ["react", "@typescript-eslint"],
+  "ignorePatterns": ["**/*.css", "**/*.svg"],
   "rules": {
     "no-use-before-define": "off",
     "@typescript-eslint/no-use-before-define": ["error"],
+    "no-unused-vars": "off",
+    "@typescript-eslint/no-unused-vars": ["error"],
     "react/jsx-filename-extension": ["warn", { "extensions": [".tsx"] }],
     "import/extensions": [
       "error",
@@ -24,7 +27,8 @@
       { "ts": "never", "tsx": "never" }
     ],
     "no-shadow": "off",
-    "@typescript-eslint/no-shadow": ["error"]
+    "@typescript-eslint/no-shadow": ["error"],
+    "react/require-default-props": "off"
   },
   "settings": {
     "import/resolver": {
