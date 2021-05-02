@@ -1,0 +1,32 @@
+.textfield {
+  align-items: center;
+  border: none;
+  border-radius: 16px;
+  box-shadow: inset 0px 0px 10px rgba(0, 0, 0, 0.25);
+  display: flex;
+  font-family: "DM Sans", sans-serif;
+  font-size: 32px;
+  font-weight: bold;
+  justify-content: center;
+  padding: 0 24px;
+  text-align: center;
+  transition: 0.3s;
+}
+
+.textfield__big {
+  height: 64px;
+  width: 100%;
+}
+
+.textfield__small {
+  font-size: 24px;
+  height: 48px;
+  width: 140px;
+}
+
+.textfield:disabled {
+  box-shadow: none;
+  background-color: #ffffff;
+  color: #9e9e9e;
+  transition: 0.3s;
+}
