@@ -8,6 +8,7 @@ import {
 } from "react-router-dom";
 import BasicPage from "./pages/BasicPage";
 import NicknamePage from "./pages/NicknamePage";
+import LobbyPage from "./pages/LobbyPage";
 
 type PathParams = {
   gameCode: string;
@@ -24,7 +25,7 @@ const GameRouter = () => {
         </Route>
 
         <Route path="/lobby">
-          <BasicPage gameCode={gameCode} path="lobby" />
+          <LobbyPage gameCode={gameCode} />
         </Route>
 
         <Route path="/preRound">
