@@ -1,4 +1,5 @@
 import { getGame } from "./game.service";
+import { Player } from "../models";
 
 export const createPlayer = async (
   gameCode: string,
@@ -14,4 +15,16 @@ export const createPlayer = async (
   await game.save();
 
   return player._id;
+};
+
+export const getPlayer = async (
+  gameCode: string,
+  playerId: string
+): Promise<Player> => {
+  const game = await getGame(gameCode);
+
+  const player = game.players.id(playerId);
+
+  if (player) return player;
+  throw new Error("Could not get player");
 };
