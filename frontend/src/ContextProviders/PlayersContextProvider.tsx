@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React from "react";
+import useCrud from "../hooks/useCrud";
 
 export type Player = {
   nickname: string;
@@ -22,34 +23,50 @@ const PlayersContextProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const [players, setPlayers] = useState<Player[]>([]);
-
-  const initialisePlayers = (initialPlayers: Player[]) =>
-    setPlayers(initialPlayers);
+  const {
+    items: players,
+    initialiseItems: initialisePlayers,
+    addItem,
+    removeItem,
+    updateItem,
+  } = useCrud<Player>();
 
   const addPlayer = (nickname: string) =>
-    setPlayers([
-      ...players,
-      {
-        nickname,
-        score: 0,
-      },
-    ]);
+    addItem({
+      nickname,
+      score: 0,
+    });
 
-  const removePlayer = (nickname: string) =>
-    setPlayers(players.filter((player) => player.nickname !== nickname));
+  const equals = (player1: Player, player2: Player) =>
+    player1.nickname === player2.nickname;
 
-  const incrementPlayerScore = (nickname: string) =>
-    setPlayers(
-      players.map((player) =>
-        player.nickname === nickname
-          ? {
-              nickname,
-              score: player.score + 1,
-            }
-          : player
-      )
+  const removePlayer = (nickname: string) => {
+    const playerToRemove = players.find(
+      (player) => player.nickname === nickname
     );
+    if (!playerToRemove) {
+      return;
+    }
+
+    removeItem(playerToRemove, equals);
+  };
+
+  const incrementPlayerScore = (nickname: string) => {
+    const playerToUpdate = players.find(
+      (player) => player.nickname === nickname
+    );
+    if (!playerToUpdate) {
+      return;
+    }
+
+    updateItem(
+      {
+        ...playerToUpdate,
+        score: playerToUpdate.score + 1,
+      },
+      equals
+    );
+  };
 
   // The context value that will be supplied to any descendants of this component.
   const context = {
