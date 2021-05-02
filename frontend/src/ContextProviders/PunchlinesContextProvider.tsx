@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React from "react";
+import useCrud from "../hooks/useCrud";
 
 export type Punchline = string;
 
@@ -18,20 +19,27 @@ const PunchlinesContextProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const [punchlines, setPunchlines] = useState<Punchline[]>([]);
+  const {
+    items: punchlines,
+    initialiseItems: initialisePunchlines,
+    addItem: addPunchline,
+    removeItem,
+  } = useCrud<Punchline>();
 
-  const initialisePunchlines = (initialPunchlines: Punchline[]) =>
-    setPunchlines(initialPunchlines);
-
-  const addPunchline = (punchline: string) =>
-    setPunchlines([...punchlines, punchline]);
-
-  const removePunchline = (punchlineToRemove: string) =>
-    setPunchlines(
-      punchlines.filter((punchline) => punchline !== punchlineToRemove)
+  const removePunchline = (punchline: string) => {
+    const punchlineToRemove = punchlines.find(
+      (p: Punchline) => p === punchline
     );
+    if (!punchlineToRemove) {
+      return;
+    }
 
-  // The context value that will be supplied to any descendants of this component.
+    const equals = (punchline1: Punchline, punchline2: Punchline) =>
+      punchline1 === punchline2;
+
+    removeItem(punchlineToRemove, equals);
+  };
+
   const context = {
     punchlines,
     initialisePunchlines,
@@ -39,7 +47,6 @@ const PunchlinesContextProvider = ({
     removePunchline,
   };
 
-  // Wraps the given child components in a Provider for the above context.
   return (
     <PunchlinesContext.Provider value={context}>
       {children}
