@@ -1,3 +1,10 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  padding: 24px;
+}
+
 .main {
   flex-grow: 1;
 }
@@ -13,5 +20,5 @@
   align-items: center;
   display: flex;
   justify-content: space-between;
-  margin: 16px 0;
+  margin: 8px 0;
 }
