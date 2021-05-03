@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useHistory } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import Button from "../../components/Button";
 import TextField from "../../components/TextField";
 import styles from "./style.module.css";
@@ -34,7 +34,7 @@ const HomePage = () => {
         handleOnClick={() => browserHistory.push(`/${gameCode}`)}
       />
       <div className={styles.footer}>
-        <a href="/">About</a> | <a href="/">Legal</a>
+        <Link to="/">About</Link> | <Link to="/">Legal</Link>
       </div>
     </>
   );

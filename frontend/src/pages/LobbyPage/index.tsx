@@ -37,7 +37,6 @@ const LobbyPage = ({ gameCode }: Props) => {
         <div className={styles.setting}>
           <p>Score to win</p>
           <TextField
-            label=""
             textValue={scoreToWin}
             size="small"
             onChangeHandler={setScoreToWin}
@@ -46,7 +45,6 @@ const LobbyPage = ({ gameCode }: Props) => {
         <div className={styles.setting}>
           <p>Round limit</p>
           <TextField
-            label=""
             textValue={roundLimit}
             size="small"
             onChangeHandler={setRoundLimit}
