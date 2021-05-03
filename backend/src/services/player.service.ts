@@ -1,5 +1,5 @@
 import { getGame } from "./game.service";
-import { GameModel, Player } from "../models";
+import { Game, GameModel, Player } from "../models";
 
 export const createPlayer = async (
   gameCode: string,
@@ -19,9 +19,10 @@ export const createPlayer = async (
 
 export const getPlayer = async (
   gameCode: string,
-  playerId: string
+  playerId: string,
+  game?: Game
 ): Promise<Player> => {
-  const game = await getGame(gameCode);
+  if (!game) game = await getGame(gameCode);
 
   const player = game.players.id(playerId);
 

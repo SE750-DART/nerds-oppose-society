@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import { createPlayer, getPlayer, validatePlayerId } from "../player.service";
 import { createGame, getGame } from "../game.service";
-import { digitShortCode } from "../../util";
+import * as GameServices from "../game.service";
 
 beforeAll(async () => {
   await mongoose.connect(global.__MONGO_URI__, {
@@ -32,31 +32,54 @@ describe("createPlayer Service", () => {
 });
 
 describe("getPlayer Service", () => {
-  it("returns a player object", async () => {
+  let spy: jest.SpyInstance;
+
+  afterEach(() => {
+    if (spy) spy.mockRestore();
+  });
+
+  it("throws an error when provided an invalid playerId", async () => {
+    const gameCode = await createGame();
+
+    await expect(
+      getPlayer(gameCode, "4qf987hergouhsdfhgoissh")
+    ).rejects.toThrow("Could not get player");
+  });
+
+  it("returns a Player object retrieving Game from gameCode", async () => {
     const gameCode = await createGame();
 
     const playerId = await createPlayer(gameCode, "James");
+
+    spy = jest.spyOn(GameServices, "getGame");
 
     const player = await getPlayer(gameCode, playerId);
 
     expect(player._id).toBeDefined();
     expect(player.nickname).toBe("James");
+    expect(spy).toHaveBeenCalledTimes(1);
+  });
+
+  it("returns a Player object using provided Game", async () => {
+    const gameCode = await createGame();
+
+    const playerId = await createPlayer(gameCode, "James");
+
+    const game = await getGame(gameCode);
+
+    spy = jest.spyOn(GameServices, "getGame");
+
+    const player = await getPlayer(gameCode, playerId, game);
+
+    expect(player._id).toBeDefined();
+    expect(player.nickname).toBe("James");
+    expect(spy).toHaveBeenCalledTimes(0);
   });
 
   it("throws an error when provided an invalid gameCode", async () => {
     await expect(getPlayer("987654321", "afgifophweuqhfeu34")).rejects.toThrow(
       "Could not get game"
     );
-  });
-
-  it("throws an error when provided an invalid playerId", async () => {
-    const gameCode = await createGame();
-    console.log(gameCode);
-    console.log(digitShortCode(6));
-
-    await expect(
-      getPlayer(gameCode, "4qf987hergouhsdfhgoissh")
-    ).rejects.toThrow("Could not get player");
   });
 });
 
