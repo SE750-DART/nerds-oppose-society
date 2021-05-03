@@ -39,3 +39,13 @@ export const validatePlayerId = async (
     players: { $elemMatch: { _id: playerId } },
   });
 };
+
+export const initialisePlayer = async (
+  game: Game,
+  playerId: string
+): Promise<void> => {
+  const player = game.players.id(playerId);
+  if (player === null) throw new Error("Player does not exist");
+  player.new = false;
+  await game.save();
+};

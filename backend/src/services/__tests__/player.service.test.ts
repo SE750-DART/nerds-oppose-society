@@ -1,5 +1,10 @@
 import mongoose from "mongoose";
-import { createPlayer, getPlayer, validatePlayerId } from "../player.service";
+import {
+  createPlayer,
+  getPlayer,
+  initialisePlayer,
+  validatePlayerId,
+} from "../player.service";
 import { createGame, getGame } from "../game.service";
 import * as GameServices from "../game.service";
 
@@ -112,5 +117,31 @@ describe("validatePlayerId Service", () => {
     );
 
     expect(result).toBe(false);
+  });
+});
+
+describe("initialisePlayer service", () => {
+  it("sets player.new to false", async () => {
+    const gameCode = await createGame();
+
+    const playerId = await createPlayer(gameCode, "Jimbo");
+
+    const game = await getGame(gameCode);
+    let player = await getPlayer(gameCode, playerId);
+    expect(player.new).toBe(true);
+
+    await initialisePlayer(game, playerId);
+
+    player = await getPlayer(gameCode, playerId);
+    expect(player.new).toBe(false);
+  });
+
+  it("throws error when provided an invalid playerId", async () => {
+    const gameCode = await createGame();
+    const game = await getGame(gameCode);
+
+    await expect(
+      initialisePlayer(game, "qtgehgoiwuehsdgs68976")
+    ).rejects.toThrow("Player does not exist");
   });
 });
