@@ -3,6 +3,7 @@ import {
   createPlayer,
   getPlayer,
   initialisePlayer,
+  removePlayer,
   validatePlayerId,
 } from "../player.service";
 import { createGame, getGame } from "../game.service";
@@ -33,6 +34,25 @@ describe("createPlayer Service", () => {
     await expect(createPlayer("987654321", "Fred")).rejects.toThrow(
       "Could not get game"
     );
+  });
+});
+
+describe("removePlayer Service", () => {
+  it("throws an error when provided an invalid gameCode", async () => {
+    await expect(
+      removePlayer("12430985735", "112acfs86a9ds8f6")
+    ).rejects.toThrow("Could not get game");
+  });
+
+  it("removes a player from a game", async () => {
+    const gameCode = await createGame();
+    const playerId = await createPlayer(gameCode, "Dave");
+
+    await expect(validatePlayerId(gameCode, playerId)).resolves.toBeTruthy();
+
+    await removePlayer(gameCode, playerId);
+
+    await expect(validatePlayerId(gameCode, playerId)).resolves.toBeFalsy();
   });
 });
 

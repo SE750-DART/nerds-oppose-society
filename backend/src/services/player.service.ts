@@ -17,6 +17,15 @@ export const createPlayer = async (
   return player._id;
 };
 
+export const removePlayer = async (
+  gameCode: string,
+  playerId: string
+): Promise<void> => {
+  const game = await getGame(gameCode);
+  game.players.id(playerId)?.remove();
+  await game.save();
+};
+
 export const getPlayer = async (
   gameCode: string,
   playerId: string,
