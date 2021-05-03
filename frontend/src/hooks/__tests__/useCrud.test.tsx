@@ -9,7 +9,7 @@ const equals = (item1: TestItem, item2: TestItem) => item1.name === item2.name;
 
 let result: RenderResult<CrudHookType<TestItem>>;
 beforeEach(() => {
-  result = renderHook(() => useCrud<TestItem>({ equals })).result;
+  result = renderHook(() => useCrud<TestItem>(equals)).result;
 });
 
 test("initialiseItems() should update items with initial items", () => {
@@ -49,7 +49,7 @@ test("removeItem() should remove item", () => {
   act(() => result.current.addItem(newItem));
   expect(result.current.items).toEqual([newItem]);
 
-  act(() => result.current.removeItem(newItem, equals));
+  act(() => result.current.removeItem(newItem));
   expect(result.current.items).toEqual([]);
 });
 
@@ -68,6 +68,6 @@ test("updateItem() should update item with new string", () => {
     ...newItem,
     val: 1,
   };
-  act(() => result.current.updateItem(updatedItem, equals));
+  act(() => result.current.updateItem(updatedItem));
   expect(result.current.items).toEqual([updatedItem]);
 });

@@ -26,7 +26,7 @@ const PunchlinesContextProvider = ({
     initialiseItems: initialisePunchlines,
     addItem: addPunchline,
     removeItem,
-  } = useCrud<Punchline>({ equals });
+  } = useCrud<Punchline>(equals);
 
   const removePunchline = (punchline: string) => {
     const punchlineToRemove = punchlines.find(

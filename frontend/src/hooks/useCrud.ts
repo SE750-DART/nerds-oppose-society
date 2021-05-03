@@ -4,25 +4,14 @@ export type CrudHookType<Type> = {
   items: Type[];
   initialiseItems: (initialItems: Type[]) => void;
   addItem: (item: Type) => void;
-  removeItem: (
-    itemToRemove: Type,
-    equals: (item1: Type, item2: Type) => boolean
-  ) => void;
-  updateItem: (
-    updatedItem: Type,
-    equals: (item1: Type, item2: Type) => boolean
-  ) => void;
+  removeItem: (itemToRemove: Type) => void;
+  updateItem: (updatedItem: Type) => void;
 };
 
-type Props<Type> = {
-  initialState?: Type[];
-  equals?: (item1: Type, item2: Type) => boolean;
-};
-
-const useCrud = <Type>({
-  initialState = [],
-  equals = () => false,
-}: Props<Type>) => {
+const useCrud = <Type>(
+  equals: (item1: Type, item2: Type) => boolean,
+  initialState: Type[] = []
+) => {
   const [items, setItems] = useState<Type[]>(initialState);
 
   const initialiseItems = (initialItems: Type[]) => {

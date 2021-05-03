@@ -31,7 +31,7 @@ const PlayersContextProvider = ({
     addItem,
     removeItem,
     updateItem,
-  } = useCrud<Player>({ equals });
+  } = useCrud<Player>(equals);
 
   const addPlayer = (nickname: string) =>
     addItem({
