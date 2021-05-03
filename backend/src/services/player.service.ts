@@ -1,5 +1,5 @@
 import { getGame } from "./game.service";
-import { Player } from "../models";
+import { GameModel, Player } from "../models";
 
 export const createPlayer = async (
   gameCode: string,
@@ -27,4 +27,14 @@ export const getPlayer = async (
 
   if (player) return player;
   throw new Error("Could not get player");
+};
+
+export const validatePlayerId = async (
+  gameCode: string,
+  playerId: string
+): Promise<boolean> => {
+  return await GameModel.exists({
+    gameCode: gameCode,
+    players: { $elemMatch: { _id: playerId } },
+  });
 };
