@@ -8,17 +8,20 @@ describe("Connection handler", () => {
   let getSpy: jest.SpyInstance;
   let navigateSpy: jest.SpyInstance;
   let joinSpy: jest.SpyInstance;
+  let leaveSpy: jest.SpyInstance;
 
   beforeEach(() => {
     getSpy = jest.spyOn(GameService, "getGame");
     navigateSpy = jest.spyOn(GameHandler, "navigatePlayer");
     joinSpy = jest.spyOn(PlayerHandler, "playerJoin");
+    leaveSpy = jest.spyOn(PlayerHandler, "playerLeave");
   });
 
   afterEach(() => {
     getSpy.mockRestore();
     navigateSpy.mockRestore();
     joinSpy.mockRestore();
+    leaveSpy.mockRestore();
   });
 
   it("connects socket.io client", async () => {
@@ -30,11 +33,13 @@ describe("Connection handler", () => {
         },
       },
       join: jest.fn(),
+      on: jest.fn(),
     } as unknown) as Socket;
 
     getSpy.mockReturnValue("game");
     navigateSpy.mockImplementation(() => null);
     joinSpy.mockImplementation(() => null);
+    leaveSpy.mockImplementation(() => null);
 
     await Connection(socket);
 
@@ -49,5 +54,7 @@ describe("Connection handler", () => {
 
     expect(joinSpy).toHaveBeenCalledTimes(1);
     expect(joinSpy).toHaveBeenCalledWith(socket, "game", "abc123");
+
+    expect(socket.on).toHaveBeenCalledTimes(1);
   });
 });
