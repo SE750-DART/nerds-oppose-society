@@ -1,0 +1,17 @@
+.main {
+  flex-grow: 1;
+}
+
+.codeContainer {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.setting {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin: 16px 0;
+}

@@ -6,7 +6,7 @@ import {
   Redirect,
   useParams,
 } from "react-router-dom";
-import BasicPage from "./BasicPage";
+import { BasicPage, NicknamePage, LobbyPage } from "./pages";
 
 type PathParams = {
   gameCode: string;
@@ -19,11 +19,11 @@ const GameRouter = () => {
     <MemoryRouter>
       <Switch>
         <Route path="/nickname">
-          <BasicPage gameCode={gameCode} path="nickname" />
+          <NicknamePage />
         </Route>
 
         <Route path="/lobby">
-          <BasicPage gameCode={gameCode} path="lobby" />
+          <LobbyPage gameCode={gameCode} />
         </Route>
 
         <Route path="/preRound">
