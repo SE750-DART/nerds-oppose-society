@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import { GameModel, SetupType } from "../../models";
 
-describe("Create game", () => {
+describe("Game Model", () => {
   beforeAll(async () => {
     await mongoose.connect(global.__MONGO_URI__, {
       useNewUrlParser: true,
@@ -12,7 +12,7 @@ describe("Create game", () => {
     await mongoose.connection.close();
   });
 
-  it("Valid", async () => {
+  it("creates a valid game", async () => {
     const gameData = {
       gameCode: "42069",
       setups: [
@@ -33,7 +33,7 @@ describe("Create game", () => {
     expect([...savedGame.punchlines]).toMatchObject(gameData.punchlines);
   });
 
-  it("Invalid: Missing gameCode", async () => {
+  it("throws a ValidationError if gameCode is not defined", async () => {
     const game = new GameModel({
       setups: [
         {
@@ -53,7 +53,7 @@ describe("Create game", () => {
     }
   });
 
-  it("Invalid: Missing setups", async () => {
+  it("throws a ValidationError if setups are not defined", async () => {
     const game = new GameModel({
       gameCode: "42069",
       punchlines: ["To get to the other side"],
@@ -68,7 +68,7 @@ describe("Create game", () => {
     }
   });
 
-  it("Invalid: Missing punchlines", async () => {
+  it("throws a ValidationError if punchlines are not defined", async () => {
     const game = new GameModel({
       gameCode: "42069",
       setups: [

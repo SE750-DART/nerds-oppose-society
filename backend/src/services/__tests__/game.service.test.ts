@@ -28,7 +28,7 @@ describe("createGame Service", () => {
     codeSpy.mockRestore();
   });
 
-  it("Creates game", async () => {
+  it("creates a game", async () => {
     const gameCode = await createGame();
 
     expect(modelSpy).toHaveBeenCalledTimes(1);
@@ -49,13 +49,13 @@ describe("createGame Service", () => {
     expect([...savedGame.setups]).not.toEqual(SETUPS);
   });
 
-  it("Mongoose error", async () => {
+  it("throws a mongoose error when the game cannot be saved", async () => {
     modelSpy.mockRejectedValue(new mongoose.Error("Mongoose error"));
 
     await expect(createGame()).rejects.toThrow("Mongoose error");
   });
 
-  it("Duplicate gameCode", async () => {
+  it("throws an error when a gameCode is not unique", async () => {
     codeSpy.mockReturnValue(42069420);
 
     await expect(createGame()).resolves.toBeDefined();
@@ -65,11 +65,11 @@ describe("createGame Service", () => {
 });
 
 describe("getGame Service", () => {
-  it("Game does not exist", async () => {
+  it("throws an error when provided an invalid gameCode", async () => {
     await expect(getGame("123456")).rejects.toThrow("Could not get game");
   });
 
-  it("Game exists", async () => {
+  it("returns a game object", async () => {
     const gameCode = await createGame();
 
     const game = await getGame(gameCode);
@@ -79,13 +79,13 @@ describe("getGame Service", () => {
 });
 
 describe("validateGameCode Service", () => {
-  it("Invalid code", async () => {
+  it("returns false for an invalid gameCode", async () => {
     const result = await validateGameCode("69420");
 
     expect(result).toBe(false);
   });
 
-  it("Valid code", async () => {
+  it("returns true for a valid gameCode", async () => {
     const gameCode = await createGame();
 
     const result = await validateGameCode(gameCode);

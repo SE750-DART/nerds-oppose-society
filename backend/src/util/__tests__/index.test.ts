@@ -1,6 +1,6 @@
 import { digitShortCode, shuffle } from "../index";
 
-describe("Test digitShortCode", () => {
+describe("digitShortCode Util", () => {
   let spy: jest.SpyInstance;
 
   beforeEach(() => {
@@ -11,7 +11,7 @@ describe("Test digitShortCode", () => {
     spy.mockRestore();
   });
 
-  it("Lower bound", () => {
+  it("returns a lower bound of correct length", () => {
     spy.mockReturnValue(0.0);
 
     const code = digitShortCode(6);
@@ -19,7 +19,7 @@ describe("Test digitShortCode", () => {
     expect(`${code}`).toHaveLength(6);
   });
 
-  it("Upper bound", () => {
+  it("returns an upper bound of correct length", () => {
     spy.mockReturnValue(0.999999999999);
 
     const code = digitShortCode(6);
@@ -28,7 +28,7 @@ describe("Test digitShortCode", () => {
   });
 });
 
-describe("Test shuffle", () => {
+describe("shuffle Util", () => {
   let spy: jest.SpyInstance;
 
   beforeEach(() => {
@@ -39,7 +39,7 @@ describe("Test shuffle", () => {
     spy.mockRestore();
   });
 
-  it("Shuffle strings", () => {
+  it("returns a shuffled array containing all original elements", () => {
     const before = ["a", "b", "c", "d", "e"];
 
     const after = shuffle(before);

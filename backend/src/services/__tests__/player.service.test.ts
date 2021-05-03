@@ -13,7 +13,7 @@ afterAll(async () => {
 });
 
 describe("createPlayer Service", () => {
-  it("Create player", async () => {
+  it("creates a player and returns its playerId", async () => {
     const gameCode = await createGame();
 
     const playerId = await createPlayer(gameCode, "Bob");
@@ -23,7 +23,7 @@ describe("createPlayer Service", () => {
     expect(game.players.id(playerId)).not.toBeNull();
   });
 
-  it("Invalid game code", async () => {
+  it("throws an error when provided an invalid gameCode", async () => {
     await expect(createPlayer("987654321", "Fred")).rejects.toThrow(
       "Could not get game"
     );
@@ -31,7 +31,7 @@ describe("createPlayer Service", () => {
 });
 
 describe("getPlayer Service", () => {
-  it("Get player", async () => {
+  it("returns a player object", async () => {
     const gameCode = await createGame();
 
     const playerId = await createPlayer(gameCode, "James");
@@ -42,13 +42,13 @@ describe("getPlayer Service", () => {
     expect(player.nickname).toBe("James");
   });
 
-  it("Invalid game code", async () => {
+  it("throws an error when provided an invalid gameCode", async () => {
     await expect(getPlayer("987654321", "afgifophweuqhfeu34")).rejects.toThrow(
       "Could not get game"
     );
   });
 
-  it("Invalid player id", async () => {
+  it("throws an error when provided an invalid playerId", async () => {
     const gameCode = await createGame();
 
     await expect(
