@@ -6,11 +6,20 @@ import styles from "./style.module.css";
 interface IconButtonProps {
   icon: IconDefinition;
   handleOnClick: React.MouseEventHandler;
+  rotated?: boolean;
 }
 
-const IconButton = ({ icon, handleOnClick }: IconButtonProps) => (
+const IconButton = ({
+  icon,
+  handleOnClick,
+  rotated = false,
+}: IconButtonProps) => (
   <button className={styles.button} type="button" onClick={handleOnClick}>
-    <FontAwesomeIcon icon={icon} size="2x" />
+    <FontAwesomeIcon
+      icon={icon}
+      size="2x"
+      rotation={rotated ? 180 : undefined}
+    />
   </button>
 );
 
