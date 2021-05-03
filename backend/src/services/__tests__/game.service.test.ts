@@ -66,7 +66,7 @@ describe("createGame Service", () => {
 
 describe("getGame Service", () => {
   it("throws an error when provided an invalid gameCode", async () => {
-    await expect(getGame("123456")).rejects.toThrow("Could not get game");
+    await expect(getGame("123456")).rejects.toThrow("Game does not exist");
   });
 
   it("returns a game object", async () => {

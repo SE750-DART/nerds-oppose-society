@@ -32,25 +32,20 @@ describe("createPlayer Service", () => {
 
   it("throws an error when provided an invalid gameCode", async () => {
     await expect(createPlayer("987654321", "Fred")).rejects.toThrow(
-      "Could not get game"
+      "Game does not exist"
     );
   });
 });
 
 describe("removePlayer Service", () => {
-  it("throws an error when provided an invalid gameCode", async () => {
-    await expect(
-      removePlayer("12430985735", "112acfs86a9ds8f6")
-    ).rejects.toThrow("Could not get game");
-  });
-
   it("removes a player from a game", async () => {
     const gameCode = await createGame();
     const playerId = await createPlayer(gameCode, "Dave");
 
     await expect(validatePlayerId(gameCode, playerId)).resolves.toBeTruthy();
 
-    await removePlayer(gameCode, playerId);
+    const game = await getGame(gameCode);
+    await removePlayer(game, playerId);
 
     await expect(validatePlayerId(gameCode, playerId)).resolves.toBeFalsy();
   });
@@ -68,7 +63,7 @@ describe("getPlayer Service", () => {
 
     await expect(
       getPlayer(gameCode, "4qf987hergouhsdfhgoissh")
-    ).rejects.toThrow("Could not get player");
+    ).rejects.toThrow("Player does not exist");
   });
 
   it("returns a Player object retrieving Game from gameCode", async () => {
@@ -103,7 +98,7 @@ describe("getPlayer Service", () => {
 
   it("throws an error when provided an invalid gameCode", async () => {
     await expect(getPlayer("987654321", "afgifophweuqhfeu34")).rejects.toThrow(
-      "Could not get game"
+      "Game does not exist"
     );
   });
 });

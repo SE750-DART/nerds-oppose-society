@@ -2,9 +2,9 @@ import { getGame } from "./game.service";
 import { Game, GameModel, Player } from "../models";
 
 export const createPlayer = async (
-  gameCode: string,
+  gameCode: Game["gameCode"],
   nickname: string
-): Promise<string> => {
+): Promise<Player["id"]> => {
   const game = await getGame(gameCode);
 
   const length = game.players.push({
@@ -14,21 +14,25 @@ export const createPlayer = async (
 
   await game.save();
 
-  return player._id;
+  return player.id;
 };
 
 export const removePlayer = async (
-  gameCode: string,
-  playerId: string
-): Promise<void> => {
-  const game = await getGame(gameCode);
-  game.players.id(playerId)?.remove();
+  game: Game,
+  playerId: Player["id"]
+): Promise<Player> => {
+  const player = game.players.id(playerId);
+  if (player === null) throw Error("Player does not exist");
+
+  await player.remove();
   await game.save();
+
+  return player;
 };
 
 export const getPlayer = async (
-  gameCode: string,
-  playerId: string,
+  gameCode: Game["gameCode"],
+  playerId: Player["id"],
   game?: Game
 ): Promise<Player> => {
   if (!game) game = await getGame(gameCode);
@@ -36,12 +40,12 @@ export const getPlayer = async (
   const player = game.players.id(playerId);
 
   if (player) return player;
-  throw new Error("Could not get player");
+  throw Error("Player does not exist");
 };
 
 export const validatePlayerId = async (
-  gameCode: string,
-  playerId: string
+  gameCode: Game["gameCode"],
+  playerId: Player["id"]
 ): Promise<boolean> => {
   return await GameModel.exists({
     gameCode: gameCode,
@@ -51,10 +55,10 @@ export const validatePlayerId = async (
 
 export const initialisePlayer = async (
   game: Game,
-  playerId: string
+  playerId: Player["id"]
 ): Promise<void> => {
   const player = game.players.id(playerId);
-  if (player === null) throw new Error("Player does not exist");
+  if (player === null) throw Error("Player does not exist");
   player.new = false;
   await game.save();
 };
