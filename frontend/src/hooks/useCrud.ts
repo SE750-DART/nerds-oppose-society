@@ -14,8 +14,15 @@ export type CrudHookType<Type> = {
   ) => void;
 };
 
-// Can't use const format since generic Type is only available for functions
-export default function useCrud<Type>(initialState: Type[] = []) {
+type Props<Type> = {
+  initialState?: Type[];
+  equals?: (item1: Type, item2: Type) => boolean;
+};
+
+const useCrud = <Type>({
+  initialState = [],
+  equals = () => false,
+}: Props<Type>) => {
   const [items, setItems] = useState<Type[]>(initialState);
 
   const initialiseItems = (initialItems: Type[]) => {
@@ -26,15 +33,10 @@ export default function useCrud<Type>(initialState: Type[] = []) {
 
   const addItem = (item: Type) => setItems([...items, item]);
 
-  const removeItem = (
-    itemToRemove: Type,
-    equals: (item1: Type, item2: Type) => boolean
-  ) => setItems(items.filter((item) => !equals(item, itemToRemove)));
+  const removeItem = (itemToRemove: Type) =>
+    setItems(items.filter((item) => !equals(item, itemToRemove)));
 
-  const updateItem = (
-    updatedItem: Type,
-    equals: (item1: Type, item2: Type) => boolean
-  ) =>
+  const updateItem = (updatedItem: Type) =>
     setItems(
       items.map((item) =>
         equals(item, updatedItem)
@@ -53,4 +55,6 @@ export default function useCrud<Type>(initialState: Type[] = []) {
     removeItem,
     updateItem,
   };
-}
+};
+
+export default useCrud;

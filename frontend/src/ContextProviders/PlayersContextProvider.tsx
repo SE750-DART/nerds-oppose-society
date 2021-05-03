@@ -5,6 +5,8 @@ export type Player = {
   nickname: string;
   score: number;
 };
+const equals = (player1: Player, player2: Player) =>
+  player1.nickname === player2.nickname;
 
 type Context = {
   players: Player[];
@@ -29,16 +31,13 @@ const PlayersContextProvider = ({
     addItem,
     removeItem,
     updateItem,
-  } = useCrud<Player>();
+  } = useCrud<Player>({ equals });
 
   const addPlayer = (nickname: string) =>
     addItem({
       nickname,
       score: 0,
     });
-
-  const equals = (player1: Player, player2: Player) =>
-    player1.nickname === player2.nickname;
 
   const removePlayer = (nickname: string) => {
     const playerToRemove = players.find(
@@ -48,7 +47,7 @@ const PlayersContextProvider = ({
       return;
     }
 
-    removeItem(playerToRemove, equals);
+    removeItem(playerToRemove);
   };
 
   const incrementPlayerScore = (nickname: string) => {
@@ -59,13 +58,10 @@ const PlayersContextProvider = ({
       return;
     }
 
-    updateItem(
-      {
-        ...playerToUpdate,
-        score: playerToUpdate.score + 1,
-      },
-      equals
-    );
+    updateItem({
+      ...playerToUpdate,
+      score: playerToUpdate.score + 1,
+    });
   };
 
   // The context value that will be supplied to any descendants of this component.

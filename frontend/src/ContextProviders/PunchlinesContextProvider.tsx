@@ -2,6 +2,8 @@ import React from "react";
 import useCrud from "../hooks/useCrud";
 
 export type Punchline = string;
+const equals = (punchline1: Punchline, punchline2: Punchline) =>
+  punchline1 === punchline2;
 
 type Context = {
   punchlines: Punchline[];
@@ -24,7 +26,7 @@ const PunchlinesContextProvider = ({
     initialiseItems: initialisePunchlines,
     addItem: addPunchline,
     removeItem,
-  } = useCrud<Punchline>();
+  } = useCrud<Punchline>({ equals });
 
   const removePunchline = (punchline: string) => {
     const punchlineToRemove = punchlines.find(
@@ -34,10 +36,7 @@ const PunchlinesContextProvider = ({
       return;
     }
 
-    const equals = (punchline1: Punchline, punchline2: Punchline) =>
-      punchline1 === punchline2;
-
-    removeItem(punchlineToRemove, equals);
+    removeItem(punchlineToRemove);
   };
 
   const context = {

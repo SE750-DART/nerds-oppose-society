@@ -9,7 +9,7 @@ const equals = (item1: TestItem, item2: TestItem) => item1.name === item2.name;
 
 let result: RenderResult<CrudHookType<TestItem>>;
 beforeEach(() => {
-  result = renderHook(() => useCrud<TestItem>()).result;
+  result = renderHook(() => useCrud<TestItem>({ equals })).result;
 });
 
 test("initialiseItems() should update items with initial items", () => {
