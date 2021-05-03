@@ -1,4 +1,4 @@
-import mongoose, { Document, ObjectId, Schema } from "mongoose";
+import mongoose, { Document, ObjectId, Schema, Types } from "mongoose";
 import { SetupSchema, Setup } from "./setup.model";
 import { SettingsSchema, Settings } from "./settings.model";
 import { PlayerSchema, Player } from "./player.model";
@@ -16,14 +16,14 @@ export enum GameState {
 export interface Game extends Document {
   gameCode: string;
   settings?: Settings;
-  setups: Setup[];
-  discardedSetups?: Setup[];
+  setups: Types.DocumentArray<Setup>;
+  discardedSetups?: Types.DocumentArray<Setup>;
   punchlines: string[];
   discardedPunchlines?: string[];
-  players?: Player[];
+  players: Types.DocumentArray<Player>;
   host?: ObjectId;
   state?: GameState;
-  rounds?: Round[];
+  rounds?: Types.DocumentArray<Round>;
 }
 
 const GameSchema: Schema = new Schema({

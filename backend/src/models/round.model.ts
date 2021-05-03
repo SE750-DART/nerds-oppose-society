@@ -1,7 +1,7 @@
-import { ObjectId, Schema } from "mongoose";
+import { Document, ObjectId, Schema } from "mongoose";
 import { SetupSchema, Setup } from "./setup.model";
 
-export interface Round {
+export interface Round extends Document {
   setup: Setup;
   playersByPunchline: Map<string, ObjectId>;
 }
