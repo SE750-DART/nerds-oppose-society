@@ -1,0 +1,22 @@
+.text {
+  margin: 24px 0;
+}
+
+.btnContainer {
+  margin-top: 12px;
+}
+
+.btnSpacer {
+  font-weight: bold;
+  text-align: center;
+}
+
+.footer {
+  margin-top: 24px;
+  text-align: center;
+}
+
+.footer > a {
+  font-size: 16px;
+  font-weight: bold;
+}

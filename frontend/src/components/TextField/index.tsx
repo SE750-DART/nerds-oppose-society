@@ -2,7 +2,7 @@ import React from "react";
 import styles from "./style.module.css";
 
 interface TextFieldProps {
-  label: string;
+  label?: string;
   textValue: string;
   size?: "big" | "small";
   onChangeHandler: (arg0: string) => void;
@@ -10,7 +10,7 @@ interface TextFieldProps {
 }
 
 const TextField = ({
-  label,
+  label = "",
   textValue,
   size = "big",
   onChangeHandler,
