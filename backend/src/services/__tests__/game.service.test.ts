@@ -3,7 +3,6 @@ import { Game, GameModel, Setup } from "../../models";
 import mongoose from "mongoose";
 import { PUNCHLINES, SETUPS } from "../../resources";
 import * as Util from "../../util";
-import { create } from "domain";
 
 beforeAll(async () => {
   await mongoose.connect(global.__MONGO_URI__, {
