@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import ApiResponse from "./ApiResponse";
 
 const NO_CONTENT_204 = 204;
@@ -9,11 +9,13 @@ type Props = {
   gameCode: string;
 };
 
-const validateGame: ({
+const validateGame: ({ gameCode }: Props) => Promise<ApiResponse<{}>> = async ({
   gameCode,
-}: Props) => Promise<ApiResponse<null>> = async ({ gameCode }: Props) => {
-  const url = "/game/create";
-  const res = await axios.post(url, { gameCode });
+}: Props) => {
+  const url = "/game/validate";
+  const res = await axios.get<any, AxiosResponse<string>>(url, {
+    params: { gameCode },
+  });
 
   switch (res.status) {
     case NO_CONTENT_204:

@@ -1,19 +1,24 @@
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import ApiResponse from "./ApiResponse";
 
 const CREATED_201 = 201;
 const BAD_REQUEST_400 = 400;
 const SERVER_ERROR_500 = 500;
 
-const createPlayer: (
-  gameCode: string,
-  nickname: string
-) => Promise<ApiResponse<string>> = async (
-  gameCode: string,
-  nickname: string
-) => {
-  const url = "/game/create";
-  const res = await axios.post(url, { gameCode, nickname });
+type Props = {
+  gameCode: string;
+  nickname: string;
+};
+
+const createPlayer: (player: Props) => Promise<ApiResponse<string>> = async ({
+  gameCode,
+  nickname,
+}: Props) => {
+  const url = "/player/create";
+  const res = await axios.post<any, AxiosResponse<string>>(url, {
+    gameCode,
+    nickname,
+  });
 
   switch (res.status) {
     case CREATED_201:
