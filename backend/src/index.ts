@@ -4,6 +4,7 @@ import helmet from "helmet";
 import http from "http";
 import { Server as IOServer, Socket } from "socket.io";
 import config from "./config";
+import { Auth } from "./handlers";
 
 // Setup Express
 const app = express();
@@ -38,6 +39,8 @@ const io = new IOServer(server, {
     origin: config.origin,
   },
 });
+
+io.use(Auth);
 
 io.on("connection", async (socket: Socket) => {
   console.log("client connected!");
