@@ -1,7 +1,7 @@
 import React, { createContext } from "react";
 import { Router, Switch, Route, Redirect } from "react-router-dom";
 import { createBrowserHistory } from "history";
-import HomePage from "../pages/HomePage";
+import { HomePage } from "../pages";
 import GameRouter from "../GameRouter";
 import "./App.css";
 

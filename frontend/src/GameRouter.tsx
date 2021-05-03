@@ -6,9 +6,7 @@ import {
   Redirect,
   useParams,
 } from "react-router-dom";
-import BasicPage from "./pages/BasicPage";
-import NicknamePage from "./pages/NicknamePage";
-import LobbyPage from "./pages/LobbyPage";
+import { BasicPage, NicknamePage, LobbyPage } from "./pages";
 
 type PathParams = {
   gameCode: string;
