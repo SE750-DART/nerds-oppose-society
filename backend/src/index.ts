@@ -2,9 +2,9 @@ import express, { Request, Response } from "express";
 import cors from "cors";
 import helmet from "helmet";
 import http from "http";
-import { Server as IOServer, Socket } from "socket.io";
+import { Server as IOServer } from "socket.io";
 import config from "./config";
-import { Auth } from "./handlers";
+import { Connection, Auth } from "./handlers";
 
 // Setup Express
 const app = express();
@@ -42,7 +42,4 @@ const io = new IOServer(server, {
 
 io.use(Auth);
 
-io.on("connection", async (socket: Socket) => {
-  console.log("client connected!");
-  socket.emit("hello", "world!");
-});
+io.on("connection", Connection);
