@@ -31,3 +31,19 @@ export const validateGameCode = async (
 ): Promise<boolean> => {
   return await GameModel.exists({ gameCode: gameCode });
 };
+
+export const setMaxPlayers = async (
+  game: Game,
+  maxPlayers: number
+): Promise<void> => {
+  game.settings.maxPlayers = maxPlayers;
+  await game.save();
+};
+
+export const setRoundLimit = async (
+  game: Game,
+  roundLimit: number
+): Promise<void> => {
+  game.settings.roundLimit = roundLimit;
+  await game.save();
+};

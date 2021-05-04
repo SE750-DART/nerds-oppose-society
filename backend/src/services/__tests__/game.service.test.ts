@@ -1,4 +1,10 @@
-import { createGame, getGame, validateGameCode } from "../game.service";
+import {
+  createGame,
+  getGame,
+  setMaxPlayers,
+  setRoundLimit,
+  validateGameCode,
+} from "../game.service";
 import { Game, GameModel, Setup } from "../../models";
 import mongoose from "mongoose";
 import { PUNCHLINES, SETUPS } from "../../resources";
@@ -91,5 +97,31 @@ describe("validateGameCode Service", () => {
     const result = await validateGameCode(gameCode);
 
     expect(result).toBeTruthy();
+  });
+});
+
+describe("setRoundLimit Service", () => {
+  it("sets roundLimit to 100", async () => {
+    const gameCode = await createGame();
+    let game = await getGame(gameCode);
+    expect(game.settings.roundLimit).not.toBe(100);
+
+    await setRoundLimit(game, 100);
+
+    game = await getGame(gameCode);
+    expect(game.settings.roundLimit).toBe(100);
+  });
+});
+
+describe("setMaxPlayers Service", () => {
+  it("sets maxPlayers to 50", async () => {
+    const gameCode = await createGame();
+    let game = await getGame(gameCode);
+    expect(game.settings.maxPlayers).not.toBe(50);
+
+    await setMaxPlayers(game, 50);
+
+    game = await getGame(gameCode);
+    expect(game.settings.maxPlayers).toBe(50);
   });
 });
