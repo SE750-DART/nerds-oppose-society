@@ -15,10 +15,11 @@ const BasicPage = ({ path, gameCode }: Props) => {
   const browserHistory = useContext(BrowserHistoryContext);
 
   const [gameCodeNew, setGameCode] = useState("");
+  const [apiResponse, setApiResponse] = useState("");
 
   const handleCreateGame = async () => {
     const res = await createGame();
-    console.log(res);
+    setApiResponse(JSON.stringify(res));
 
     if (res.success && res.data) {
       setGameCode(res.data);
@@ -27,7 +28,7 @@ const BasicPage = ({ path, gameCode }: Props) => {
 
   const handleValidateGame = async (code: string) => {
     const res = await validateGame({ gameCode: code });
-    console.log(res);
+    setApiResponse(JSON.stringify(res));
   };
 
   const handleCreatePlayer = async (code: string, nickname: string) => {
@@ -35,7 +36,7 @@ const BasicPage = ({ path, gameCode }: Props) => {
       gameCode: code,
       nickname,
     });
-    console.log(res);
+    setApiResponse(JSON.stringify(res));
   };
 
   return (
@@ -95,6 +96,8 @@ const BasicPage = ({ path, gameCode }: Props) => {
       <button type="button" onClick={() => handleCreatePlayer("123", "test2")}>
         /player/create code not found
       </button>
+
+      <p>Api Response: {apiResponse}</p>
     </>
   );
 };
