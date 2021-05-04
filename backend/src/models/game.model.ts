@@ -41,9 +41,12 @@ const GameSchema: Schema = new Schema({
   discardedPunchlines: [String],
   players: {
     type: [PlayerSchema],
-    validate: (v: Game["players"]) =>
-      Array.isArray(v) &&
-      v.filter((v, i, a) => a.indexOf(v) === i).length === v.length,
+    validate: (players: Game["players"]) =>
+      Array.isArray(players) &&
+      players.filter(
+        (p, i, a) =>
+          a.findIndex((player) => player.nickname === p.nickname) === i
+      ).length === players.length,
   },
   host: Schema.Types.ObjectId,
   state: {
