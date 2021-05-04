@@ -41,8 +41,6 @@ describe("Game Model", () => {
   it("throws a ValidationError if gameCode is not defined", async () => {
     gameData.gameCode = undefined;
 
-    console.log(gameData);
-
     const game = new GameModel(gameData);
 
     try {

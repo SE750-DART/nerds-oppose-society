@@ -111,7 +111,7 @@ describe("validatePlayerId Service", () => {
 
     const result = await validatePlayerId(gameCode, playerId);
 
-    expect(result).toBe(true);
+    expect(result).toBeTruthy();
   });
 
   it("returns false for an invalid gameCode", async () => {
@@ -120,7 +120,7 @@ describe("validatePlayerId Service", () => {
       mongoose.Types.ObjectId().toHexString()
     );
 
-    expect(result).toBe(false);
+    expect(result).toBeFalsy();
   });
 
   it("returns false for an invalid playerId", async () => {
@@ -131,7 +131,7 @@ describe("validatePlayerId Service", () => {
       mongoose.Types.ObjectId().toHexString()
     );
 
-    expect(result).toBe(false);
+    expect(result).toBeFalsy();
   });
 });
 
@@ -143,12 +143,12 @@ describe("initialisePlayer service", () => {
 
     const game = await getGame(gameCode);
     let player = await getPlayer(gameCode, playerId);
-    expect(player.new).toBe(true);
+    expect(player.new).toBeTruthy();
 
     await initialisePlayer(game, playerId);
 
     player = await getPlayer(gameCode, playerId);
-    expect(player.new).toBe(false);
+    expect(player.new).toBeFalsy();
   });
 
   it("throws error when provided an invalid playerId", async () => {

@@ -82,7 +82,7 @@ describe("validateGameCode Service", () => {
   it("returns false for an invalid gameCode", async () => {
     const result = await validateGameCode("69420");
 
-    expect(result).toBe(false);
+    expect(result).toBeFalsy();
   });
 
   it("returns true for a valid gameCode", async () => {
@@ -90,6 +90,6 @@ describe("validateGameCode Service", () => {
 
     const result = await validateGameCode(gameCode);
 
-    expect(result).toBe(true);
+    expect(result).toBeTruthy();
   });
 });
