@@ -101,4 +101,35 @@ describe("Game Model", () => {
     expect([...savedGame.players]).toMatchObject(Array(3).fill({ new: true }));
     expect([...savedGame.players]).toMatchObject(Array(3).fill({ score: 0 }));
   });
+
+  it("throws a ValidationError if two players with the same nickname are added to the same game", async () => {
+    gameData.players = [{ nickname: "Bob" }, { nickname: "Bob" }];
+
+    const game = new GameModel(gameData);
+
+    try {
+      await game.save();
+    } catch (e) {
+      expect(e).toBeInstanceOf(mongoose.Error.ValidationError);
+      expect(e.error.players).toBeDefined();
+    }
+  });
+
+  it("allows two players with the same nickname to be added to separate games", async () => {
+    gameData.players = [{ nickname: "Bob" }];
+    const gameCodeOne = gameData.gameCode;
+
+    const gameOne = new GameModel(gameData);
+    await gameOne.save();
+
+    const gameCodeTwo = String(gameCode++);
+    gameData.gameCode = gameCodeTwo;
+
+    const gameTwo = new GameModel(gameData);
+    await gameTwo.save();
+
+    expect(gameCodeOne === gameCodeTwo).toBe(false);
+    expect([...gameOne.players]).toMatchObject([{ nickname: "Bob" }]);
+    expect([...gameTwo.players]).toMatchObject([{ nickname: "Bob" }]);
+  });
 });
