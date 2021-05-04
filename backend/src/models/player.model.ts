@@ -7,7 +7,7 @@ export interface Player extends Document {
 }
 
 export const PlayerSchema: Schema = new Schema({
-  nickname: { type: String, required: true, unique: true },
+  nickname: { type: String, required: true },
   punchlines: [String],
   score: Number,
 });

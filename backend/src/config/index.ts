@@ -23,6 +23,11 @@ const index = convict({
     default: "http://localhost:3000",
     env: "ORIGIN",
   },
+  mongo_uri: {
+    format: "String",
+    default: "mongodb://localhost:27017/nos-db",
+    env: "MONGO_URI",
+  },
 });
 
 const env = index.get("env");
