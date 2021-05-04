@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from "axios";
 import ApiResponse from "./ApiResponse";
-import axiosCall from "./axiosCall";
+import axiosCall, { BASE_URL } from "./axiosCall";
 
 // Expected status codes
 const CREATED_201 = 201;
@@ -16,11 +16,13 @@ const createPlayer: (player: Props) => Promise<ApiResponse<string>> = async ({
   gameCode,
   nickname,
 }: Props) => {
-  const url = "/player/create";
+  const url = `${BASE_URL}/player/create`;
   const axiosMethod = async () =>
-    axios.post<any, AxiosResponse<string>>(url, {
-      gameCode,
-      nickname,
+    axios.post<any, AxiosResponse<string>>(url, undefined, {
+      params: {
+        gameCode,
+        nickname,
+      },
     });
   const acceptedCodes = [CREATED_201];
 

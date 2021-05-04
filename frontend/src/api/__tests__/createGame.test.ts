@@ -1,6 +1,7 @@
 import mockAxios from "jest-mock-axios";
 import { AxiosError, AxiosResponse } from "axios";
 import createGame from "../createGame";
+import { BASE_URL } from "../axiosCall";
 
 afterEach(() => {
   mockAxios.reset();
@@ -20,7 +21,7 @@ test("should return game code on successful creation", async () => {
   const res = await createGame();
 
   expect(mockAxios.post).toHaveBeenCalledTimes(1);
-  expect(mockAxios.post).toHaveBeenCalledWith("/game/create");
+  expect(mockAxios.post).toHaveBeenCalledWith(`${BASE_URL}/game/create`);
 
   expect(res).toEqual({
     success: true,
@@ -44,7 +45,7 @@ test("should return error on 500 server error", async () => {
   const res = await createGame();
 
   expect(mockAxios.post).toHaveBeenCalledTimes(1);
-  expect(mockAxios.post).toHaveBeenCalledWith("/game/create");
+  expect(mockAxios.post).toHaveBeenCalledWith(`${BASE_URL}/game/create`);
 
   expect(res).toEqual({
     success: false,

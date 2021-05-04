@@ -1,6 +1,7 @@
 import mockAxios from "jest-mock-axios";
 import { AxiosError, AxiosResponse } from "axios";
 import createPlayer from "../createPlayer";
+import { BASE_URL } from "../axiosCall";
 
 const testPlayer = {
   nickname: "test",
@@ -25,7 +26,11 @@ test("should return user id on successful creation", async () => {
   const res = await createPlayer(testPlayer);
 
   expect(mockAxios.post).toHaveBeenCalledTimes(1);
-  expect(mockAxios.post).toHaveBeenCalledWith("/player/create", testPlayer);
+  expect(mockAxios.post).toHaveBeenCalledWith(
+    `${BASE_URL}/player/create`,
+    undefined,
+    { params: testPlayer }
+  );
 
   expect(res).toEqual({
     success: true,
@@ -55,7 +60,11 @@ test("should return error on 400 bad request (invalid code or nickname)", async 
   const res = await createPlayer(testPlayer);
 
   expect(mockAxios.post).toHaveBeenCalledTimes(1);
-  expect(mockAxios.post).toHaveBeenCalledWith("/player/create", testPlayer);
+  expect(mockAxios.post).toHaveBeenCalledWith(
+    `${BASE_URL}/player/create`,
+    undefined,
+    { params: testPlayer }
+  );
 
   expect(res).toEqual({
     success: false,
@@ -79,7 +88,11 @@ test("should return error on 500 server error", async () => {
   const res = await createPlayer(testPlayer);
 
   expect(mockAxios.post).toHaveBeenCalledTimes(1);
-  expect(mockAxios.post).toHaveBeenCalledWith("/player/create", testPlayer);
+  expect(mockAxios.post).toHaveBeenCalledWith(
+    `${BASE_URL}/player/create`,
+    undefined,
+    { params: testPlayer }
+  );
 
   expect(res).toEqual({
     success: false,

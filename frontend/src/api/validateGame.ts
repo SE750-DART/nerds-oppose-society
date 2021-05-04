@@ -1,9 +1,10 @@
 import axios, { AxiosResponse } from "axios";
 import ApiResponse from "./ApiResponse";
-import axiosCall from "./axiosCall";
+import axiosCall, { BASE_URL } from "./axiosCall";
 
 // Expected status codes
 const NO_CONTENT_204 = 204;
+// const NOT_FOUND_404 = 404;
 // const SERVER_ERROR_500 = 500;
 
 type Props = {
@@ -13,7 +14,7 @@ type Props = {
 const validateGame: ({ gameCode }: Props) => Promise<ApiResponse<{}>> = async ({
   gameCode,
 }: Props) => {
-  const url = "/game/validate";
+  const url = `${BASE_URL}/game/validate`;
   const axiosMethod = async () =>
     axios.get<any, AxiosResponse<{}>>(url, {
       params: { gameCode },
