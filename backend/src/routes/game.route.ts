@@ -7,6 +7,4 @@ router.post("/create", createGame);
 
 router.get("/validate", validateGame);
 
-router.get("/ping", async (req, res) => res.sendStatus(200));
-
 export default router;
