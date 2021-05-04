@@ -24,6 +24,7 @@ test("should return game code on successful creation", async () => {
 
   expect(res).toEqual({
     success: true,
+    status: 201,
     data: "12345",
   });
 });

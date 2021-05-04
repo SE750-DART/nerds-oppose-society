@@ -2,7 +2,6 @@ import axios, { AxiosResponse } from "axios";
 import ApiResponse from "./ApiResponse";
 
 const NO_CONTENT_204 = 204;
-const NOT_FOUND_404 = 404;
 const SERVER_ERROR_500 = 500;
 
 type Props = {
@@ -13,30 +12,54 @@ const validateGame: ({ gameCode }: Props) => Promise<ApiResponse<{}>> = async ({
   gameCode,
 }: Props) => {
   const url = "/game/validate";
-  const res = await axios.get<any, AxiosResponse<string>>(url, {
-    params: { gameCode },
-  });
 
-  switch (res.status) {
-    case NO_CONTENT_204:
+  try {
+    const res = await axios.get<any, AxiosResponse<{}>>(url, {
+      params: { gameCode },
+    });
+
+    // Success
+    if (res.status === NO_CONTENT_204) {
       return {
         success: true,
+        status: res.status,
       };
-    case NOT_FOUND_404:
+    }
+    return {
+      success: false,
+      status: SERVER_ERROR_500,
+      error: `Unexpected status code: ${res.status}. Data: ${res.data}`,
+    };
+  } catch (err) {
+    // Error
+    if (err.response) {
+      /*
+       * The request was made and the server responded with a
+       * status code that falls out of the range of 2xx
+       */
       return {
         success: false,
-        error: res.data,
+        status: err.response.status,
+        error: err.response.data,
       };
-    case SERVER_ERROR_500:
+    }
+    if (err.request) {
+      /*
+       * The request was made but no response was received, `error.request`
+       * is an instance of XMLHttpRequest in the browser and an instance
+       * of http.ClientRequest in Node.js
+       */
       return {
         success: false,
-        error: res.data,
+        status: SERVER_ERROR_500,
+        error: err.request,
       };
-    default:
-      return {
-        success: false,
-        error: `Unexpected status code: ${res.status}. Data: ${res.data}`,
-      };
+    }
+    return {
+      success: false,
+      status: SERVER_ERROR_500,
+      error: err.message,
+    };
   }
 };
 

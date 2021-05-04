@@ -30,6 +30,7 @@ test("should return user id on successful creation", async () => {
 
   expect(res).toEqual({
     success: true,
+    status: 201,
     data: "1a2b3c",
   });
 });

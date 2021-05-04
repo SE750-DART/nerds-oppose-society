@@ -26,5 +26,6 @@ test("should return success on valid game code", async () => {
 
   expect(res).toEqual({
     success: true,
+    status: 204,
   });
 });
