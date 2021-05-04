@@ -32,8 +32,40 @@ test("should return success on valid game code", async () => {
   });
 });
 
+test("should return error on 404 not found (invalid code)", async () => {
+  const mockError: AxiosError<{}> = {
+    name: "error",
+    message: "test message",
+    config: {},
+    response: {
+      data: {},
+      status: 404,
+      statusText: "NOT FOUND",
+      headers: {},
+      config: {},
+    },
+    isAxiosError: true,
+    toJSON: () => ({}),
+  };
+
+  mockAxios.get.mockImplementationOnce(() => Promise.reject(mockError));
+
+  const res = await validateGame(testGameCode);
+
+  expect(mockAxios.get).toHaveBeenCalledTimes(1);
+  expect(mockAxios.get).toHaveBeenCalledWith("/game/validate", {
+    params: testGameCode,
+  });
+
+  expect(res).toEqual({
+    success: false,
+    status: 404,
+    error: {},
+  });
+});
+
 test("should return error on 500 server error", async () => {
-  const mockError: AxiosError<string> = {
+  const mockError: AxiosError<{}> = {
     name: "error",
     message: "test message",
     config: {},

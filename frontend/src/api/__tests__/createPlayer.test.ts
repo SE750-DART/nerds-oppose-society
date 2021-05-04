@@ -34,6 +34,36 @@ test("should return user id on successful creation", async () => {
   });
 });
 
+test("should return error on 400 bad request (invalid code or nickname)", async () => {
+  const mockError: AxiosError<string> = {
+    name: "error",
+    message: "test message",
+    config: {},
+    response: {
+      data: "invalid nickname",
+      status: 400,
+      statusText: "BAD REQUEST",
+      headers: {},
+      config: {},
+    },
+    isAxiosError: true,
+    toJSON: () => ({}),
+  };
+
+  mockAxios.post.mockImplementationOnce(() => Promise.reject(mockError));
+
+  const res = await createPlayer(testPlayer);
+
+  expect(mockAxios.post).toHaveBeenCalledTimes(1);
+  expect(mockAxios.post).toHaveBeenCalledWith("/player/create", testPlayer);
+
+  expect(res).toEqual({
+    success: false,
+    status: 400,
+    error: "invalid nickname",
+  });
+});
+
 test("should return error on 500 server error", async () => {
   const mockError: AxiosError<string> = {
     name: "error",
