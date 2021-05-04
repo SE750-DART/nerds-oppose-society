@@ -1,0 +1,13 @@
+.barContainer {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.25);
+  height: 16px;
+  width: 100%;
+  margin-bottom: 12px;
+}
+.barComplete {
+  background-color: #84b5de;
+  border-radius: 8px;
+  height: 100%;
+}
