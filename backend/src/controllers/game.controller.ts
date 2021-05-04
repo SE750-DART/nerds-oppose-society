@@ -1,20 +1,20 @@
 import { NextFunction, Request, Response } from "express";
+import {
+  createGame as createGameService,
+  validateGameCode as validateGameCodeService,
+} from "../services/game.service";
 
 export const createGame = async (
   req: Request,
   res: Response,
-  next: NextFunction,
-  service: () => Promise<string> = async () => {
-    return "Success";
-  }
+  next: NextFunction
 ): Promise<void> => {
   try {
-    const dbResp = await service();
+    const dbResp = await createGameService();
     console.log("Created game!");
     res.status(201).send(dbResp);
     next();
   } catch (e) {
-    console.log(e.message);
     return next(e);
   }
 };
@@ -22,19 +22,19 @@ export const createGame = async (
 export const validateGame = async (
   req: Request,
   res: Response,
-  next: NextFunction,
-  service: () => Promise<boolean> = async () => {
-    return true;
-  }
+  next: NextFunction
 ): Promise<void> => {
   try {
-    const dbResp = await service();
+    const code = req.query.gameCode;
+    if (typeof code != "string") {
+      throw new Error("Code not of type string");
+    }
+    const dbResp = await validateGameCodeService(code);
     console.log("Validated game");
     res
       .status(204)
       .send({ body: `Game code ${req.query.gameCode}`, valid: dbResp });
   } catch (e) {
-    console.log(e.message);
     return next(e);
   }
 };
