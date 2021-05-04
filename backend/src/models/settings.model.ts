@@ -1,6 +1,6 @@
-import { Schema } from "mongoose";
+import { Document, Schema } from "mongoose";
 
-export interface Settings {
+export interface Settings extends Document {
   roundLimit?: number;
   maxPlayers?: number;
 }
