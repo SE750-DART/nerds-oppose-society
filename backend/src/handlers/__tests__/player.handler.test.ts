@@ -6,16 +6,18 @@ import registerPlayerHandler, { playerJoin } from "../player.handler";
 import { Game, GameState, Player } from "../../models";
 
 describe("playerJoin handler", () => {
-  let gameSpy: jest.SpyInstance;
-  let navigateSpy: jest.SpyInstance;
-  let playerSpy: jest.SpyInstance;
-  let initialiseSpy: jest.SpyInstance;
-  let hostSpy: jest.SpyInstance;
+  let getGameSpy: jest.SpyInstance;
+  let emitNavigateSpy: jest.SpyInstance;
+  let emitHostSpy: jest.SpyInstance;
+  let getPlayerSpy: jest.SpyInstance;
+  let initialisePlayerSpy: jest.SpyInstance;
+  let setHostSpy: jest.SpyInstance;
 
+  let emitMock: jest.Mock;
   let fetchMock: jest.Mock;
   let inMock: jest.Mock;
   let joinMock: jest.Mock;
-  let emitMock: jest.Mock;
+  let toEmitMock: jest.Mock;
   let toMock: jest.Mock;
 
   let io: Server;
@@ -23,107 +25,133 @@ describe("playerJoin handler", () => {
   let game: Game;
 
   beforeEach(() => {
+    emitMock = jest.fn();
+    joinMock = jest.fn();
+    toEmitMock = jest.fn();
+    toMock = jest.fn(() => {
+      return {
+        emit: toEmitMock,
+      };
+    });
+
     fetchMock = jest.fn();
     inMock = jest.fn(() => {
       return {
         fetchSockets: fetchMock,
       };
     });
-    joinMock = jest.fn();
-    emitMock = jest.fn();
-    toMock = jest.fn(() => {
-      return {
-        emit: emitMock,
-      };
-    });
-
     io = ({
       in: inMock,
     } as unknown) as Server;
+
     socket = ({
       data: {
         gameCode: "42069",
         playerId: "abc123",
+        nickname: "Bob",
       },
       to: toMock,
       join: joinMock,
+      emit: emitMock,
     } as unknown) as Socket;
+
     game = ({
       gameCode: "42069",
+      players: [
+        { nickname: "Bob", score: 0, new: false },
+        { nickname: "Fred", score: 0, new: true },
+        { nickname: "James", score: 1, new: false },
+      ],
+      settings: "{SETTINGS}",
     } as unknown) as Game;
 
-    gameSpy = jest
+    getGameSpy = jest
       .spyOn(GameService, "getGame")
       .mockImplementation(async () => game);
-    navigateSpy = jest
-      .spyOn(GameHandler, "navigatePlayer")
-      .mockImplementation();
-    playerSpy = jest.spyOn(PlayerService, "getPlayer");
-    initialiseSpy = jest
+    emitNavigateSpy = jest
+      .spyOn(GameHandler, "emitNavigate")
+      .mockImplementation(() => null);
+    emitHostSpy = jest.spyOn(GameHandler, "emitHost").mockImplementation();
+    getPlayerSpy = jest.spyOn(PlayerService, "getPlayer");
+    initialisePlayerSpy = jest
       .spyOn(PlayerService, "initialisePlayer")
       .mockImplementation();
-    hostSpy = jest.spyOn(GameHandler, "setHost").mockImplementation();
+    setHostSpy = jest.spyOn(GameHandler, "setHost").mockImplementation();
   });
 
   afterEach(() => {
-    gameSpy.mockRestore();
-    navigateSpy.mockRestore();
-    playerSpy.mockRestore();
-    initialiseSpy.mockRestore();
-    hostSpy.mockRestore();
+    getGameSpy.mockRestore();
+    emitNavigateSpy.mockRestore();
+    emitHostSpy.mockRestore();
+    getPlayerSpy.mockRestore();
+    initialisePlayerSpy.mockRestore();
+    setHostSpy.mockRestore();
   });
 
-  it("broadcasts to game room if player is new", async () => {
+  it("broadcasts player to game room if player is new", async () => {
     const player: Player = ({
       nickname: "Bob",
       new: true,
     } as unknown) as Player;
-    playerSpy.mockReturnValue(player);
+    getPlayerSpy.mockReturnValue(player);
 
     fetchMock.mockReturnValue(["1"]);
 
     await playerJoin(io, socket);
 
-    expect(gameSpy).toHaveBeenCalledTimes(1);
-    expect(gameSpy).toHaveBeenCalledWith("42069");
+    expect(getGameSpy).toHaveBeenCalledTimes(1);
+    expect(getGameSpy).toHaveBeenCalledWith("42069");
 
-    expect(navigateSpy).toHaveBeenCalledTimes(1);
-    expect(navigateSpy).toHaveBeenCalledWith(socket, game);
+    expect(emitMock).toHaveBeenCalledTimes(2);
+    expect(emitMock).toHaveBeenCalledWith("players:initial", [
+      { nickname: "Bob", score: 0, new: false },
+      { nickname: "James", score: 1, new: false },
+    ]);
+    expect(emitMock).toHaveBeenCalledWith("settings:initial", "{SETTINGS}");
 
-    expect(playerSpy).toHaveBeenCalledTimes(1);
-    expect(playerSpy).toHaveBeenCalledWith(game.gameCode, "abc123", game);
+    expect(emitNavigateSpy).toHaveBeenCalledTimes(1);
+    expect(emitNavigateSpy).toHaveBeenCalledWith(socket, game);
 
-    expect(initialiseSpy).toHaveBeenCalledTimes(1);
-    expect(initialiseSpy).toHaveBeenCalledWith(game, "abc123");
+    expect(getPlayerSpy).toHaveBeenCalledTimes(1);
+    expect(getPlayerSpy).toHaveBeenCalledWith(game.gameCode, "abc123", game);
+
+    expect(initialisePlayerSpy).toHaveBeenCalledTimes(1);
+    expect(initialisePlayerSpy).toHaveBeenCalledWith(game, "abc123");
 
     expect(toMock).toHaveBeenCalledTimes(1);
     expect(toMock).toHaveBeenCalledWith(game.gameCode);
 
-    expect(emitMock).toHaveBeenCalledTimes(1);
-    expect(emitMock).toHaveBeenCalledWith("players:add", "Bob");
+    expect(toEmitMock).toHaveBeenCalledTimes(1);
+    expect(toEmitMock).toHaveBeenCalledWith("players:add", "Bob");
 
     expect(joinMock).toHaveBeenCalledTimes(1);
     expect(joinMock).toHaveBeenCalledWith(game.gameCode);
+
+    expect(emitHostSpy).toHaveBeenCalledTimes(1);
+    expect(emitHostSpy).toHaveBeenCalledWith(io, socket);
   });
 
   it("does not broadcast to game room if player is not new", async () => {
     const player: Player = ({
       new: false,
     } as unknown) as Player;
-    playerSpy.mockReturnValue(player);
+    getPlayerSpy.mockReturnValue(player);
 
     fetchMock.mockReturnValue(["1"]);
 
     await playerJoin(io, socket);
 
-    expect(playerSpy).toHaveBeenCalledTimes(1);
-    expect(playerSpy).toHaveBeenCalledWith("42069", "abc123", game);
+    expect(getPlayerSpy).toHaveBeenCalledTimes(1);
+    expect(getPlayerSpy).toHaveBeenCalledWith("42069", "abc123", game);
 
-    expect(initialiseSpy).toHaveBeenCalledTimes(0);
+    expect(initialisePlayerSpy).toHaveBeenCalledTimes(0);
 
     expect(toMock).toHaveBeenCalledTimes(0);
 
-    expect(emitMock).toHaveBeenCalledTimes(0);
+    expect(emitMock).toHaveBeenCalledTimes(2);
+
+    expect(emitHostSpy).toHaveBeenCalledTimes(1);
+    expect(emitHostSpy).toHaveBeenCalledWith(io, socket);
   });
 
   it("sets player as host if no other players are in game room", async () => {
@@ -131,7 +159,7 @@ describe("playerJoin handler", () => {
       nickname: "Bob",
       new: true,
     } as unknown) as Player;
-    playerSpy.mockReturnValue(player);
+    getPlayerSpy.mockReturnValue(player);
 
     fetchMock.mockReturnValue([]);
 
@@ -142,8 +170,10 @@ describe("playerJoin handler", () => {
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
 
-    expect(hostSpy).toHaveBeenCalledTimes(1);
-    expect(hostSpy).toHaveBeenCalledWith(io, socket, "Bob");
+    expect(setHostSpy).toHaveBeenCalledTimes(1);
+    expect(setHostSpy).toHaveBeenCalledWith(io, socket);
+
+    expect(emitHostSpy).toHaveBeenCalledTimes(0);
   });
 
   it("does not set the player as host if other players are in game room", async () => {
@@ -151,7 +181,7 @@ describe("playerJoin handler", () => {
       nickname: "Dave",
       new: true,
     } as unknown) as Player;
-    playerSpy.mockReturnValue(player);
+    getPlayerSpy.mockReturnValue(player);
 
     fetchMock.mockReturnValue(["1"]);
 
@@ -162,7 +192,23 @@ describe("playerJoin handler", () => {
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
 
-    expect(hostSpy).toHaveBeenCalledTimes(0);
+    expect(setHostSpy).toHaveBeenCalledTimes(0);
+
+    expect(emitHostSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it("adds nickname to the socket data property", async () => {
+    const player: Player = ({
+      nickname: "Bob",
+      new: true,
+    } as unknown) as Player;
+    getPlayerSpy.mockReturnValue(player);
+
+    fetchMock.mockReturnValue(["1"]);
+
+    await playerJoin(io, socket);
+
+    expect(socket.data.nickname).toBe("Bob");
   });
 });
 
@@ -376,7 +422,7 @@ describe("Player handlers", () => {
 
       fetchMock.mockReturnValue([
         { data: { playerId: "1" } },
-        { data: { playerId: "2" } },
+        { data: { playerId: "2", nickname: "Fred" } },
       ]);
 
       handlers = await registerPlayerHandler(io, socket);
@@ -386,11 +432,9 @@ describe("Player handlers", () => {
       await handlers.playerLeaving();
 
       expect(setHostSpy).toHaveBeenCalledTimes(1);
-      expect(setHostSpy).toHaveBeenCalledWith(
-        io,
-        { data: { playerId: "2" } },
-        "Fred"
-      );
+      expect(setHostSpy).toHaveBeenCalledWith(io, {
+        data: { playerId: "2", nickname: "Fred" },
+      });
     });
 
     it("assigns new host looping to start of active players array", async () => {
@@ -398,12 +442,13 @@ describe("Player handlers", () => {
         data: {
           gameCode: "42069",
           playerId: "5",
+          nickname: "Steve",
         },
         on: jest.fn(),
       } as unknown) as Socket;
 
       fetchMock.mockReturnValue([
-        { data: { playerId: "1" } },
+        { data: { playerId: "1", nickname: "Bob" } },
         { data: { playerId: "5" } },
       ]);
 
@@ -414,11 +459,9 @@ describe("Player handlers", () => {
       await handlers.playerLeaving();
 
       expect(setHostSpy).toHaveBeenCalledTimes(1);
-      expect(setHostSpy).toHaveBeenCalledWith(
-        io,
-        { data: { playerId: "1" } },
-        "Bob"
-      );
+      expect(setHostSpy).toHaveBeenCalledWith(io, {
+        data: { playerId: "1", nickname: "Bob" },
+      });
     });
 
     it("does not set host if new host socket is somehow undefined", async () => {

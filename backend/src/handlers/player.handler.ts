@@ -5,26 +5,8 @@ import {
 } from "../services/player.service";
 import { Server, Socket } from "socket.io";
 import { GameState, Player } from "../models";
-import { isHost, navigatePlayer, setHost } from "./game.handler";
+import { emitHost, emitNavigate, isHost, setHost } from "./game.handler";
 import { getGame } from "../services/game.service";
-
-export const playerJoin = async (io: Server, socket: Socket): Promise<void> => {
-  const { gameCode, playerId } = socket.data;
-
-  const game = await getGame(gameCode);
-
-  navigatePlayer(socket, game);
-
-  const player = await getPlayer(game.gameCode, playerId, game);
-  if (player.new) {
-    await initialisePlayer(game, playerId);
-    socket.to(game.gameCode).emit("players:add", player.nickname);
-  }
-
-  const sockets = await io.in(gameCode).fetchSockets();
-  await socket.join(game.gameCode);
-  if (sockets.length === 0) setHost(io, socket, player.nickname);
-};
 
 export default (
   io: Server,
@@ -60,8 +42,7 @@ export default (
         const newHost = game.players[nextHostIndex];
         const newHostSocket = playerIdToSocket.get(newHost.id);
 
-        if (newHostSocket !== undefined)
-          setHost(io, newHostSocket, newHost.nickname);
+        if (newHostSocket !== undefined) setHost(io, newHostSocket);
       }
     }
   };
@@ -82,4 +63,32 @@ export default (
     playerLeave,
     playerLeaving,
   };
+};
+
+export const playerJoin = async (io: Server, socket: Socket): Promise<void> => {
+  const { gameCode, playerId } = socket.data;
+
+  const game = await getGame(gameCode);
+
+  socket.emit(
+    "players:initial",
+    game.players.filter((v) => !v.new)
+  );
+  socket.emit("settings:initial", game.settings);
+  emitNavigate(socket, game);
+
+  const player = await getPlayer(game.gameCode, playerId, game);
+  if (player.new) {
+    await initialisePlayer(game, playerId);
+    socket.to(game.gameCode).emit("players:add", player.nickname);
+  }
+  socket.data.nickname = player.nickname;
+
+  const sockets = await io.in(gameCode).fetchSockets();
+  await socket.join(game.gameCode);
+  if (sockets.length === 0) {
+    setHost(io, socket);
+  } else {
+    await emitHost(io, socket);
+  }
 };

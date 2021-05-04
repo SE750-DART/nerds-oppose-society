@@ -110,7 +110,6 @@ describe("Game Model", () => {
     try {
       await game.save();
     } catch (e) {
-      console.log(e);
       expect(e).toBeInstanceOf(mongoose.Error.ValidationError);
       expect(e.errors.players).toBeDefined();
     }

@@ -1,8 +1,14 @@
 import { Server, Socket } from "socket.io";
-import { Game, GameState, Settings } from "../../models";
-import { isHost, navigatePlayer, setHost } from "../game.handler";
-import registerGameHandler from "../game.handler";
+import { Game, GameState } from "../../models";
 import * as GameService from "../../services/game.service";
+import {
+  emitHost,
+  emitNavigate,
+  getHost,
+  isHost,
+  setHost,
+} from "../game.handler";
+import registerGameHandler from "../game.handler";
 
 describe("Game handler", () => {
   const io = ("io" as unknown) as Server;
@@ -15,40 +21,61 @@ describe("Game handler", () => {
   } as unknown) as Socket;
 
   let handlers: {
-    setMaxPlayers: (maxPlayers: Settings["maxPlayers"]) => Promise<void>;
-    setRoundLimit: (roundLimit: Settings["roundLimit"]) => Promise<void>;
+    updateSetting: (
+      setting: "MAX_PLAYERS" | "ROUND_LIMIT",
+      value: number | undefined
+    ) => Promise<void>;
   };
 
   it("registers each game handler", async () => {
     handlers = registerGameHandler(io, socket);
 
-    expect(socket.on).toHaveBeenCalledTimes(2);
+    expect(socket.on).toHaveBeenCalledTimes(1);
     expect(socket.on).toHaveBeenCalledWith(
-      "game:set-max-players",
-      handlers.setMaxPlayers
-    );
-    expect(socket.on).toHaveBeenCalledWith(
-      "game:set-round-limit",
-      handlers.setRoundLimit
+      "settings:update",
+      handlers.updateSetting
     );
   });
 
-  describe("setMaxPlayers handler", () => {
+  describe("updateSetting handler", () => {
     let gameSpy: jest.SpyInstance;
-    let settingSpy: jest.SpyInstance;
+    let maxPlayerSpy: jest.SpyInstance;
+    let roundLimitSpy: jest.SpyInstance;
 
     beforeEach(() => {
       gameSpy = jest
         .spyOn(GameService, "getGame")
         .mockResolvedValue(({ settings: {} } as unknown) as Game);
-      settingSpy = jest
+      maxPlayerSpy = jest
         .spyOn(GameService, "setMaxPlayers")
+        .mockImplementation();
+      roundLimitSpy = jest
+        .spyOn(GameService, "setRoundLimit")
         .mockImplementation();
     });
 
     afterEach(() => {
       gameSpy.mockRestore();
-      settingSpy.mockRestore();
+      maxPlayerSpy.mockRestore();
+      roundLimitSpy.mockRestore();
+    });
+
+    it("does nothing if player is not host", async () => {
+      socket = ({
+        data: { gameCode: "42069" },
+        rooms: new Set(["<socket-1>", "42069"]),
+        on: jest.fn(),
+        emit: jest.fn(),
+      } as unknown) as Socket;
+
+      handlers = registerGameHandler(io, socket);
+
+      await handlers.updateSetting("MAX_PLAYERS", 100);
+
+      expect(maxPlayerSpy).toHaveBeenCalledTimes(0);
+      expect(roundLimitSpy).toHaveBeenCalledTimes(0);
+
+      expect(socket.emit).toHaveBeenCalledTimes(0);
     });
 
     it("sets max players if player is host", async () => {
@@ -56,47 +83,24 @@ describe("Game handler", () => {
         data: { gameCode: "42069" },
         rooms: new Set(["<socket-1>", "42069", "42069:host"]),
         on: jest.fn(),
+        emit: jest.fn(),
       } as unknown) as Socket;
 
       handlers = registerGameHandler(io, socket);
 
-      await handlers.setMaxPlayers(30);
+      await handlers.updateSetting("MAX_PLAYERS", 30);
 
-      expect(settingSpy).toHaveBeenCalledTimes(1);
-      expect(settingSpy).toHaveBeenCalledWith({ settings: {} }, 30);
-    });
+      expect(maxPlayerSpy).toHaveBeenCalledTimes(1);
+      expect(maxPlayerSpy).toHaveBeenCalledWith({ settings: {} }, 30);
 
-    it("does nothing if player is not host", async () => {
-      socket = ({
-        data: { gameCode: "42069" },
-        rooms: new Set(["<socket-1>", "42069"]),
-        on: jest.fn(),
-      } as unknown) as Socket;
+      expect(roundLimitSpy).toHaveBeenCalledTimes(0);
 
-      handlers = registerGameHandler(io, socket);
-
-      await handlers.setMaxPlayers(100);
-
-      expect(settingSpy).toHaveBeenCalledTimes(0);
-    });
-  });
-
-  describe("setRoundLimit handler", () => {
-    let gameSpy: jest.SpyInstance;
-    let settingSpy: jest.SpyInstance;
-
-    beforeEach(() => {
-      gameSpy = jest
-        .spyOn(GameService, "getGame")
-        .mockResolvedValue(({ settings: {} } as unknown) as Game);
-      settingSpy = jest
-        .spyOn(GameService, "setRoundLimit")
-        .mockImplementation();
-    });
-
-    afterEach(() => {
-      gameSpy.mockRestore();
-      settingSpy.mockRestore();
+      expect(socket.emit).toHaveBeenCalledTimes(1);
+      expect(socket.emit).toHaveBeenCalledWith(
+        "settings:update",
+        "MAX_PLAYERS",
+        30
+      );
     });
 
     it("sets round limit if player is host", async () => {
@@ -104,33 +108,29 @@ describe("Game handler", () => {
         data: { gameCode: "42069" },
         rooms: new Set(["<socket-1>", "42069", "42069:host"]),
         on: jest.fn(),
+        emit: jest.fn(),
       } as unknown) as Socket;
 
       handlers = registerGameHandler(io, socket);
 
-      await handlers.setRoundLimit(100);
+      await handlers.updateSetting("ROUND_LIMIT", 100);
 
-      expect(settingSpy).toHaveBeenCalledTimes(1);
-      expect(settingSpy).toHaveBeenCalledWith({ settings: {} }, 100);
-    });
+      expect(roundLimitSpy).toHaveBeenCalledTimes(1);
+      expect(roundLimitSpy).toHaveBeenCalledWith({ settings: {} }, 100);
 
-    it("does nothing if player is not host", async () => {
-      socket = ({
-        data: { gameCode: "42069" },
-        rooms: new Set(["<socket-1>", "42069"]),
-        on: jest.fn(),
-      } as unknown) as Socket;
+      expect(maxPlayerSpy).toHaveBeenCalledTimes(0);
 
-      handlers = registerGameHandler(io, socket);
-
-      await handlers.setRoundLimit(100);
-
-      expect(settingSpy).toHaveBeenCalledTimes(0);
+      expect(socket.emit).toHaveBeenCalledTimes(1);
+      expect(socket.emit).toHaveBeenCalledWith(
+        "settings:update",
+        "ROUND_LIMIT",
+        100
+      );
     });
   });
 });
 
-describe("navigatePlayer handler", () => {
+describe("emitNavigate handler", () => {
   let socket: Socket;
   let game: Game;
 
@@ -153,23 +153,93 @@ describe("navigatePlayer handler", () => {
   });
 
   it("navigates player to lobby", () => {
-    navigatePlayer(socket, game);
+    emitNavigate(socket, game);
 
     expect(socket.emit).toHaveBeenCalledTimes(1);
-    expect(socket.emit).toHaveBeenCalledWith(
-      "navigate",
-      GameState.lobby,
-      [{ nickname: "Fred", new: false }],
-      { roundLimit: 69, maxPlayers: 25 }
-    );
+    expect(socket.emit).toHaveBeenCalledWith("navigate", GameState.lobby);
+  });
+});
+
+describe("emitHost handler", () => {
+  let fetchMock: jest.Mock;
+  let inMock: jest.Mock;
+
+  let io: Server;
+  let socket: Socket;
+
+  beforeEach(() => {
+    fetchMock = jest.fn();
+    inMock = jest.fn(() => {
+      return {
+        fetchSockets: fetchMock,
+      };
+    });
+
+    io = ({
+      in: inMock,
+    } as unknown) as Server;
+
+    socket = ({
+      data: {
+        gameCode: "42069",
+      },
+      emit: jest.fn(),
+    } as unknown) as Socket;
   });
 
-  it("throws error for invalid game state", () => {
-    game = ({
-      state: "INVALID",
-    } as unknown) as Game;
+  it("emits the current host", async () => {
+    fetchMock.mockReturnValue([{ data: { nickname: "Bob" } }]);
 
-    expect(() => navigatePlayer(socket, game)).toThrow("Invalid game state");
+    await emitHost(io, socket);
+
+    expect(socket.emit).toHaveBeenCalledTimes(1);
+    expect(socket.emit).toHaveBeenCalledWith("host", "Bob");
+  });
+});
+
+describe("getHost handler", () => {
+  let fetchMock: jest.Mock;
+  let inMock: jest.Mock;
+
+  let io: Server;
+
+  beforeEach(() => {
+    fetchMock = jest.fn();
+    inMock = jest.fn(() => {
+      return {
+        fetchSockets: fetchMock,
+      };
+    });
+
+    io = ({
+      in: inMock,
+    } as unknown) as Server;
+  });
+
+  it("gets the nickname of the current host", async () => {
+    fetchMock.mockReturnValue([{ data: { nickname: "Jim" } }]);
+
+    const host = await getHost(io, "69420");
+
+    expect(host).toBe("Jim");
+
+    expect(inMock).toHaveBeenCalledTimes(1);
+    expect(inMock).toHaveBeenCalledWith("69420:host");
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("returns undefined if no host exists", async () => {
+    fetchMock.mockReturnValue([]);
+
+    const host = await getHost(io, "69420");
+
+    expect(host).toBe(undefined);
+
+    expect(inMock).toHaveBeenCalledTimes(1);
+    expect(inMock).toHaveBeenCalledWith("69420:host");
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -197,13 +267,14 @@ describe("setHost handler", () => {
     socket = ({
       data: {
         gameCode: "42069",
+        nickname: "Bob",
       },
       join: joinMock,
     } as unknown) as Socket;
   });
 
   it("adds socket to game:host room and broadcasts to all players", () => {
-    setHost(io, socket, "Bob");
+    setHost(io, socket);
 
     expect(joinMock).toHaveBeenCalledTimes(1);
     expect(joinMock).toHaveBeenCalledWith("42069:host");
@@ -212,7 +283,7 @@ describe("setHost handler", () => {
     expect(toMock).toHaveBeenCalledWith("42069");
 
     expect(emitMock).toHaveBeenCalledTimes(1);
-    expect(emitMock).toHaveBeenCalledWith("host:new", "Bob");
+    expect(emitMock).toHaveBeenCalledWith("host", "Bob");
   });
 });
 

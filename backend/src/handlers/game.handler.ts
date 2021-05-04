@@ -1,4 +1,4 @@
-import { Game, GameState, Player, Settings } from "../models";
+import { Game, GameState, Player } from "../models";
 import { Server, Socket } from "socket.io";
 import { getGame } from "../services/game.service";
 import {
@@ -10,61 +10,63 @@ export default (
   io: Server,
   socket: Socket
 ): {
-  setMaxPlayers: (maxPlayers: Settings["maxPlayers"]) => Promise<void>;
-  setRoundLimit: (roundLimit: Settings["roundLimit"]) => Promise<void>;
+  updateSetting: (
+    setting: "MAX_PLAYERS" | "ROUND_LIMIT",
+    value: number | undefined
+  ) => Promise<void>;
 } => {
   const { gameCode } = socket.data;
 
-  const setMaxPlayers = async (
-    maxPlayers: Settings["maxPlayers"]
+  const updateSetting = async (
+    setting: "MAX_PLAYERS" | "ROUND_LIMIT",
+    value: number | undefined
   ): Promise<void> => {
     if (isHost(socket, gameCode)) {
       const game = await getGame(gameCode);
-      await setMaxPlayersService(game, maxPlayers);
+      switch (setting) {
+        case "MAX_PLAYERS":
+          await setMaxPlayersService(game, value);
+          break;
+        case "ROUND_LIMIT":
+          await setRoundLimitService(game, value);
+          break;
+      }
+      socket.emit("settings:update", setting, value);
     }
   };
 
-  const setRoundLimit = async (
-    roundLimit: Settings["roundLimit"]
-  ): Promise<void> => {
-    if (isHost(socket, gameCode)) {
-      const game = await getGame(gameCode);
-      await setRoundLimitService(game, roundLimit);
-    }
-  };
-
-  socket.on("game:set-max-players", setMaxPlayers);
-  socket.on("game:set-round-limit", setRoundLimit);
+  socket.on("settings:update", updateSetting);
 
   return {
-    setMaxPlayers,
-    setRoundLimit,
+    updateSetting,
   };
 };
 
-export const navigatePlayer = (socket: Socket, game: Game): void => {
+export const emitNavigate = (socket: Socket, game: Game): void => {
   switch (game.state) {
     case GameState.lobby:
-      socket.emit(
-        "navigate",
-        GameState.lobby,
-        game.players.filter((v) => !v.new),
-        game.settings
-      );
+      socket.emit("navigate", GameState.lobby);
       break;
-    default:
-      throw Error("Invalid game state");
   }
 };
 
-export const setHost = (
+export const emitHost = async (io: Server, socket: Socket): Promise<void> => {
+  const host = await getHost(io, socket.data.gameCode);
+  socket.emit("host", host);
+};
+
+export const getHost = async (
   io: Server,
-  socket: Socket,
-  nickname: Player["nickname"]
-): void => {
+  gameCode: Game["gameCode"]
+): Promise<Player["nickname"] | undefined> => {
+  const sockets = await io.in(`${gameCode}:host`).fetchSockets();
+  return sockets[0]?.data.nickname;
+};
+
+export const setHost = (io: Server, socket: Socket): void => {
   const { gameCode } = socket.data;
   socket.join(`${gameCode}:host`);
-  io.to(gameCode).emit("host:new", nickname);
+  io.to(gameCode).emit("host", socket.data.nickname);
 };
 
 export const isHost = (socket: Socket, gameCode: Game["gameCode"]): boolean => {
