@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import {
   createPlayer,
   getPlayer,
+  incrementScore,
   initialisePlayer,
   removePlayer,
   validatePlayerId,
@@ -138,7 +139,6 @@ describe("validatePlayerId Service", () => {
 describe("initialisePlayer service", () => {
   it("sets player.new to false", async () => {
     const gameCode = await createGame();
-
     const playerId = await createPlayer(gameCode, "Jimbo");
 
     const game = await getGame(gameCode);
@@ -158,5 +158,30 @@ describe("initialisePlayer service", () => {
     await expect(
       initialisePlayer(game, "qtgehgoiwuehsdgs68976")
     ).rejects.toThrow("Player does not exist");
+  });
+});
+
+describe("incrementScore service", () => {
+  it("increments a players score", async () => {
+    const gameCode = await createGame();
+    const playerId = await createPlayer(gameCode, "Jimbo");
+
+    let player = await getPlayer(gameCode, playerId);
+    expect(player.score).toBe(0);
+
+    const game = await getGame(gameCode);
+    await incrementScore(game, playerId);
+
+    player = await getPlayer(gameCode, playerId);
+    expect(player.score).toBe(1);
+  });
+
+  it("throws error when provided an invalid playerId", async () => {
+    const gameCode = await createGame();
+    const game = await getGame(gameCode);
+
+    await expect(incrementScore(game, "qtgehgoiwuehsdgs68976")).rejects.toThrow(
+      "Player does not exist"
+    );
   });
 });

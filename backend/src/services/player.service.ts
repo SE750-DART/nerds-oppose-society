@@ -24,8 +24,10 @@ export const removePlayer = async (
   const player = game.players.id(playerId);
   if (player === null) throw Error("Player does not exist");
 
-  await player.remove();
-  await game.save();
+  if (player.score === 0) {
+    await player.remove();
+    await game.save();
+  }
 
   return player;
 };
@@ -60,5 +62,15 @@ export const initialisePlayer = async (
   const player = game.players.id(playerId);
   if (player === null) throw Error("Player does not exist");
   player.new = false;
+  await game.save();
+};
+
+export const incrementScore = async (
+  game: Game,
+  playerId: Player["id"]
+): Promise<void> => {
+  const player = game.players.id(playerId);
+  if (player === null) throw Error("Player does not exist");
+  player.score++;
   await game.save();
 };
