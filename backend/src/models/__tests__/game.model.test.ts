@@ -88,7 +88,7 @@ describe("Game Model", () => {
     }
   });
 
-  it("inserts a player with new defaulting to true", async () => {
+  it("inserts a player with new defaulting to true and score defaulting to zero", async () => {
     gameData.players = [
       { nickname: "Bob" },
       { nickname: "Fred" },
@@ -99,5 +99,6 @@ describe("Game Model", () => {
     const savedGame = await game.save();
 
     expect([...savedGame.players]).toMatchObject(Array(3).fill({ new: true }));
+    expect([...savedGame.players]).toMatchObject(Array(3).fill({ score: 0 }));
   });
 });
