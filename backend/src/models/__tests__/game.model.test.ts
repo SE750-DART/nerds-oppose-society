@@ -36,6 +36,10 @@ describe("Game Model", () => {
     expect(savedGame.gameCode).toBe(gameData.gameCode);
     expect([...savedGame.setups]).toMatchObject(gameData.setups);
     expect([...savedGame.punchlines]).toMatchObject(gameData.punchlines);
+    expect(savedGame.settings).toMatchObject({
+      roundLimit: 69,
+      maxPlayers: 25,
+    });
   });
 
   it("throws a ValidationError if gameCode is not defined", async () => {

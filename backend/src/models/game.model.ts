@@ -15,7 +15,7 @@ export enum GameState {
 
 export interface Game extends Document {
   gameCode: string;
-  settings?: Settings;
+  settings: Settings;
   setups: Types.DocumentArray<Setup>;
   discardedSetups?: Types.DocumentArray<Setup>;
   punchlines: string[];
@@ -27,7 +27,10 @@ export interface Game extends Document {
 
 const GameSchema: Schema = new Schema({
   gameCode: { type: String, required: true, unique: true },
-  settings: SettingsSchema,
+  settings: {
+    type: SettingsSchema,
+    default: () => ({}),
+  },
   setups: {
     type: [SetupSchema],
     validate: (v: Game["setups"]) => Array.isArray(v) && v.length > 0,
