@@ -39,7 +39,7 @@ describe("createPlayer Service", () => {
 });
 
 describe("removePlayer Service", () => {
-  it("removes a player from a game", async () => {
+  it("removes a player from a game is score is zero", async () => {
     const gameCode = await createGame();
     const playerId = await createPlayer(gameCode, "Dave");
 
@@ -49,6 +49,30 @@ describe("removePlayer Service", () => {
     await removePlayer(game, playerId);
 
     await expect(validatePlayerId(gameCode, playerId)).resolves.toBeFalsy();
+  });
+
+  it("throws error when provided an invalid playerId", async () => {
+    const gameCode = await createGame();
+    const game = await getGame(gameCode);
+
+    await expect(removePlayer(game, "qtgehgoiwuehsdgs68976")).rejects.toThrow(
+      "Player does not exist"
+    );
+  });
+
+  it("does not remove a player from the game if score is greater than zero", async () => {
+    const gameCode = await createGame();
+    const playerId = await createPlayer(gameCode, "Dave");
+
+    let game = await getGame(gameCode);
+    await incrementScore(game, playerId);
+
+    await expect(validatePlayerId(gameCode, playerId)).resolves.toBeTruthy();
+
+    game = await getGame(gameCode);
+    await removePlayer(game, playerId);
+
+    await expect(validatePlayerId(gameCode, playerId)).resolves.toBeTruthy();
   });
 });
 
