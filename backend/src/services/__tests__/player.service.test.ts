@@ -21,6 +21,16 @@ afterAll(async () => {
 });
 
 describe("createPlayer Service", () => {
+  let gameSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    gameSpy = jest.spyOn(GameServices, "getGame");
+  });
+
+  afterEach(() => {
+    gameSpy.mockRestore();
+  });
+
   it("creates a player and returns its playerId", async () => {
     const gameCode = await createGame();
 
@@ -34,6 +44,18 @@ describe("createPlayer Service", () => {
   it("throws an error when provided an invalid gameCode", async () => {
     await expect(createPlayer("987654321", "Fred")).rejects.toThrow(
       "Game does not exist"
+    );
+  });
+
+  it("throws an error when provided a duplicate nickname", async () => {
+    const mockSave = jest.fn().mockRejectedValue(new Error("Mongoose error"));
+    gameSpy.mockReturnValue({
+      players: [],
+      save: mockSave,
+    });
+
+    await expect(createPlayer("987654321", "Fred")).rejects.toThrow(
+      "Duplicate player nickname"
     );
   });
 });

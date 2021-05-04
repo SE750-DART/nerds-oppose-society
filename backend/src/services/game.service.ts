@@ -1,5 +1,5 @@
 import { Game, GameModel, Settings, Setup } from "../models";
-import { digitShortCode, shuffle } from "../util";
+import { digitShortCode, ErrorType, ServiceError, shuffle } from "../util";
 import { PUNCHLINES, SETUPS } from "../resources";
 
 export const createGame = async (): Promise<Game["gameCode"]> => {
@@ -23,7 +23,7 @@ export const getGame = async (gameCode: Game["gameCode"]): Promise<Game> => {
   }).exec();
 
   if (game) return game;
-  throw new Error("Game does not exist");
+  throw new ServiceError(ErrorType.gameCode, "Game does not exist");
 };
 
 export const validateGameCode = async (
