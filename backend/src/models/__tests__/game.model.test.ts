@@ -3,6 +3,7 @@ import { GameModel, SetupType } from "../../models";
 
 describe("Game Model", () => {
   let gameCode = 42069;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let gameData: any;
 
   beforeAll(async () => {

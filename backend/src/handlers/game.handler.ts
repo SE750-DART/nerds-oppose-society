@@ -1,7 +1,7 @@
-import { Game, GameState } from "../models";
+import { Game, GameState, Player } from "../models";
 import { Server, Socket } from "socket.io";
 
-export const navigatePlayer = (socket: Socket, game: Game) => {
+export const navigatePlayer = (socket: Socket, game: Game): void => {
   switch (game.state) {
     case GameState.lobby:
       socket.emit(
@@ -16,8 +16,16 @@ export const navigatePlayer = (socket: Socket, game: Game) => {
   }
 };
 
-export const setHost = (io: Server, socket: Socket, nickname: string) => {
+export const setHost = (
+  io: Server,
+  socket: Socket,
+  nickname: Player["nickname"]
+): void => {
   const { gameCode } = socket.data;
   socket.join(`${gameCode}:host`);
   io.to(gameCode).emit("host:new", nickname);
+};
+
+export const isHost = (socket: Socket, gameCode: Game["gameCode"]): boolean => {
+  return socket.rooms.has(`${gameCode}:host`);
 };

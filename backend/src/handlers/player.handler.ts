@@ -5,7 +5,7 @@ import {
 } from "../services/player.service";
 import { Server, Socket } from "socket.io";
 import { GameState, Player } from "../models";
-import { navigatePlayer, setHost } from "./game.handler";
+import { isHost, navigatePlayer, setHost } from "./game.handler";
 import { getGame } from "../services/game.service";
 
 export const playerJoin = async (io: Server, socket: Socket): Promise<void> => {
@@ -36,9 +36,7 @@ export default (
   const { gameCode, playerId } = socket.data;
 
   const playerLeaving = async (): Promise<void> => {
-    const isHost = socket.rooms.has(`${gameCode}:host`);
-
-    if (isHost) {
+    if (isHost(socket, gameCode)) {
       const game = await getGame(gameCode);
 
       const sockets = ((await io

@@ -279,7 +279,8 @@ describe("Player handlers", () => {
     let inMock: jest.Mock;
 
     let gameSpy: jest.SpyInstance;
-    let hostSpy: jest.SpyInstance;
+    let isHostSpy: jest.SpyInstance;
+    let setHostSpy: jest.SpyInstance;
     let mapSpy: jest.SpyInstance;
 
     beforeEach(() => {
@@ -303,13 +304,15 @@ describe("Player handlers", () => {
           { id: "5", nickname: "Steve" },
         ],
       });
-      hostSpy = jest.spyOn(GameHandler, "setHost").mockImplementation();
+      isHostSpy = jest.spyOn(GameHandler, "isHost");
+      setHostSpy = jest.spyOn(GameHandler, "setHost").mockImplementation();
       mapSpy = jest.spyOn(Map.prototype, "get");
     });
 
     afterEach(() => {
       gameSpy.mockRestore();
-      hostSpy.mockRestore();
+      isHostSpy.mockRestore();
+      setHostSpy.mockRestore();
       mapSpy.mockRestore();
     });
 
@@ -319,11 +322,12 @@ describe("Player handlers", () => {
           gameCode: "42069",
           playerId: "1",
         },
-        rooms: new Set(["<socket-1>", "42069"]),
         on: jest.fn(),
       } as unknown) as Socket;
 
       handlers = await registerPlayerHandler(io, socket);
+
+      isHostSpy.mockReturnValue(false);
 
       await handlers.playerLeaving();
 
@@ -332,22 +336,23 @@ describe("Player handlers", () => {
       expect(inMock).toHaveBeenCalledTimes(0);
       expect(fetchMock).toHaveBeenCalledTimes(0);
 
-      expect(hostSpy).toHaveBeenCalledTimes(0);
+      expect(setHostSpy).toHaveBeenCalledTimes(0);
     });
 
-    it("does not assign new host if player is host but only player", async () => {
+    it("does not assign new host if player is host but the only player", async () => {
       const socket = ({
         data: {
           gameCode: "42069",
           playerId: "1",
         },
-        rooms: new Set(["<socket-1>", "42069", "42069:host"]),
         on: jest.fn(),
       } as unknown) as Socket;
 
       fetchMock.mockReturnValue([{ data: { playerId: "1" } }]);
 
       handlers = await registerPlayerHandler(io, socket);
+
+      isHostSpy.mockReturnValue(true);
 
       await handlers.playerLeaving();
 
@@ -357,7 +362,7 @@ describe("Player handlers", () => {
       expect(inMock).toHaveBeenCalledWith("42069");
       expect(fetchMock).toHaveBeenCalledTimes(1);
 
-      expect(hostSpy).toHaveBeenCalledTimes(0);
+      expect(setHostSpy).toHaveBeenCalledTimes(0);
     });
 
     it("assigns new host", async () => {
@@ -366,7 +371,6 @@ describe("Player handlers", () => {
           gameCode: "42069",
           playerId: "1",
         },
-        rooms: new Set(["<socket-1>", "42069", "42069:host"]),
         on: jest.fn(),
       } as unknown) as Socket;
 
@@ -377,10 +381,12 @@ describe("Player handlers", () => {
 
       handlers = await registerPlayerHandler(io, socket);
 
+      isHostSpy.mockReturnValue(true);
+
       await handlers.playerLeaving();
 
-      expect(hostSpy).toHaveBeenCalledTimes(1);
-      expect(hostSpy).toHaveBeenCalledWith(
+      expect(setHostSpy).toHaveBeenCalledTimes(1);
+      expect(setHostSpy).toHaveBeenCalledWith(
         io,
         { data: { playerId: "2" } },
         "Fred"
@@ -393,7 +399,6 @@ describe("Player handlers", () => {
           gameCode: "42069",
           playerId: "5",
         },
-        rooms: new Set(["<socket-1>", "42069", "42069:host"]),
         on: jest.fn(),
       } as unknown) as Socket;
 
@@ -404,10 +409,12 @@ describe("Player handlers", () => {
 
       handlers = await registerPlayerHandler(io, socket);
 
+      isHostSpy.mockReturnValue(true);
+
       await handlers.playerLeaving();
 
-      expect(hostSpy).toHaveBeenCalledTimes(1);
-      expect(hostSpy).toHaveBeenCalledWith(
+      expect(setHostSpy).toHaveBeenCalledTimes(1);
+      expect(setHostSpy).toHaveBeenCalledWith(
         io,
         { data: { playerId: "1" } },
         "Bob"
@@ -420,7 +427,6 @@ describe("Player handlers", () => {
           gameCode: "42069",
           playerId: "5",
         },
-        rooms: new Set(["<socket-1>", "42069", "42069:host"]),
         on: jest.fn(),
       } as unknown) as Socket;
 
@@ -433,9 +439,11 @@ describe("Player handlers", () => {
 
       handlers = await registerPlayerHandler(io, socket);
 
+      isHostSpy.mockReturnValue(true);
+
       await handlers.playerLeaving();
 
-      expect(hostSpy).toHaveBeenCalledTimes(0);
+      expect(setHostSpy).toHaveBeenCalledTimes(0);
     });
   });
 });

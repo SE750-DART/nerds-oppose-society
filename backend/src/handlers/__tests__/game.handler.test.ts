@@ -1,6 +1,6 @@
 import { Server, Socket } from "socket.io";
 import { Game, GameState } from "../../models";
-import { navigatePlayer, setHost } from "../game.handler";
+import { isHost, navigatePlayer, setHost } from "../game.handler";
 
 describe("navigatePlayer handler", () => {
   let socket: Socket;
@@ -85,5 +85,23 @@ describe("setHost handler", () => {
 
     expect(emitMock).toHaveBeenCalledTimes(1);
     expect(emitMock).toHaveBeenCalledWith("host:new", "Bob");
+  });
+});
+
+describe("isHost handler", () => {
+  it("returns true if player is the host", () => {
+    const socket = ({
+      rooms: new Set(["<socket-1>", "42069", "42069:host"]),
+    } as unknown) as Socket;
+
+    expect(isHost(socket, "42069")).toBeTruthy();
+  });
+
+  it("returns false if player is not the host", () => {
+    const socket = ({
+      rooms: new Set(["<socket-1>", "42069"]),
+    } as unknown) as Socket;
+
+    expect(isHost(socket, "42069")).toBeFalsy();
   });
 });
