@@ -9,7 +9,7 @@ import { navigatePlayer, setHost } from "./game.handler";
 import { getGame } from "../services/game.service";
 
 export const playerJoin = async (io: Server, socket: Socket): Promise<void> => {
-  const { gameCode, playerId } = socket.handshake.auth;
+  const { gameCode, playerId } = socket.data;
 
   const game = await getGame(gameCode);
 
@@ -33,7 +33,7 @@ export default (
   playerLeave: () => Promise<void>;
   playerLeaving: () => void;
 } => {
-  const { gameCode, playerId } = socket.handshake.auth;
+  const { gameCode, playerId } = socket.data;
 
   const playerLeaving = async (): Promise<void> => {
     const isHost = socket.rooms.has(`${gameCode}:host`);
@@ -51,7 +51,7 @@ export default (
       const activePlayers = game.players.filter((player) =>
         playerIdToSocket.has(player.id)
       );
-      console.log(activePlayers);
+
       if (activePlayers.length > 1) {
         const leavingHostIndex = activePlayers.findIndex(
           (player) => player.id === playerId
@@ -61,10 +61,6 @@ export default (
 
         const newHost = game.players[nextHostIndex];
         const newHostSocket = playerIdToSocket.get(newHost.id);
-
-        console.log(newHost);
-        console.log(newHostSocket);
-        console.log(playerIdToSocket);
 
         if (newHostSocket !== undefined)
           setHost(io, newHostSocket, newHost.nickname);

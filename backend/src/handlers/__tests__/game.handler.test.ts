@@ -67,10 +67,8 @@ describe("setHost handler", () => {
     } as unknown) as Server;
 
     socket = ({
-      handshake: {
-        auth: {
-          gameCode: "42069",
-        },
+      data: {
+        gameCode: "42069",
       },
       join: joinMock,
     } as unknown) as Socket;

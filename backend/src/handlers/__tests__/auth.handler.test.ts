@@ -5,6 +5,13 @@ import { Socket } from "socket.io";
 describe("auth Handler", () => {
   let spy: jest.SpyInstance;
 
+  const socket = ({
+    handshake: {
+      auth: { gameCode: "42069", playerId: "abc123" },
+    },
+    data: {},
+  } as unknown) as Socket;
+
   beforeEach(() => {
     spy = jest.spyOn(PlayerService, "validatePlayerId");
   });
@@ -16,12 +23,6 @@ describe("auth Handler", () => {
   it("authorizes user with valid credentials", async () => {
     spy.mockReturnValue(true);
 
-    const socket = ({
-      handshake: {
-        auth: { gameCode: "42069", playerId: "abc123" },
-      },
-    } as unknown) as Socket;
-
     const next = jest.fn();
 
     await Auth(socket, next);
@@ -30,16 +31,12 @@ describe("auth Handler", () => {
     expect(spy).toHaveBeenCalledWith("42069", "abc123");
     expect(next).toHaveBeenCalledTimes(1);
     expect(next).toHaveBeenCalledWith();
+
+    expect(socket.data).toMatchObject(socket.handshake.auth);
   });
 
   it("calls next() with an error with invalid credentials", async () => {
     spy.mockReturnValue(false);
-
-    const socket = ({
-      handshake: {
-        auth: { gameCode: "42069", playerId: "abc123" },
-      },
-    } as unknown) as Socket;
 
     const next = jest.fn();
 

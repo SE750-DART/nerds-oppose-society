@@ -7,6 +7,9 @@ export default async (
 ): Promise<void> => {
   const { gameCode, playerId } = socket.handshake.auth;
 
+  socket.data.gameCode = gameCode;
+  socket.data.playerId = playerId;
+
   if (await validatePlayerId(gameCode, playerId)) {
     return next();
   }

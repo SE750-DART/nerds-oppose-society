@@ -17,7 +17,7 @@ export const navigatePlayer = (socket: Socket, game: Game) => {
 };
 
 export const setHost = (io: Server, socket: Socket, nickname: string) => {
-  const { gameCode } = socket.handshake.auth;
+  const { gameCode } = socket.data;
   socket.join(`${gameCode}:host`);
   io.to(gameCode).emit("host:new", nickname);
 };
