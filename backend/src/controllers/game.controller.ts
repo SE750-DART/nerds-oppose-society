@@ -13,7 +13,7 @@ export const createGame = async (
     const dbResp = await createGameService();
     console.log("Created game!");
     res.status(201).send(dbResp);
-    next();
+    return;
   } catch (e) {
     return next(e);
   }
@@ -27,13 +27,17 @@ export const validateGame = async (
   try {
     const code = req.query.gameCode;
     if (typeof code != "string") {
-      throw new Error("Code not of type string");
+      res.status(400).send("Code not of type string");
+      return;
     }
     const dbResp = await validateGameCodeService(code);
-    console.log("Validated game");
-    res
-      .status(204)
-      .send({ body: `Game code ${req.query.gameCode}`, valid: dbResp });
+    if (dbResp) {
+      res.sendStatus(204);
+      return;
+    } else {
+      res.sendStatus(404);
+      return;
+    }
   } catch (e) {
     return next(e);
   }
