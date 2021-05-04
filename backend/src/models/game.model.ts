@@ -1,4 +1,4 @@
-import mongoose, { Document, ObjectId, Schema, Types } from "mongoose";
+import mongoose, { Document, Schema, Types } from "mongoose";
 import { SetupSchema, Setup } from "./setup.model";
 import { SettingsSchema, Settings } from "./settings.model";
 import { PlayerSchema, Player } from "./player.model";
@@ -21,7 +21,6 @@ export interface Game extends Document {
   punchlines: string[];
   discardedPunchlines?: string[];
   players: Types.DocumentArray<Player>;
-  host?: ObjectId;
   state?: GameState;
   rounds?: Types.DocumentArray<Round>;
 }
@@ -40,7 +39,6 @@ const GameSchema: Schema = new Schema({
   },
   discardedPunchlines: [String],
   players: [PlayerSchema],
-  host: Schema.Types.ObjectId,
   state: {
     type: String,
     enum: Object.values(GameState),
