@@ -1,5 +1,5 @@
 import { Game, GameModel, Setup } from "../models";
-import { digitShortCode, shuffle } from "../util";
+import { digitShortCode, ErrorType, ServiceError, shuffle } from "../util";
 import { PUNCHLINES, SETUPS } from "../resources";
 
 export const createGame = async (): Promise<string> => {
@@ -27,7 +27,7 @@ export const getGame = async (
   ).exec();
 
   if (game) return game;
-  throw new Error("Could not get game");
+  throw new ServiceError(ErrorType.gameCode, "Could not get game");
 };
 
 export const validateGameCode = async (gameCode: string): Promise<boolean> => {

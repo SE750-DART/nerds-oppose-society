@@ -12,3 +12,16 @@ export const shuffle = <Type>(array: Type[]): Type[] => {
     .sort((a, b) => a.rank - b.rank)
     .map((value) => value.value);
 };
+
+export enum ErrorType {
+  gameCode = "GAME_CODE",
+  playerName = "PLAYER_NAME",
+}
+
+export class ServiceError extends Error {
+  type: ErrorType;
+  constructor(type: ErrorType, message?: string) {
+    super(message);
+    this.type = type;
+  }
+}

@@ -1,5 +1,6 @@
 import { getGame } from "./game.service";
 import { Player } from "../models";
+import { ErrorType, ServiceError } from "../util";
 
 export const createPlayer = async (
   gameCode: string,
@@ -12,7 +13,11 @@ export const createPlayer = async (
   });
   const player = game.players[length - 1];
 
-  await game.save();
+  try {
+    await game.save();
+  } catch (e) {
+    throw new ServiceError(ErrorType.playerName, "Duplicate player nickname");
+  }
 
   return player._id;
 };
@@ -26,5 +31,5 @@ export const getPlayer = async (
   const player = game.players.id(playerId);
 
   if (player) return player;
-  throw new Error("Could not get player");
+  throw new ServiceError(ErrorType.playerName, "Could not get player");
 };
