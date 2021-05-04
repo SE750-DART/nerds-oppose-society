@@ -10,9 +10,8 @@ export const createGame = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const dbResp = await createGameService();
-    console.log("Created game!");
-    res.status(201).send(dbResp);
+    const gameCode = await createGameService();
+    res.status(201).send(gameCode);
     return;
   } catch (e) {
     return next(e);
@@ -30,8 +29,8 @@ export const validateGame = async (
       res.status(400).send("Code not of type string");
       return;
     }
-    const dbResp = await validateGameCodeService(code);
-    if (dbResp) {
+    const isValid: boolean = await validateGameCodeService(code);
+    if (isValid) {
       res.sendStatus(204);
       return;
     } else {

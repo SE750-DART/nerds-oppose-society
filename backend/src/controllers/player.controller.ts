@@ -18,11 +18,10 @@ export const createPlayer = async (
       res.status(400).send("Nickname not of type string");
       return;
     }
-    const dbResp = await createPlayerService(code, nickname);
-    res.status(201).send(dbResp);
+    const playerId = await createPlayerService(code, nickname);
+    res.status(201).send(playerId);
     return;
   } catch (e) {
-    console.log(e);
     if (e.type === ErrorType.gameCode) {
       res.status(400).send("Could not get game");
       return;

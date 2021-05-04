@@ -48,6 +48,7 @@ describe("Player controller", () => {
     expect(send).toHaveBeenCalledTimes(1);
     expect(send).toHaveBeenCalledWith("69eb420cg69");
   });
+
   it("Responds with a 400 if the game code is invalid", async () => {
     const req: any = {
       query: {
@@ -84,6 +85,7 @@ describe("Player controller", () => {
     expect(send).toHaveBeenCalledTimes(1);
     expect(send).toHaveBeenCalledWith("Could not get game");
   });
+
   it("Responds with a 400 if the nickname is duplicated", async () => {
     const req: any = {
       query: {
@@ -120,6 +122,7 @@ describe("Player controller", () => {
     expect(send).toHaveBeenCalledTimes(1);
     expect(send).toHaveBeenCalledWith("Nickname taken");
   });
+
   it("should respond with a 400 if the game code is not a string", async () => {
     const req: any = {
       query: {
