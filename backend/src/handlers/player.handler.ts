@@ -5,7 +5,7 @@ import {
 } from "../services/player.service";
 import { Server, Socket } from "socket.io";
 import { GameState } from "../models";
-import { navigatePlayer } from "./game.handler";
+import { navigatePlayer, setHost } from "./game.handler";
 import { getGame } from "../services/game.service";
 
 export const playerJoin = async (io: Server, socket: Socket): Promise<void> => {
@@ -15,13 +15,15 @@ export const playerJoin = async (io: Server, socket: Socket): Promise<void> => {
 
   navigatePlayer(socket, game);
 
-  socket.join(game.gameCode);
-
   const player = await getPlayer(game.gameCode, playerId, game);
   if (player.new) {
     await initialisePlayer(game, playerId);
     socket.to(game.gameCode).emit("players:add", player.nickname);
   }
+
+  const sockets = await io.in(gameCode).fetchSockets();
+  await socket.join(game.gameCode);
+  if (sockets.length === 0) setHost(io, socket, player.nickname);
 };
 
 export default (

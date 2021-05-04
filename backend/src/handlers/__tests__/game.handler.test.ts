@@ -1,6 +1,6 @@
-import { Socket } from "socket.io";
+import { Server, Socket } from "socket.io";
 import { Game, GameState } from "../../models";
-import { navigatePlayer } from "../game.handler";
+import { navigatePlayer, setHost } from "../game.handler";
 
 describe("navigatePlayer handler", () => {
   let socket: Socket;
@@ -42,5 +42,50 @@ describe("navigatePlayer handler", () => {
     } as unknown) as Game;
 
     expect(() => navigatePlayer(socket, game)).toThrow("Invalid game state");
+  });
+});
+
+describe("setHost handler", () => {
+  let joinMock: jest.Mock;
+  let emitMock: jest.Mock;
+  let toMock: jest.Mock;
+
+  let io: Server;
+  let socket: Socket;
+
+  beforeEach(() => {
+    joinMock = jest.fn();
+    emitMock = jest.fn();
+    toMock = jest.fn(() => {
+      return {
+        emit: emitMock,
+      };
+    });
+
+    io = ({
+      to: toMock,
+    } as unknown) as Server;
+
+    socket = ({
+      handshake: {
+        auth: {
+          gameCode: "42069",
+        },
+      },
+      join: joinMock,
+    } as unknown) as Socket;
+  });
+
+  it("adds socket to game:host room and broadcasts to all players", () => {
+    setHost(io, socket, "Bob");
+
+    expect(joinMock).toHaveBeenCalledTimes(1);
+    expect(joinMock).toHaveBeenCalledWith("42069:host");
+
+    expect(toMock).toHaveBeenCalledTimes(1);
+    expect(toMock).toHaveBeenCalledWith("42069");
+
+    expect(emitMock).toHaveBeenCalledTimes(1);
+    expect(emitMock).toHaveBeenCalledWith("host:new", "Bob");
   });
 });
