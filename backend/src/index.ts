@@ -42,4 +42,6 @@ const io = new IOServer(server, {
 
 io.use(Auth);
 
-io.on("connection", Connection);
+io.on("connection", async (socket) => {
+  await Connection(io, socket);
+});

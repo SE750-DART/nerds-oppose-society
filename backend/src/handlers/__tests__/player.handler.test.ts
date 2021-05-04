@@ -169,25 +169,15 @@ describe("playerJoin handler", () => {
 });
 
 describe("Player handlers", () => {
-  let toMock: jest.Mock;
-  let emitMock: jest.Mock;
-
-  const io = ("io" as unknown) as Server;
+  let io = ("io" as unknown) as Server;
   let socket: Socket;
 
   let handlers: {
     playerLeave: () => Promise<void>;
+    playerLeaving: () => void;
   };
 
-  beforeEach(async () => {
-    toMock = jest.fn();
-    emitMock = jest.fn();
-    toMock.mockImplementation(() => {
-      return {
-        emit: emitMock,
-      };
-    });
-
+  it("registers each player handler", async () => {
     socket = ({
       handshake: {
         auth: {
@@ -196,24 +186,49 @@ describe("Player handlers", () => {
         },
       },
       on: jest.fn(),
-      to: toMock,
     } as unknown) as Socket;
 
     handlers = await registerPlayerHandler(io, socket);
-  });
 
-  it("registers each player handler", async () => {
-    expect(socket.on).toHaveBeenCalledTimes(1);
+    expect(socket.on).toHaveBeenCalledTimes(2);
     expect(socket.on).toHaveBeenCalledWith("disconnect", handlers.playerLeave);
+    expect(socket.on).toHaveBeenCalledWith(
+      "disconnecting",
+      handlers.playerLeaving
+    );
   });
 
   describe("playerLeave handler", () => {
+    let toMock: jest.Mock;
+    let emitMock: jest.Mock;
+
     let gameSpy: jest.SpyInstance;
     let removeSpy: jest.SpyInstance;
 
-    beforeEach(() => {
+    beforeEach(async () => {
+      toMock = jest.fn();
+      emitMock = jest.fn();
+      toMock.mockImplementation(() => {
+        return {
+          emit: emitMock,
+        };
+      });
+
       gameSpy = jest.spyOn(GameService, "getGame");
       removeSpy = jest.spyOn(PlayerService, "removePlayer");
+
+      socket = ({
+        handshake: {
+          auth: {
+            gameCode: "42069",
+            playerId: "12345",
+          },
+        },
+        on: jest.fn(),
+        to: toMock,
+      } as unknown) as Socket;
+
+      handlers = await registerPlayerHandler(io, socket);
     });
 
     afterEach(() => {
@@ -262,6 +277,181 @@ describe("Player handlers", () => {
       expect(toMock).toHaveBeenCalledTimes(0);
 
       expect(emitMock).toHaveBeenCalledTimes(0);
+    });
+  });
+
+  describe("playerLeaving handler", () => {
+    let fetchMock: jest.Mock;
+    let inMock: jest.Mock;
+
+    let gameSpy: jest.SpyInstance;
+    let hostSpy: jest.SpyInstance;
+    let mapSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      fetchMock = jest.fn();
+      inMock = jest.fn(() => {
+        return {
+          fetchSockets: fetchMock,
+        };
+      });
+      io = ({
+        in: inMock,
+      } as unknown) as Server;
+
+      gameSpy = jest.spyOn(GameService, "getGame");
+      gameSpy.mockReturnValue({
+        players: [
+          { id: "1", nickname: "Bob" },
+          { id: "2", nickname: "Fred" },
+          { id: "3", nickname: "Dave" },
+          { id: "4", nickname: "Jim" },
+          { id: "5", nickname: "Steve" },
+        ],
+      });
+      hostSpy = jest.spyOn(GameHandler, "setHost").mockImplementation();
+      mapSpy = jest.spyOn(Map.prototype, "get");
+    });
+
+    afterEach(() => {
+      gameSpy.mockRestore();
+      hostSpy.mockRestore();
+      mapSpy.mockRestore();
+    });
+
+    it("does nothing if player is not host", async () => {
+      const socket = ({
+        handshake: {
+          auth: {
+            gameCode: "42069",
+            playerId: "1",
+          },
+        },
+        rooms: new Set(["<socket-1>", "42069"]),
+        on: jest.fn(),
+      } as unknown) as Socket;
+
+      handlers = await registerPlayerHandler(io, socket);
+
+      await handlers.playerLeaving();
+
+      expect(gameSpy).toHaveBeenCalledTimes(0);
+
+      expect(inMock).toHaveBeenCalledTimes(0);
+      expect(fetchMock).toHaveBeenCalledTimes(0);
+
+      expect(hostSpy).toHaveBeenCalledTimes(0);
+    });
+
+    it("does not assign new host if player is host but only player", async () => {
+      const socket = ({
+        handshake: {
+          auth: {
+            gameCode: "42069",
+            playerId: "1",
+          },
+        },
+        rooms: new Set(["<socket-1>", "42069", "42069:host"]),
+        on: jest.fn(),
+      } as unknown) as Socket;
+
+      fetchMock.mockReturnValue([{ data: { playerId: "1" } }]);
+
+      handlers = await registerPlayerHandler(io, socket);
+
+      await handlers.playerLeaving();
+
+      expect(gameSpy).toHaveBeenCalledTimes(1);
+
+      expect(inMock).toHaveBeenCalledTimes(1);
+      expect(inMock).toHaveBeenCalledWith("42069");
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+
+      expect(hostSpy).toHaveBeenCalledTimes(0);
+    });
+
+    it("assigns new host", async () => {
+      const socket = ({
+        handshake: {
+          auth: {
+            gameCode: "42069",
+            playerId: "1",
+          },
+        },
+        rooms: new Set(["<socket-1>", "42069", "42069:host"]),
+        on: jest.fn(),
+      } as unknown) as Socket;
+
+      fetchMock.mockReturnValue([
+        { data: { playerId: "1" } },
+        { data: { playerId: "2" } },
+      ]);
+
+      handlers = await registerPlayerHandler(io, socket);
+
+      await handlers.playerLeaving();
+
+      expect(hostSpy).toHaveBeenCalledTimes(1);
+      expect(hostSpy).toHaveBeenCalledWith(
+        io,
+        { data: { playerId: "2" } },
+        "Fred"
+      );
+    });
+
+    it("assigns new host looping to start of active players array", async () => {
+      const socket = ({
+        handshake: {
+          auth: {
+            gameCode: "42069",
+            playerId: "5",
+          },
+        },
+        rooms: new Set(["<socket-1>", "42069", "42069:host"]),
+        on: jest.fn(),
+      } as unknown) as Socket;
+
+      fetchMock.mockReturnValue([
+        { data: { playerId: "1" } },
+        { data: { playerId: "5" } },
+      ]);
+
+      handlers = await registerPlayerHandler(io, socket);
+
+      await handlers.playerLeaving();
+
+      expect(hostSpy).toHaveBeenCalledTimes(1);
+      expect(hostSpy).toHaveBeenCalledWith(
+        io,
+        { data: { playerId: "1" } },
+        "Bob"
+      );
+    });
+
+    it("does not set host if new host socket is somehow undefined", async () => {
+      const socket = ({
+        handshake: {
+          auth: {
+            gameCode: "42069",
+            playerId: "5",
+          },
+        },
+        rooms: new Set(["<socket-1>", "42069", "42069:host"]),
+        on: jest.fn(),
+      } as unknown) as Socket;
+
+      fetchMock.mockReturnValue([
+        { data: { playerId: "1" } },
+        { data: { playerId: "5" } },
+      ]);
+
+      mapSpy.mockReturnValue(undefined);
+
+      handlers = await registerPlayerHandler(io, socket);
+
+      await handlers.playerLeaving();
+
+      expect(hostSpy).toHaveBeenCalledTimes(0);
     });
   });
 });

@@ -4,7 +4,7 @@ import {
   removePlayer,
 } from "../services/player.service";
 import { Server, Socket } from "socket.io";
-import { GameState } from "../models";
+import { GameState, Player } from "../models";
 import { navigatePlayer, setHost } from "./game.handler";
 import { getGame } from "../services/game.service";
 
@@ -31,8 +31,46 @@ export default (
   socket: Socket
 ): {
   playerLeave: () => Promise<void>;
+  playerLeaving: () => void;
 } => {
   const { gameCode, playerId } = socket.handshake.auth;
+
+  const playerLeaving = async (): Promise<void> => {
+    const isHost = socket.rooms.has(`${gameCode}:host`);
+
+    if (isHost) {
+      const game = await getGame(gameCode);
+
+      const sockets = ((await io
+        .in(gameCode)
+        .fetchSockets()) as unknown) as Socket[];
+
+      const playerIdToSocket = new Map<Player["id"], Socket>(
+        sockets.map((socket) => [socket.data.playerId, socket])
+      );
+      const activePlayers = game.players.filter((player) =>
+        playerIdToSocket.has(player.id)
+      );
+      console.log(activePlayers);
+      if (activePlayers.length > 1) {
+        const leavingHostIndex = activePlayers.findIndex(
+          (player) => player.id === playerId
+        );
+        let nextHostIndex = leavingHostIndex + 1;
+        if (nextHostIndex === activePlayers.length) nextHostIndex = 0;
+
+        const newHost = game.players[nextHostIndex];
+        const newHostSocket = playerIdToSocket.get(newHost.id);
+
+        console.log(newHost);
+        console.log(newHostSocket);
+        console.log(playerIdToSocket);
+
+        if (newHostSocket !== undefined)
+          setHost(io, newHostSocket, newHost.nickname);
+      }
+    }
+  };
 
   const playerLeave = async (): Promise<void> => {
     const game = await getGame(gameCode);
@@ -44,8 +82,10 @@ export default (
   };
 
   socket.on("disconnect", playerLeave);
+  socket.on("disconnecting", playerLeaving);
 
   return {
     playerLeave,
+    playerLeaving,
   };
 };
