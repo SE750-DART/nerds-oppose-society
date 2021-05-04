@@ -1,4 +1,4 @@
-import { Game, GameModel, Setup } from "../models";
+import { Game, GameModel, Settings, Setup } from "../models";
 import { digitShortCode, shuffle } from "../util";
 import { PUNCHLINES, SETUPS } from "../resources";
 
@@ -34,7 +34,7 @@ export const validateGameCode = async (
 
 export const setMaxPlayers = async (
   game: Game,
-  maxPlayers: number
+  maxPlayers: Settings["maxPlayers"]
 ): Promise<void> => {
   game.settings.maxPlayers = maxPlayers;
   await game.save();
@@ -42,7 +42,7 @@ export const setMaxPlayers = async (
 
 export const setRoundLimit = async (
   game: Game,
-  roundLimit: number
+  roundLimit: Settings["maxPlayers"]
 ): Promise<void> => {
   game.settings.roundLimit = roundLimit;
   await game.save();
