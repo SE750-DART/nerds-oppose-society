@@ -2,15 +2,19 @@ import axios, { AxiosResponse } from "axios";
 import ApiResponse from "./ApiResponse";
 import axiosCall, { BASE_URL } from "./axiosCall";
 
-// Expected status codes
 const NO_CONTENT_204 = 204;
-// const NOT_FOUND_404 = 404;
-// const SERVER_ERROR_500 = 500;
 
 type Props = {
   gameCode: string;
 };
 
+/**
+ * Expected status codes:
+ * 204 - Valid Game Code,
+ * 404 - Invalid Game Code,
+ * 500 - Server Error
+ * @param gameCode - game code to validate
+ */
 const validateGame: ({ gameCode }: Props) => Promise<ApiResponse<{}>> = async ({
   gameCode,
 }: Props) => {
