@@ -28,8 +28,9 @@ const HomePage = () => {
 
     if (res.success) {
       if (res.data) {
-        setGameCode(res.data);
         browserHistory.push(`/${res.data}`);
+      } else {
+        setNewGameError("Unknown Error, please try again");
       }
     } else {
       setNewGameError(res.error);
