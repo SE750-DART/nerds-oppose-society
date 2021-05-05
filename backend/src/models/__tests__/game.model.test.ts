@@ -34,8 +34,6 @@ describe("Game Model", () => {
     const game = new GameModel(gameData);
     const savedGame = await game.save();
 
-    console.log(savedGame);
-
     expect(savedGame._id).toBeDefined();
     expect(savedGame.gameCode).toBe(gameData.gameCode);
     expect(savedGame.settings).toMatchObject({
@@ -49,6 +47,20 @@ describe("Game Model", () => {
     expect(savedGame.players).toHaveProperty("length", 0);
     expect(savedGame.state).toBe(GameState.lobby);
     expect(savedGame.rounds).toHaveProperty("length", 0);
+  });
+
+  it("initialises setup type to pick one by default", async () => {
+    gameData.setups = [
+      {
+        setup: "Why did the chicken cross the road?",
+      },
+    ];
+    const game = new GameModel(gameData);
+    const savedGame = await game.save();
+
+    expect([...savedGame.setups]).toMatchObject([
+      { setup: "Why did the chicken cross the road?", type: SetupType.pickOne },
+    ]);
   });
 
   it("throws a ValidationError if gameCode is not defined", async () => {
@@ -82,6 +94,28 @@ describe("Game Model", () => {
     }
   });
 
+  it("throws a ValidationError if setup string is not defined", async () => {
+    gameData.setups = undefined;
+
+    const game = new GameModel({
+      gameCode: "42069",
+      setups: [
+        {
+          type: SetupType.pickOne,
+        },
+      ],
+      punchlines: ["To get to the other side"],
+    });
+
+    try {
+      await game.save();
+      fail("setups are required");
+    } catch (e) {
+      expect(e).toBeInstanceOf(mongoose.Error.ValidationError);
+      expect(e.errors["setups.0.setup"]).toBeDefined();
+    }
+  });
+
   it("throws a ValidationError if punchlines are not defined", async () => {
     gameData.punchlines = undefined;
 
@@ -106,6 +140,10 @@ describe("Game Model", () => {
     const game = new GameModel(gameData);
     const savedGame = await game.save();
 
+    expect(savedGame.players).toHaveProperty("length", 3);
+    expect(savedGame.players[0].punchlines).toHaveProperty("length", 0);
+    expect(savedGame.players[1].punchlines).toHaveProperty("length", 0);
+    expect(savedGame.players[2].punchlines).toHaveProperty("length", 0);
     expect([...savedGame.players]).toMatchObject(Array(3).fill({ new: true }));
     expect([...savedGame.players]).toMatchObject(Array(3).fill({ score: 0 }));
   });

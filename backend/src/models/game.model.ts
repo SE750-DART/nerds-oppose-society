@@ -14,9 +14,9 @@ export interface Game extends Document {
   gameCode: string;
   settings: Settings;
   setups: Types.DocumentArray<Setup>;
-  discardedSetups?: Types.DocumentArray<Setup>;
+  discardedSetups: Types.DocumentArray<Setup>;
   punchlines: string[];
-  discardedPunchlines?: string[];
+  discardedPunchlines: string[];
   players: Types.DocumentArray<Player>;
   state: GameState;
   rounds: Types.DocumentArray<Round>;

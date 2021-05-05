@@ -2,7 +2,7 @@ import { Document, Schema } from "mongoose";
 
 export interface Player extends Document {
   nickname: string;
-  punchlines?: string[];
+  punchlines: string[];
   score: number;
   new: boolean;
 }
