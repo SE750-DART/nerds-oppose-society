@@ -21,6 +21,15 @@ const createPlayer: (player: Props) => Promise<ApiResponse<string>> = async ({
   gameCode,
   nickname,
 }: Props) => {
+  // Check that game code is a number
+  if (!gameCode.match(/^\d+$/)) {
+    return {
+      success: false,
+      status: 400,
+      error: "Game code must be a number",
+    };
+  }
+
   const url = `${BASE_URL}/player/create`;
   const axiosMethod = async () =>
     axios.post<any, AxiosResponse<string>>(url, undefined, {

@@ -18,6 +18,15 @@ type Props = {
 const validateGame: ({ gameCode }: Props) => Promise<ApiResponse<{}>> = async ({
   gameCode,
 }: Props) => {
+  // Check that game code is a number
+  if (!gameCode.match(/^\d+$/)) {
+    return {
+      success: false,
+      status: 400,
+      error: "Game code must be a number",
+    };
+  }
+
   const url = `${BASE_URL}/game/validate`;
   const axiosMethod = async () =>
     axios.get<any, AxiosResponse<{}>>(url, {
