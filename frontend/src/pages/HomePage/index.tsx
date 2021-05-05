@@ -3,11 +3,38 @@ import { Link, useHistory } from "react-router-dom";
 import Button from "../../components/Button";
 import TextField from "../../components/TextField";
 import styles from "./style.module.css";
+import validateGame from "../../api/validateGame";
+import createGame from "../../api/createGame";
 
 const HomePage = () => {
   const [gameCode, setGameCode] = useState("");
+  const [gameCodeError, setGameCodeError] = useState("");
+  const [newGameError, setNewGameError] = useState("");
 
   const browserHistory = useHistory();
+
+  const handleJoinGame = async () => {
+    const res = await validateGame({ gameCode });
+
+    if (res.success) {
+      browserHistory.push(`/${gameCode}`);
+    } else {
+      setGameCodeError(res.error);
+    }
+  };
+
+  const handleNewGame = async () => {
+    const res = await createGame();
+
+    if (res.success) {
+      if (res.data) {
+        setGameCode(res.data);
+        browserHistory.push(`/${res.data}`);
+      }
+    } else {
+      setNewGameError(res.error);
+    }
+  };
 
   return (
     <div className={styles.container}>
@@ -21,18 +48,21 @@ const HomePage = () => {
         textValue={gameCode}
         onChangeHandler={setGameCode}
       />
+      <h5 style={{ color: "red", textAlign: "center" }}>{gameCodeError}</h5>
       <div className={styles.btnContainer}>
         <Button
           text="Join game"
-          handleOnClick={() => browserHistory.push(`/${gameCode}`)}
+          handleOnClick={handleJoinGame}
+          disabled={!gameCode}
         />
       </div>
       <p className={`${styles.text} ${styles.btnSpacer}`}>OR</p>
       <Button
         variant="secondary"
         text="Start new game"
-        handleOnClick={() => browserHistory.push(`/${gameCode}`)}
+        handleOnClick={handleNewGame}
       />
+      <h5 style={{ color: "red", textAlign: "center" }}>{newGameError}</h5>
       <div className={styles.footer}>
         <Link to="/">About</Link> | <Link to="/">Legal</Link>
       </div>
