@@ -18,7 +18,7 @@ export interface Game extends Document {
   punchlines: string[];
   discardedPunchlines?: string[];
   players: Types.DocumentArray<Player>;
-  state?: GameState;
+  state: GameState;
   rounds: Types.DocumentArray<Round>;
 }
 

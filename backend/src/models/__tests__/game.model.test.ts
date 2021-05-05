@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { GameModel, SetupType } from "../../models";
+import { GameModel, GameState, SetupType } from "../../models";
 import { RoundState } from "../round.model";
 
 describe("Game Model", () => {
@@ -30,18 +30,25 @@ describe("Game Model", () => {
     };
   });
 
-  it("creates a valid game", async () => {
+  it("creates a valid game with initialised and default fields", async () => {
     const game = new GameModel(gameData);
     const savedGame = await game.save();
 
+    console.log(savedGame);
+
     expect(savedGame._id).toBeDefined();
     expect(savedGame.gameCode).toBe(gameData.gameCode);
-    expect([...savedGame.setups]).toMatchObject(gameData.setups);
-    expect([...savedGame.punchlines]).toMatchObject(gameData.punchlines);
     expect(savedGame.settings).toMatchObject({
       roundLimit: 69,
       maxPlayers: 25,
     });
+    expect([...savedGame.setups]).toMatchObject(gameData.setups);
+    expect(savedGame.discardedSetups).toHaveProperty("length", 0);
+    expect([...savedGame.punchlines]).toMatchObject(gameData.punchlines);
+    expect(savedGame.discardedPunchlines).toHaveProperty("length", 0);
+    expect(savedGame.players).toHaveProperty("length", 0);
+    expect(savedGame.state).toBe(GameState.lobby);
+    expect(savedGame.rounds).toHaveProperty("length", 0);
   });
 
   it("throws a ValidationError if gameCode is not defined", async () => {
@@ -153,7 +160,7 @@ describe("Game Model", () => {
     expect(savedGame.rounds[0]).toMatchObject({
       state: RoundState.before,
     });
-    expect(savedGame.rounds[0]).toHaveProperty("playersByPunchline");
+    expect(savedGame.rounds[0].playersByPunchline).toHaveProperty("size", 0);
   });
 
   it("throws a ValidationError for a round inserted without a setup", async () => {
