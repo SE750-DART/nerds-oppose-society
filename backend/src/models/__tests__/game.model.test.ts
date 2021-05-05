@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
-import { GameModel, SetupType } from "../../models";
+import { GameModel, GameState, SetupType } from "../../models";
+import { RoundState } from "../round.model";
 
 describe("Game Model", () => {
   let gameCode = 42069;
@@ -29,18 +30,37 @@ describe("Game Model", () => {
     };
   });
 
-  it("creates a valid game", async () => {
+  it("creates a valid game with initialised and default fields", async () => {
     const game = new GameModel(gameData);
     const savedGame = await game.save();
 
     expect(savedGame._id).toBeDefined();
     expect(savedGame.gameCode).toBe(gameData.gameCode);
-    expect([...savedGame.setups]).toMatchObject(gameData.setups);
-    expect([...savedGame.punchlines]).toMatchObject(gameData.punchlines);
     expect(savedGame.settings).toMatchObject({
       roundLimit: 69,
       maxPlayers: 25,
     });
+    expect([...savedGame.setups]).toMatchObject(gameData.setups);
+    expect(savedGame.discardedSetups).toHaveProperty("length", 0);
+    expect([...savedGame.punchlines]).toMatchObject(gameData.punchlines);
+    expect(savedGame.discardedPunchlines).toHaveProperty("length", 0);
+    expect(savedGame.players).toHaveProperty("length", 0);
+    expect(savedGame.state).toBe(GameState.lobby);
+    expect(savedGame.rounds).toHaveProperty("length", 0);
+  });
+
+  it("initialises setup type to pick one by default", async () => {
+    gameData.setups = [
+      {
+        setup: "Why did the chicken cross the road?",
+      },
+    ];
+    const game = new GameModel(gameData);
+    const savedGame = await game.save();
+
+    expect([...savedGame.setups]).toMatchObject([
+      { setup: "Why did the chicken cross the road?", type: SetupType.pickOne },
+    ]);
   });
 
   it("throws a ValidationError if gameCode is not defined", async () => {
@@ -74,6 +94,28 @@ describe("Game Model", () => {
     }
   });
 
+  it("throws a ValidationError if setup string is not defined", async () => {
+    gameData.setups = undefined;
+
+    const game = new GameModel({
+      gameCode: "42069",
+      setups: [
+        {
+          type: SetupType.pickOne,
+        },
+      ],
+      punchlines: ["To get to the other side"],
+    });
+
+    try {
+      await game.save();
+      fail("setups are required");
+    } catch (e) {
+      expect(e).toBeInstanceOf(mongoose.Error.ValidationError);
+      expect(e.errors["setups.0.setup"]).toBeDefined();
+    }
+  });
+
   it("throws a ValidationError if punchlines are not defined", async () => {
     gameData.punchlines = undefined;
 
@@ -98,6 +140,10 @@ describe("Game Model", () => {
     const game = new GameModel(gameData);
     const savedGame = await game.save();
 
+    expect(savedGame.players).toHaveProperty("length", 3);
+    expect(savedGame.players[0].punchlines).toHaveProperty("length", 0);
+    expect(savedGame.players[1].punchlines).toHaveProperty("length", 0);
+    expect(savedGame.players[2].punchlines).toHaveProperty("length", 0);
     expect([...savedGame.players]).toMatchObject(Array(3).fill({ new: true }));
     expect([...savedGame.players]).toMatchObject(Array(3).fill({ score: 0 }));
   });
@@ -131,5 +177,64 @@ describe("Game Model", () => {
     expect(gameCodeOne === gameCodeTwo).toBe(false);
     expect([...gameOne.players]).toMatchObject([{ nickname: "Bob" }]);
     expect([...gameTwo.players]).toMatchObject([{ nickname: "Bob" }]);
+  });
+
+  it("inserts a round with state defaulting to BEFORE and initialised playersByPunchline map", async () => {
+    gameData.rounds = [
+      {
+        setup: {
+          setup: "Why did the chicken cross the road?",
+          type: SetupType.pickOne,
+        },
+        host: "abc123",
+      },
+    ];
+
+    const game = new GameModel(gameData);
+    const savedGame = await game.save();
+
+    expect(savedGame.rounds).toHaveProperty("length", 1);
+    expect(savedGame.rounds[0]).toHaveProperty("state", RoundState.before);
+    expect(savedGame.rounds[0]).toMatchObject({
+      state: RoundState.before,
+    });
+    expect(savedGame.rounds[0].playersByPunchline).toHaveProperty("size", 0);
+  });
+
+  it("throws a ValidationError for a round inserted without a setup", async () => {
+    gameData.rounds = [
+      {
+        host: "abc123",
+      },
+    ];
+
+    const game = new GameModel(gameData);
+
+    try {
+      await game.save();
+    } catch (e) {
+      expect(e).toBeInstanceOf(mongoose.Error.ValidationError);
+      expect(e.errors["rounds.0.setup"]).toBeDefined();
+    }
+  });
+
+  it("throws a ValidationError for a round inserted without a host", async () => {
+    gameData.rounds = [
+      {
+        setup: {
+          setup: "Why did the chicken cross the road?",
+          type: SetupType.pickOne,
+        },
+      },
+    ];
+
+    const game = new GameModel(gameData);
+
+    try {
+      await game.save();
+    } catch (e) {
+      expect(e).toBeInstanceOf(mongoose.Error.ValidationError);
+      expect(e.errors["rounds.0.host"]).toBeDefined();
+    }
   });
 });

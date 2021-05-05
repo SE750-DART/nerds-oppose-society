@@ -6,10 +6,7 @@ import { RoundSchema, Round } from "./round.model";
 
 export enum GameState {
   lobby = "LOBBY",
-  roundBefore = "ROUND_BEFORE",
-  roundPlayers = "ROUND_PLAYERS_CHOOSE",
-  roundHost = "ROUND_HOST_CHOOSE",
-  roundAfter = "ROUND_AFTER",
+  active = "ACTIVE",
   finished = "FINISHED",
 }
 
@@ -17,12 +14,12 @@ export interface Game extends Document {
   gameCode: string;
   settings: Settings;
   setups: Types.DocumentArray<Setup>;
-  discardedSetups?: Types.DocumentArray<Setup>;
+  discardedSetups: Types.DocumentArray<Setup>;
   punchlines: string[];
-  discardedPunchlines?: string[];
+  discardedPunchlines: string[];
   players: Types.DocumentArray<Player>;
-  state?: GameState;
-  rounds?: Types.DocumentArray<Round>;
+  state: GameState;
+  rounds: Types.DocumentArray<Round>;
 }
 
 const GameSchema: Schema = new Schema({
