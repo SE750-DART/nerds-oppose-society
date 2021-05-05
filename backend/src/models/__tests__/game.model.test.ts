@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { GameModel, SetupType } from "../../models";
+import { RoundState } from "../round.model";
 
 describe("Game Model", () => {
   let gameCode = 42069;
@@ -131,5 +132,64 @@ describe("Game Model", () => {
     expect(gameCodeOne === gameCodeTwo).toBe(false);
     expect([...gameOne.players]).toMatchObject([{ nickname: "Bob" }]);
     expect([...gameTwo.players]).toMatchObject([{ nickname: "Bob" }]);
+  });
+
+  it("inserts a round with state defaulting to BEFORE and initialised playersByPunchline map", async () => {
+    gameData.rounds = [
+      {
+        setup: {
+          setup: "Why did the chicken cross the road?",
+          type: SetupType.pickOne,
+        },
+        host: "abc123",
+      },
+    ];
+
+    const game = new GameModel(gameData);
+    const savedGame = await game.save();
+
+    expect(savedGame.rounds).toHaveProperty("length", 1);
+    expect(savedGame.rounds[0]).toHaveProperty("state", RoundState.before);
+    expect(savedGame.rounds[0]).toMatchObject({
+      state: RoundState.before,
+    });
+    expect(savedGame.rounds[0]).toHaveProperty("playersByPunchline");
+  });
+
+  it("throws a ValidationError for a round inserted without a setup", async () => {
+    gameData.rounds = [
+      {
+        host: "abc123",
+      },
+    ];
+
+    const game = new GameModel(gameData);
+
+    try {
+      await game.save();
+    } catch (e) {
+      expect(e).toBeInstanceOf(mongoose.Error.ValidationError);
+      expect(e.errors["rounds.0.setup"]).toBeDefined();
+    }
+  });
+
+  it("throws a ValidationError for a round inserted without a host", async () => {
+    gameData.rounds = [
+      {
+        setup: {
+          setup: "Why did the chicken cross the road?",
+          type: SetupType.pickOne,
+        },
+      },
+    ];
+
+    const game = new GameModel(gameData);
+
+    try {
+      await game.save();
+    } catch (e) {
+      expect(e).toBeInstanceOf(mongoose.Error.ValidationError);
+      expect(e.errors["rounds.0.host"]).toBeDefined();
+    }
   });
 });
