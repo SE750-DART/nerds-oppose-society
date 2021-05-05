@@ -4,6 +4,7 @@
   flex-direction: column;
   justify-content: center;
   margin: auto 0;
+  padding: 24px;
 }
 
 .spacer {

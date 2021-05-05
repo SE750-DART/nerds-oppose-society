@@ -1,0 +1,62 @@
+.punchline {
+  background-color: #eeffff;
+  border-radius: 16px;
+  box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  height: fit-content;
+  margin-bottom: 24px;
+  max-height: 146px; /* This magic number is the height of the longest punchline */
+  min-height: 100px;
+  padding: 20px;
+  position: relative;
+  transition: 0.3s;
+}
+
+.punchline:hover {
+  box-shadow: 0px 10px 40px rgba(0, 0, 0, 0.25);
+  transition: 0.3s;
+}
+
+.punchlineSelected {
+  background-color: #ffffff;
+  border: 4px solid #84b5de;
+  box-shadow: 0px 10px 40px rgba(0, 0, 0, 0.25);
+  transition: 0.3s;
+}
+
+.punchlineSubmitted {
+  background-color: #84b5de;
+  box-shadow: inset 0px 10px 20px rgba(0, 0, 0, 0.1);
+  cursor: default;
+  transition: 0.3s;
+}
+
+.punchlineSubmitted:hover {
+  box-shadow: inset 0px 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.indicator {
+  align-items: center;
+  background-color: #84b5de;
+  border-radius: 50%;
+  display: flex;
+  height: 28px;
+  justify-content: center;
+  position: absolute;
+  top: 0;
+  width: 28px;
+}
+
+.newIndicator {
+  left: 0;
+  margin: -13px 0 0 -13px;
+}
+
+.numIndicator {
+  right: 0;
+  margin: -13px -13px 0 0;
+}
+
+.textSmall {
+  font-size: 20px;
+}

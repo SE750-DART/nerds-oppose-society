@@ -10,7 +10,7 @@ const HomePage = () => {
   const browserHistory = useHistory();
 
   return (
-    <>
+    <div className={styles.container}>
       <h1>Nerds Oppose Society</h1>
       <p className={styles.text}>
         Your favourite online game that coincidentally uses the writing from
@@ -36,7 +36,7 @@ const HomePage = () => {
       <div className={styles.footer}>
         <Link to="/">About</Link> | <Link to="/">Legal</Link>
       </div>
-    </>
+    </div>
   );
 };
 
