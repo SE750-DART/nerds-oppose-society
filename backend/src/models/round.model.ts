@@ -1,4 +1,4 @@
-import { Document, ObjectId, Schema, Types } from "mongoose";
+import { Document, Schema } from "mongoose";
 import { SetupSchema, Setup } from "./setup.model";
 import { Player } from "./player.model";
 
@@ -12,14 +12,14 @@ export enum RoundState {
 export interface Round extends Document {
   setup: Setup;
   host: Player["id"];
-  playersByPunchline: Map<string, ObjectId>;
+  playersByPunchline: Map<string, Player["id"]>;
   state: RoundState;
 }
 
 export const RoundSchema: Schema = new Schema({
   setup: { type: SetupSchema, required: true },
   host: { type: String, required: true },
-  playersByPunchline: { type: Map, of: Types.ObjectId, default: () => ({}) },
+  playersByPunchline: { type: Map, of: String, default: () => ({}) },
   state: {
     type: String,
     enum: Object.values(RoundState),

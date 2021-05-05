@@ -17,6 +17,7 @@ export enum ErrorType {
   gameCode = "GAME_CODE",
   playerName = "PLAYER_NAME",
   invalidAction = "INVALID_ACTION",
+  noRound = "NO_ROUND",
 }
 
 export class ServiceError extends Error {
