@@ -1,4 +1,10 @@
-import { createGame, getGame, validateGameCode } from "../game.service";
+import {
+  createGame,
+  getGame,
+  setMaxPlayers,
+  setRoundLimit,
+  validateGameCode,
+} from "../game.service";
 import { Game, GameModel, Setup } from "../../models";
 import mongoose from "mongoose";
 import { PUNCHLINES, SETUPS } from "../../resources";
@@ -66,7 +72,7 @@ describe("createGame Service", () => {
 
 describe("getGame Service", () => {
   it("throws an error when provided an invalid gameCode", async () => {
-    await expect(getGame("123456")).rejects.toThrow("Could not get game");
+    await expect(getGame("123456")).rejects.toThrow("Game does not exist");
   });
 
   it("returns a game object", async () => {
@@ -82,7 +88,7 @@ describe("validateGameCode Service", () => {
   it("returns false for an invalid gameCode", async () => {
     const result = await validateGameCode("69420");
 
-    expect(result).toBe(false);
+    expect(result).toBeFalsy();
   });
 
   it("returns true for a valid gameCode", async () => {
@@ -90,6 +96,32 @@ describe("validateGameCode Service", () => {
 
     const result = await validateGameCode(gameCode);
 
-    expect(result).toBe(true);
+    expect(result).toBeTruthy();
+  });
+});
+
+describe("setRoundLimit Service", () => {
+  it("sets roundLimit to 100", async () => {
+    const gameCode = await createGame();
+    let game = await getGame(gameCode);
+    expect(game.settings.roundLimit).not.toBe(100);
+
+    await setRoundLimit(game, 100);
+
+    game = await getGame(gameCode);
+    expect(game.settings.roundLimit).toBe(100);
+  });
+});
+
+describe("setMaxPlayers Service", () => {
+  it("sets maxPlayers to 50", async () => {
+    const gameCode = await createGame();
+    let game = await getGame(gameCode);
+    expect(game.settings.maxPlayers).not.toBe(50);
+
+    await setMaxPlayers(game, 50);
+
+    game = await getGame(gameCode);
+    expect(game.settings.maxPlayers).toBe(50);
   });
 });
