@@ -1,0 +1,15 @@
+.button {
+  background-color: transparent;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  height: 48px;
+  padding: 0;
+  transition: 0.3s;
+  width: 48px;
+}
+
+.button:hover {
+  background-color: #84b5de;
+  transition: 0.3s;
+}
