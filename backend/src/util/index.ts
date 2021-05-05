@@ -16,6 +16,7 @@ export const shuffle = <Type>(array: Type[]): Type[] => {
 export enum ErrorType {
   gameCode = "GAME_CODE",
   playerName = "PLAYER_NAME",
+  invalidAction = "INVALID_ACTION",
 }
 
 export class ServiceError extends Error {
