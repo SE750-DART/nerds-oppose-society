@@ -1,11 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
+import debounce from "lodash/debounce";
 import Button from "../../components/Button";
 import PlayerList from "../../components/PlayerList";
 import styles from "./style.module.css";
 import TextField from "../../components/TextField";
 import Dropdown from "../../components/Dropdown";
 import { Settings } from "../../../../backend/src/models";
+import socket from "../../socket";
 
 type Props = {
   gameCode: string;
@@ -28,6 +30,30 @@ const LobbyPage = ({ gameCode, settings }: Props) => {
       }
     }
   }, [settings]);
+
+  // Wait until 500ms after last input before emitting setting update
+  const msDebounceDelay = 500;
+  const updateSettings = useCallback(
+    debounce((setting: string, value: string) => {
+      if (value.match(/^\d+$/)) {
+        socket.emit("settings:update", {
+          setting,
+          value: parseInt(value, 10),
+        });
+      }
+    }, msDebounceDelay),
+    []
+  );
+
+  const handleChangeMaxPlayers = (newMaxPlayers: string) => {
+    setMaxPlayers(newMaxPlayers);
+    updateSettings("MAX_PLAYERS", newMaxPlayers);
+  };
+
+  const handleChangeRoundLimit = (newRoundLimit: string) => {
+    setRoundLimit(newRoundLimit);
+    updateSettings("ROUND_LIMIT", roundLimit);
+  };
 
   const gameCodeNodes: React.ReactNode = (
     <>
@@ -53,7 +79,7 @@ const LobbyPage = ({ gameCode, settings }: Props) => {
         <TextField
           textValue={maxPlayers}
           size="small"
-          onChangeHandler={setMaxPlayers}
+          onChangeHandler={handleChangeMaxPlayers}
         />
       </div>
       <div className={styles.setting}>
@@ -61,7 +87,7 @@ const LobbyPage = ({ gameCode, settings }: Props) => {
         <TextField
           textValue={roundLimit}
           size="small"
-          onChangeHandler={setRoundLimit}
+          onChangeHandler={handleChangeRoundLimit}
         />
       </div>
     </>
