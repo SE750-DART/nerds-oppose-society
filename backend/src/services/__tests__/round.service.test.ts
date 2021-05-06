@@ -4,6 +4,7 @@ import {
   enterPlayersChooseState,
   enterHostChoosesState,
   playerChoosePunchlines,
+  hostChoosesWinner,
 } from "../round.service";
 import mongoose from "mongoose";
 import { RoundState } from "../../models/round.model";
@@ -302,5 +303,69 @@ describe("enterHostChoosesState Service", () => {
     await expect(enterHostChoosesState(game.gameCode)).rejects.toThrow(
       "Cannot enter host chooses state"
     );
+  });
+});
+
+describe("hostChoosesWinner Service", () => {
+  let game: Game;
+
+  beforeEach(async () => {
+    const gameCode = await createGame();
+    game = await getGame(gameCode);
+
+    game.rounds.push({
+      setup: {
+        setup: "Why did the chicken cross the road?",
+        type: SetupType.pickOne,
+      },
+      host: "abc123",
+      state: RoundState.hostChooses,
+      punchlinesByPlayer: new Map([
+        ["def456", '["To get to the other side"]'],
+        ["ghi789", '["It was feeling cocky"]'],
+      ]),
+    });
+  });
+
+  it("returns winner", async () => {
+    await game.save();
+
+    const winner = await hostChoosesWinner(game.gameCode, "abc123", [
+      "It was feeling cocky",
+    ]);
+
+    game = await getGame(game.gameCode);
+    expect(game.rounds[0].state).toBe(RoundState.after);
+    expect(winner).toMatchObject({
+      playerId: "ghi789",
+      punchlines: ["It was feeling cocky"],
+    });
+  });
+
+  it("throws error if game contains no rounds", async () => {
+    game.rounds.pop();
+    await game.save();
+
+    await expect(
+      hostChoosesWinner(game.gameCode, "abc123", ["It was feeling cocky"])
+    ).rejects.toThrow("Cannot choose winner");
+  });
+
+  it("throws error if round state is not PLAYERS_CHOOSE", async () => {
+    game.rounds[0].state = RoundState.before;
+    await game.save();
+
+    await expect(
+      hostChoosesWinner(game.gameCode, "abc123", ["It was feeling cocky"])
+    ).rejects.toThrow("Cannot choose winner");
+  });
+
+  it("throws error if player is not the round host", async () => {
+    game.rounds[0].host = "abcd1234";
+    await game.save();
+
+    await expect(
+      hostChoosesWinner(game.gameCode, "abc123", ["It was feeling cocky"])
+    ).rejects.toThrow("Cannot choose winner");
   });
 });

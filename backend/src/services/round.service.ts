@@ -84,3 +84,32 @@ export const enterHostChoosesState = async (
     "Cannot enter host chooses state"
   );
 };
+
+export const hostChoosesWinner = async (
+  gameCode: Game["gameCode"],
+  playerId: Player["id"],
+  winningPunchlines: string[]
+): Promise<{ playerId: Player["id"]; punchlines: string[] }> => {
+  const game = await getGame(gameCode);
+  const round = game.rounds.slice(-1)[0];
+
+  if (
+    round !== undefined &&
+    round.state === RoundState.hostChooses &&
+    round.host === playerId
+  ) {
+    const winningEntry = Array.from(round.punchlinesByPlayer.entries()).find(
+      (entry) => entry[1] === JSON.stringify(winningPunchlines)
+    );
+    if (winningEntry !== undefined) {
+      round.state = RoundState.after;
+
+      await game.save();
+      return {
+        playerId: winningEntry[0],
+        punchlines: JSON.parse(winningEntry[1]),
+      };
+    }
+  }
+  throw new ServiceError(ErrorType.invalidAction, "Cannot choose winner");
+};
