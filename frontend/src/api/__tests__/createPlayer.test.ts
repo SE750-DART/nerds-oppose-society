@@ -97,6 +97,6 @@ test("should return error on 500 server error", async () => {
   expect(res).toEqual({
     success: false,
     status: 500,
-    error: "test request",
+    error: "Server error, please try again.",
   });
 });
