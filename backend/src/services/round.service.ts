@@ -96,7 +96,6 @@ export const hostChoosesWinner = async (
     round.state === RoundState.hostChooses &&
     round.host === playerId
   ) {
-    console.log(winningPunchlines);
     const winningEntry = Array.from(round.punchlinesByPlayer.entries()).find(
       (entry) =>
         winningPunchlines.length === entry[1].length &&

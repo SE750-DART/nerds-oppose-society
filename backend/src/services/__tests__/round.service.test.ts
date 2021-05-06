@@ -369,4 +369,12 @@ describe("hostChoosesWinner Service", () => {
       hostChoosesWinner(game.gameCode, "abc123", ["It was feeling cocky"])
     ).rejects.toThrow("Cannot choose winner");
   });
+
+  it("throws error if winningPunchlines are invalid", async () => {
+    await game.save();
+
+    await expect(
+      hostChoosesWinner(game.gameCode, "abc123", ["It was feeling bold"])
+    ).rejects.toThrow("Cannot choose winner");
+  });
 });
