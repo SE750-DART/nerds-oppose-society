@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import useCrud from "../hooks/useCrud";
 
 export type Player = {
@@ -9,6 +9,8 @@ const equals = (player1: Player, player2: Player) =>
   player1.nickname === player2.nickname;
 
 type Context = {
+  host: string;
+  setHost: (host: string) => void;
   players: Player[];
   initialisePlayers?: (arg0: Player[]) => void;
   addPlayer?: (arg0: string) => void;
@@ -17,6 +19,8 @@ type Context = {
 };
 
 const PlayersContext = React.createContext<Context>({
+  host: "",
+  setHost: () => null,
   players: [],
 });
 
@@ -25,6 +29,8 @@ const PlayersContextProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
+  const [host, setHost] = useState("");
+
   const {
     items: players,
     initialiseItems: initialisePlayers,
@@ -66,6 +72,8 @@ const PlayersContextProvider = ({
 
   // The context value that will be supplied to any descendants of this component.
   const context = {
+    host,
+    setHost: (newHost: string) => setHost(newHost),
     players,
     initialisePlayers,
     addPlayer,

@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Router, Switch, Route, Redirect, useParams } from "react-router-dom";
 import { createMemoryHistory } from "history";
 import { BasicPage, NicknamePage, LobbyPage } from "./pages";
 import socket from "./socket";
+import { PlayersContext } from "./ContextProviders/PlayersContextProvider";
 
 type PathParams = {
   gameCode: string;
@@ -12,8 +13,10 @@ const memoryHistory = createMemoryHistory();
 
 const GameRouter = () => {
   const { gameCode } = useParams<PathParams>();
+  const { setHost } = useContext(PlayersContext);
 
   socket.on("navigate", (route) => memoryHistory.push(route));
+  socket.on("host", (host: string) => setHost(host));
 
   return (
     <Router history={memoryHistory}>
