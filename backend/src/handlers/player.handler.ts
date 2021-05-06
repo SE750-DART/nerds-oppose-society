@@ -70,19 +70,19 @@ export const playerJoin = async (io: Server, socket: Socket): Promise<void> => {
 
   const game = await getGame(gameCode);
 
-  socket.emit(
-    "players:initial",
-    game.players.filter((v) => !v.new)
-  );
-  socket.emit("settings:initial", game.settings);
-  emitNavigate(socket, game);
-
   const player = await getPlayer(game.gameCode, playerId, game);
   if (player.new) {
     await initialisePlayer(game, playerId);
     socket.to(game.gameCode).emit("players:add", player.nickname);
   }
   socket.data.nickname = player.nickname;
+
+  socket.emit(
+    "players:initial",
+    game.players.filter((v) => !v.new)
+  );
+  socket.emit("settings:initial", game.settings);
+  emitNavigate(socket, game);
 
   const sockets = await io.in(gameCode).fetchSockets();
   await socket.join(game.gameCode);
