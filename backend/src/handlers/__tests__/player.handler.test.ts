@@ -464,6 +464,33 @@ describe("Player handlers", () => {
       });
     });
 
+    it("assigns new host skipping non-active players", async () => {
+      const socket = ({
+        data: {
+          gameCode: "42069",
+          playerId: "1",
+          nickname: "Steve",
+        },
+        on: jest.fn(),
+      } as unknown) as Socket;
+
+      fetchMock.mockReturnValue([
+        { data: { playerId: "1" } },
+        { data: { playerId: "3", nickname: "Dave" } },
+      ]);
+
+      handlers = await registerPlayerHandler(io, socket);
+
+      isHostSpy.mockReturnValue(true);
+
+      await handlers.playerLeaving();
+
+      expect(setHostSpy).toHaveBeenCalledTimes(1);
+      expect(setHostSpy).toHaveBeenCalledWith(io, {
+        data: { playerId: "3", nickname: "Dave" },
+      });
+    });
+
     it("does not set host if new host socket is somehow undefined", async () => {
       const socket = ({
         data: {

@@ -19,11 +19,11 @@ export default (
 
   const playerLeaving = async (): Promise<void> => {
     if (isHost(socket, gameCode)) {
-      const game = await getGame(gameCode);
-
       const sockets = ((await io
         .in(gameCode)
         .fetchSockets()) as unknown) as Socket[];
+
+      const game = await getGame(gameCode);
 
       const playerIdToSocket = new Map<Player["id"], Socket>(
         sockets.map((socket) => [socket.data.playerId, socket])
@@ -39,7 +39,7 @@ export default (
         let nextHostIndex = leavingHostIndex + 1;
         if (nextHostIndex === activePlayers.length) nextHostIndex = 0;
 
-        const newHost = game.players[nextHostIndex];
+        const newHost = activePlayers[nextHostIndex];
         const newHostSocket = playerIdToSocket.get(newHost.id);
 
         if (newHostSocket !== undefined) setHost(io, newHostSocket);
