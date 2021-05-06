@@ -8,7 +8,7 @@ import { BrowserHistoryContext } from "../../App";
 import validateGame from "../../api/validateGame";
 import createPlayer from "../../api/createPlayer";
 
-const useUserIdState = createPersistedState("userId");
+const usePlayerIdState = createPersistedState("playerId");
 
 type Props = {
   gameCode: string;
@@ -17,7 +17,7 @@ type Props = {
 const NicknamePage = ({ gameCode }: Props) => {
   const [nickname, setNickname] = useState("");
   const [error, setError] = useState("");
-  const [userId, setUserId] = useUserIdState("");
+  const [playerId, setPlayerId] = usePlayerIdState("");
 
   const memoryHistory = useHistory();
   const browserHistory = useContext(BrowserHistoryContext);
@@ -28,9 +28,9 @@ const NicknamePage = ({ gameCode }: Props) => {
 
       const gameCodeIsValid = res.success;
       if (gameCodeIsValid) {
-        if (userId) {
+        if (playerId) {
           // TODO try connect to socket.io
-          // No way to check whether userId is for the current gameCode
+          // No way to check whether playerId is for the current gameCode
         } else {
           // Stay on this page
         }
@@ -45,7 +45,7 @@ const NicknamePage = ({ gameCode }: Props) => {
 
     if (res.success) {
       if (res.data) {
-        setUserId(res.data);
+        setPlayerId(res.data);
         // TODO connect to socket.io, remove memoryHistory.push
         memoryHistory.push("/lobby");
       } else {
