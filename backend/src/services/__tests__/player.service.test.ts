@@ -44,6 +44,7 @@ describe("createPlayer Service", () => {
     if (player === null) return;
     expect(token).toBe(player.token);
     expect(validateUUID(token)).toBeTruthy();
+    expect(mongoose.Types.ObjectId.isValid(playerId));
   });
 
   it("throws an error when provided an invalid gameCode", async () => {
