@@ -104,8 +104,8 @@ describe("playerJoin handler", () => {
 
     expect(emitMock).toHaveBeenCalledTimes(2);
     expect(emitMock).toHaveBeenCalledWith("players:initial", [
-      { nickname: "Bob", score: 0, new: false },
-      { nickname: "James", score: 1, new: false },
+      { nickname: "Bob", score: 0 },
+      { nickname: "James", score: 1 },
     ]);
     expect(emitMock).toHaveBeenCalledWith("settings:initial", "{SETTINGS}");
 
