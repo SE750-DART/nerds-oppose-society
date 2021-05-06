@@ -179,7 +179,7 @@ describe("Game Model", () => {
     expect([...gameTwo.players]).toMatchObject([{ nickname: "Bob" }]);
   });
 
-  it("inserts a round with state defaulting to BEFORE and initialised playersByPunchline map", async () => {
+  it("inserts a round with state defaulting to BEFORE and initialised punchlinesByPlayer map", async () => {
     gameData.rounds = [
       {
         setup: {
@@ -198,7 +198,7 @@ describe("Game Model", () => {
     expect(savedGame.rounds[0]).toMatchObject({
       state: RoundState.before,
     });
-    expect(savedGame.rounds[0].playersByPunchline).toHaveProperty("size", 0);
+    expect(savedGame.rounds[0].punchlinesByPlayer).toHaveProperty("size", 0);
   });
 
   it("throws a ValidationError for a round inserted without a setup", async () => {

@@ -109,9 +109,9 @@ describe("playersChoosePunchline Service", () => {
     expect(game.players[0]).toEqual(
       expect.not.arrayContaining(["To get to the other side"])
     );
-    expect(
-      game.rounds[0].playersByPunchline.get('["To get to the other side"]')
-    ).toBe(playerId);
+    expect(game.rounds[0].punchlinesByPlayer.get(playerId)).toBe(
+      '["To get to the other side"]'
+    );
     expect(game.discardedPunchlines).toEqual(
       expect.arrayContaining(["To get to the other side"])
     );
@@ -141,9 +141,9 @@ describe("playersChoosePunchline Service", () => {
     expect(game.players[1]).toEqual(
       expect.not.arrayContaining(["It was feeling cocky"])
     );
-    expect(
-      game.rounds[0].playersByPunchline.get('["It was feeling cocky"]')
-    ).toBe(player2Id);
+    expect(game.rounds[0].punchlinesByPlayer.get(player2Id)).toBe(
+      '["It was feeling cocky"]'
+    );
     expect(game.discardedPunchlines).toEqual(
       expect.arrayContaining([
         "To get to the other side",
@@ -179,9 +179,9 @@ describe("playersChoosePunchline Service", () => {
   });
 
   it("throws error if player has already chosen punchlines for this round", async () => {
-    game.rounds[0].playersByPunchline.set(
-      '["To get to the other side"]',
-      playerId
+    game.rounds[0].punchlinesByPlayer.set(
+      playerId,
+      '["To get to the other side"]'
     );
     await game.save();
 

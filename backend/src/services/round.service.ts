@@ -38,7 +38,7 @@ export const playerChoosePunchlines = async (
     round !== undefined &&
     round.state === RoundState.playersChoose &&
     playerId !== round.host &&
-    !Array.from(round.playersByPunchline.values()).includes(playerId) &&
+    !round.punchlinesByPlayer.has(playerId) &&
     ((round.setup.type === SetupType.pickOne && punchlines.length === 1) ||
       (round.setup.type === SetupType.pickTwo && punchlines.length === 2) ||
       (round.setup.type === SetupType.drawTwoPickThree &&
@@ -53,7 +53,7 @@ export const playerChoosePunchlines = async (
     player.punchlines = player.punchlines.filter(
       (p) => !punchlines.includes(p)
     );
-    round.playersByPunchline.set(JSON.stringify(punchlines), playerId);
+    round.punchlinesByPlayer.set(playerId, JSON.stringify(punchlines));
     game.discardedPunchlines.push(...punchlines);
 
     await game.save();
