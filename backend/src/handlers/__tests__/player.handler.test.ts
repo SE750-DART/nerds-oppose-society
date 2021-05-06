@@ -63,7 +63,10 @@ describe("playerJoin handler", () => {
         { nickname: "Fred", score: 0, new: true },
         { nickname: "James", score: 1, new: false },
       ],
-      settings: "{SETTINGS}",
+      settings: {
+        roundLimit: 69,
+        maxPlayers: 25,
+      },
     } as unknown) as Game;
 
     getGameSpy = jest
@@ -108,7 +111,10 @@ describe("playerJoin handler", () => {
       { nickname: "Bob", score: 0 },
       { nickname: "James", score: 1 },
     ]);
-    expect(emitMock).toHaveBeenCalledWith("settings:initial", "{SETTINGS}");
+    expect(emitMock).toHaveBeenCalledWith("settings:initial", {
+      roundLimit: 69,
+      maxPlayers: 25,
+    });
 
     expect(emitNavigateSpy).toHaveBeenCalledTimes(1);
     expect(emitNavigateSpy).toHaveBeenCalledWith(socket, game);
