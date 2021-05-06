@@ -61,3 +61,25 @@ export const playerChoosePunchlines = async (
   }
   throw new ServiceError(ErrorType.invalidAction, "Cannot choose punchlines");
 };
+
+export const enterHostChoosesState = async (
+  gameCode: Game["gameCode"],
+  playerId: Player["id"]
+): Promise<string[][]> => {
+  const game = await getGame(gameCode);
+  const round = game.rounds.slice(-1)[0];
+
+  if (
+    round !== undefined &&
+    round.state === RoundState.playersChoose &&
+    round.host === playerId
+  ) {
+    round.state = RoundState.hostChooses;
+
+    await game.save();
+    return Array.from(round.punchlinesByPlayer.values()).map((value) =>
+      JSON.parse(value)
+    );
+  }
+  throw new ServiceError(ErrorType.invalidAction, "Cannot enter state");
+};

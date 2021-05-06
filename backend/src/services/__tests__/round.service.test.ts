@@ -1,6 +1,10 @@
 import { createGame, getGame } from "../game.service";
 import { Game, Player, SetupType } from "../../models";
-import { beginRound, playerChoosePunchlines } from "../round.service";
+import {
+  beginRound,
+  enterHostChoosesState,
+  playerChoosePunchlines,
+} from "../round.service";
 import mongoose from "mongoose";
 import { RoundState } from "../../models/round.model";
 import { createPlayer } from "../player.service";
@@ -245,5 +249,67 @@ describe("playersChoosePunchline Service", () => {
         "To try out their black market jokes",
       ])
     ).rejects.toThrow("Cannot choose punchlines");
+  });
+});
+
+describe("enterHostChoosesState Service", () => {
+  let game: Game;
+
+  beforeEach(async () => {
+    const gameCode = await createGame();
+    game = await getGame(gameCode);
+
+    game.rounds.push({
+      setup: {
+        setup: "Why did the chicken cross the road?",
+        type: SetupType.pickOne,
+      },
+      host: "abc123",
+      state: RoundState.playersChoose,
+      punchlinesByPlayer: new Map([
+        ["abc123", '["To get to the other side"]'],
+        ["def456", '["It was feeling cocky"]'],
+      ]),
+    });
+  });
+
+  it("enters host chooses state", async () => {
+    await game.save();
+
+    const punchlines = await enterHostChoosesState(game.gameCode, "abc123");
+
+    game = await getGame(game.gameCode);
+    expect(game.rounds[0].state).toBe(RoundState.hostChooses);
+    expect(punchlines).toMatchObject([
+      ["To get to the other side"],
+      ["It was feeling cocky"],
+    ]);
+  });
+
+  it("throws error if game contains no rounds", async () => {
+    game.rounds.pop();
+    await game.save();
+
+    await expect(
+      enterHostChoosesState(game.gameCode, "abc123")
+    ).rejects.toThrow("Cannot enter state");
+  });
+
+  it("throws error if round state is not PLAYERS_CHOOSE", async () => {
+    game.rounds[0].state = RoundState.before;
+    await game.save();
+
+    await expect(
+      enterHostChoosesState(game.gameCode, "abc123")
+    ).rejects.toThrow("Cannot enter state");
+  });
+
+  it("throws error if player is not the round host", async () => {
+    game.rounds[0].host = "abcd1234";
+    await game.save();
+
+    await expect(
+      enterHostChoosesState(game.gameCode, "abc123")
+    ).rejects.toThrow("Cannot enter state");
   });
 });
