@@ -12,14 +12,14 @@ export enum RoundState {
 export interface Round extends Document {
   setup: Setup;
   host: Player["id"];
-  punchlinesByPlayer: Map<Player["id"], string>;
+  punchlinesByPlayer: Map<Player["id"], string[]>;
   state: RoundState;
 }
 
 export const RoundSchema: Schema = new Schema({
   setup: { type: SetupSchema, required: true },
   host: { type: String, required: true },
-  punchlinesByPlayer: { type: Map, of: String, default: () => ({}) },
+  punchlinesByPlayer: { type: Map, of: [String], default: () => ({}) },
   state: {
     type: String,
     enum: Object.values(RoundState),

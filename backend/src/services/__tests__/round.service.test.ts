@@ -114,8 +114,8 @@ describe("playersChoosePunchline Service", () => {
     expect(game.players[0]).toEqual(
       expect.not.arrayContaining(["To get to the other side"])
     );
-    expect(game.rounds[0].punchlinesByPlayer.get(playerId)).toBe(
-      '["To get to the other side"]'
+    expect(game.rounds[0].punchlinesByPlayer.get(playerId)).toEqual(
+      expect.arrayContaining(["To get to the other side"])
     );
     expect(game.discardedPunchlines).toEqual(
       expect.arrayContaining(["To get to the other side"])
@@ -146,8 +146,8 @@ describe("playersChoosePunchline Service", () => {
     expect(game.players[1]).toEqual(
       expect.not.arrayContaining(["It was feeling cocky"])
     );
-    expect(game.rounds[0].punchlinesByPlayer.get(player2Id)).toBe(
-      '["It was feeling cocky"]'
+    expect(game.rounds[0].punchlinesByPlayer.get(player2Id)).toEqual(
+      expect.arrayContaining(["It was feeling cocky"])
     );
     expect(game.discardedPunchlines).toEqual(
       expect.arrayContaining([
@@ -184,10 +184,9 @@ describe("playersChoosePunchline Service", () => {
   });
 
   it("throws error if player has already chosen punchlines for this round", async () => {
-    game.rounds[0].punchlinesByPlayer.set(
-      playerId,
-      '["To get to the other side"]'
-    );
+    game.rounds[0].punchlinesByPlayer.set(playerId, [
+      "To get to the other side",
+    ]);
     await game.save();
 
     await expect(
@@ -268,8 +267,8 @@ describe("enterHostChoosesState Service", () => {
       host: "abc123",
       state: RoundState.playersChoose,
       punchlinesByPlayer: new Map([
-        ["abc123", '["To get to the other side"]'],
-        ["def456", '["It was feeling cocky"]'],
+        ["abc123", ["To get to the other side"]],
+        ["def456", ["It was feeling cocky"]],
       ]),
     });
   });
@@ -281,10 +280,12 @@ describe("enterHostChoosesState Service", () => {
 
     game = await getGame(game.gameCode);
     expect(game.rounds[0].state).toBe(RoundState.hostChooses);
-    expect(punchlines).toMatchObject([
-      ["To get to the other side"],
-      ["It was feeling cocky"],
-    ]);
+    expect(punchlines[0]).toEqual(
+      expect.arrayContaining(["To get to the other side"])
+    );
+    expect(punchlines[1]).toEqual(
+      expect.arrayContaining(["It was feeling cocky"])
+    );
   });
 
   it("throws error if game contains no rounds", async () => {
@@ -321,8 +322,8 @@ describe("hostChoosesWinner Service", () => {
       host: "abc123",
       state: RoundState.hostChooses,
       punchlinesByPlayer: new Map([
-        ["def456", '["To get to the other side"]'],
-        ["ghi789", '["It was feeling cocky"]'],
+        ["def456", ["To get to the other side"]],
+        ["ghi789", ["It was feeling cocky"]],
       ]),
     });
   });
@@ -330,16 +331,16 @@ describe("hostChoosesWinner Service", () => {
   it("returns winner", async () => {
     await game.save();
 
-    const winner = await hostChoosesWinner(game.gameCode, "abc123", [
+    const winningEntry = await hostChoosesWinner(game.gameCode, "abc123", [
       "It was feeling cocky",
     ]);
 
     game = await getGame(game.gameCode);
     expect(game.rounds[0].state).toBe(RoundState.after);
-    expect(winner).toMatchObject({
-      playerId: "ghi789",
-      punchlines: ["It was feeling cocky"],
-    });
+    expect(winningEntry.playerId).toBe("ghi789");
+    expect(winningEntry.punchlines).toEqual(
+      expect.arrayContaining(["It was feeling cocky"])
+    );
   });
 
   it("throws error if game contains no rounds", async () => {

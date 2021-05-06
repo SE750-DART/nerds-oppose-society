@@ -56,7 +56,7 @@ export const playerChoosePunchlines = async (
     player.punchlines = player.punchlines.filter(
       (p) => !punchlines.includes(p)
     );
-    round.punchlinesByPlayer.set(playerId, JSON.stringify(punchlines));
+    round.punchlinesByPlayer.set(playerId, punchlines);
     game.discardedPunchlines.push(...punchlines);
 
     await game.save();
@@ -75,9 +75,7 @@ export const enterHostChoosesState = async (
     round.state = RoundState.hostChooses;
 
     await game.save();
-    return Array.from(round.punchlinesByPlayer.values()).map((value) =>
-      JSON.parse(value)
-    );
+    return Array.from(round.punchlinesByPlayer.values()).map((entry) => entry);
   }
   throw new ServiceError(
     ErrorType.invalidAction,
@@ -98,8 +96,13 @@ export const hostChoosesWinner = async (
     round.state === RoundState.hostChooses &&
     round.host === playerId
   ) {
+    console.log(winningPunchlines);
     const winningEntry = Array.from(round.punchlinesByPlayer.entries()).find(
-      (entry) => entry[1] === JSON.stringify(winningPunchlines)
+      (entry) =>
+        winningPunchlines.length === entry[1].length &&
+        winningPunchlines.every(
+          (punchline, index) => punchline === entry[1][index]
+        )
     );
     if (winningEntry !== undefined) {
       round.state = RoundState.after;
@@ -107,7 +110,7 @@ export const hostChoosesWinner = async (
       await game.save();
       return {
         playerId: winningEntry[0],
-        punchlines: JSON.parse(winningEntry[1]),
+        punchlines: winningEntry[1],
       };
     }
   }
