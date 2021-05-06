@@ -69,11 +69,12 @@ describe("beginRound Service", () => {
 });
 
 describe("playersChoosePunchline Service", () => {
+  let gameCode: string;
   let game: Game;
   let playerId: Player["id"];
 
   beforeEach(async () => {
-    const gameCode = await createGame();
+    gameCode = await createGame();
     playerId = await createPlayer(gameCode, "Bob");
 
     game = await getGame(gameCode);
@@ -99,11 +100,11 @@ describe("playersChoosePunchline Service", () => {
   it("chooses players cards for the round, removes cards from the players hand and add them to game discard pile", async () => {
     await game.save();
 
-    await playerChoosePunchlines(game.gameCode, playerId, [
+    await playerChoosePunchlines(gameCode, playerId, [
       "To get to the other side",
     ]);
 
-    game = await getGame(game.gameCode);
+    game = await getGame(gameCode);
 
     expect(game.players[0]).toEqual(
       expect.not.arrayContaining(["To get to the other side"])
@@ -116,14 +117,47 @@ describe("playersChoosePunchline Service", () => {
     );
   });
 
+  it("handles multiple players choosing cards", async () => {
+    await game.save();
+
+    const player2Id = await createPlayer(gameCode, "Fred");
+    game = await getGame(gameCode);
+    const player2 = game.players.id(player2Id);
+    if (player2 !== null) {
+      player2.punchlines = [
+        "To prove it wasn't chicken!",
+        "It was feeling cocky",
+      ];
+    }
+    await game.save();
+
+    await playerChoosePunchlines(gameCode, playerId, [
+      "To get to the other side",
+    ]);
+    await playerChoosePunchlines(gameCode, player2Id, ["It was feeling cocky"]);
+
+    game = await getGame(gameCode);
+
+    expect(game.players[1]).toEqual(
+      expect.not.arrayContaining(["It was feeling cocky"])
+    );
+    expect(
+      game.rounds[0].playersByPunchline.get('["It was feeling cocky"]')
+    ).toBe(player2Id);
+    expect(game.discardedPunchlines).toEqual(
+      expect.arrayContaining([
+        "To get to the other side",
+        "It was feeling cocky",
+      ])
+    );
+  });
+
   it("throws error if game contains no rounds", async () => {
     game.rounds.pop();
     await game.save();
 
     await expect(
-      playerChoosePunchlines(game.gameCode, playerId, [
-        "To get to the other side",
-      ])
+      playerChoosePunchlines(gameCode, playerId, ["To get to the other side"])
     ).rejects.toThrow("Cannot choose punchlines");
   });
 
@@ -132,9 +166,7 @@ describe("playersChoosePunchline Service", () => {
     await game.save();
 
     await expect(
-      playerChoosePunchlines(game.gameCode, playerId, [
-        "To get to the other side",
-      ])
+      playerChoosePunchlines(gameCode, playerId, ["To get to the other side"])
     ).rejects.toThrow("Cannot choose punchlines");
   });
 
@@ -142,9 +174,7 @@ describe("playersChoosePunchline Service", () => {
     await game.save();
 
     await expect(
-      playerChoosePunchlines(game.gameCode, "abc123", [
-        "To get to the other side",
-      ])
+      playerChoosePunchlines(gameCode, "abc123", ["To get to the other side"])
     ).rejects.toThrow("Cannot choose punchlines");
   });
 
@@ -156,9 +186,7 @@ describe("playersChoosePunchline Service", () => {
     await game.save();
 
     await expect(
-      playerChoosePunchlines(game.gameCode, playerId, [
-        "To get to the other side",
-      ])
+      playerChoosePunchlines(gameCode, playerId, ["To get to the other side"])
     ).rejects.toThrow("Cannot choose punchlines");
   });
 
@@ -166,7 +194,7 @@ describe("playersChoosePunchline Service", () => {
     await game.save();
 
     await expect(
-      playerChoosePunchlines(game.gameCode, playerId, [
+      playerChoosePunchlines(gameCode, playerId, [
         "To get to the other side",
         "To avoid bad jokes",
       ])
@@ -178,7 +206,7 @@ describe("playersChoosePunchline Service", () => {
     await game.save();
 
     await expect(
-      playerChoosePunchlines(game.gameCode, playerId, [
+      playerChoosePunchlines(gameCode, playerId, [
         "To get to the other side",
         "To avoid bad jokes",
         "To go to KFC",
@@ -191,7 +219,7 @@ describe("playersChoosePunchline Service", () => {
     await game.save();
 
     await expect(
-      playerChoosePunchlines(game.gameCode, playerId, [
+      playerChoosePunchlines(gameCode, playerId, [
         "To get to the other side",
         "To avoid bad jokes",
         "To go to KFC",
@@ -205,9 +233,7 @@ describe("playersChoosePunchline Service", () => {
     await game.save();
 
     await expect(
-      playerChoosePunchlines(game.gameCode, playerId, [
-        "To get to the other side",
-      ])
+      playerChoosePunchlines(gameCode, playerId, ["To get to the other side"])
     ).rejects.toThrow("Cannot choose punchlines");
   });
 
@@ -215,7 +241,7 @@ describe("playersChoosePunchline Service", () => {
     await game.save();
 
     await expect(
-      playerChoosePunchlines(game.gameCode, playerId, [
+      playerChoosePunchlines(gameCode, playerId, [
         "To try out their black market jokes",
       ])
     ).rejects.toThrow("Cannot choose punchlines");
