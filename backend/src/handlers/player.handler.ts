@@ -72,7 +72,15 @@ export const playerJoin = async (io: Server, socket: Socket): Promise<void> => {
 
   socket.emit(
     "players:initial",
-    game.players.filter((v) => !v.new)
+    game.players
+      .filter((player) => !player.new)
+      .map((player) => {
+        return {
+          id: player.id,
+          nickname: player.nickname,
+          score: player.score,
+        };
+      })
   );
   socket.emit("settings:initial", game.settings);
   emitNavigate(socket, game);
