@@ -22,7 +22,10 @@ export const enterPlayersChooseState = async (
     await game.save();
     return;
   }
-  throw new ServiceError(ErrorType.invalidAction, "Cannot begin round");
+  throw new ServiceError(
+    ErrorType.invalidAction,
+    "Cannot enter players choose state"
+  );
 };
 
 export const playerChoosePunchlines = async (
@@ -63,17 +66,12 @@ export const playerChoosePunchlines = async (
 };
 
 export const enterHostChoosesState = async (
-  gameCode: Game["gameCode"],
-  playerId: Player["id"]
+  gameCode: Game["gameCode"]
 ): Promise<string[][]> => {
   const game = await getGame(gameCode);
   const round = game.rounds.slice(-1)[0];
 
-  if (
-    round !== undefined &&
-    round.state === RoundState.playersChoose &&
-    round.host === playerId
-  ) {
+  if (round !== undefined && round.state === RoundState.playersChoose) {
     round.state = RoundState.hostChooses;
 
     await game.save();
@@ -81,5 +79,8 @@ export const enterHostChoosesState = async (
       JSON.parse(value)
     );
   }
-  throw new ServiceError(ErrorType.invalidAction, "Cannot enter state");
+  throw new ServiceError(
+    ErrorType.invalidAction,
+    "Cannot enter host chooses state"
+  );
 };

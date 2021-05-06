@@ -50,7 +50,7 @@ describe("enterPlayersChooseState Service", () => {
 
     await expect(
       enterPlayersChooseState(game.gameCode, "abc123")
-    ).rejects.toThrow("Cannot begin round");
+    ).rejects.toThrow("Cannot enter players choose state");
   });
 
   it("throws error if round state is not BEFORE", async () => {
@@ -59,7 +59,7 @@ describe("enterPlayersChooseState Service", () => {
 
     await expect(
       enterPlayersChooseState(game.gameCode, "abc123")
-    ).rejects.toThrow("Cannot begin round");
+    ).rejects.toThrow("Cannot enter players choose state");
   });
 
   it("throws error if player is not the round host", async () => {
@@ -68,7 +68,7 @@ describe("enterPlayersChooseState Service", () => {
 
     await expect(
       enterPlayersChooseState(game.gameCode, "abc123")
-    ).rejects.toThrow("Cannot begin round");
+    ).rejects.toThrow("Cannot enter players choose state");
   });
 });
 
@@ -273,10 +273,10 @@ describe("enterHostChoosesState Service", () => {
     });
   });
 
-  it("enters hostChooses state", async () => {
+  it("enters host chooses state", async () => {
     await game.save();
 
-    const punchlines = await enterHostChoosesState(game.gameCode, "abc123");
+    const punchlines = await enterHostChoosesState(game.gameCode);
 
     game = await getGame(game.gameCode);
     expect(game.rounds[0].state).toBe(RoundState.hostChooses);
@@ -290,26 +290,17 @@ describe("enterHostChoosesState Service", () => {
     game.rounds.pop();
     await game.save();
 
-    await expect(
-      enterHostChoosesState(game.gameCode, "abc123")
-    ).rejects.toThrow("Cannot enter state");
+    await expect(enterHostChoosesState(game.gameCode)).rejects.toThrow(
+      "Cannot enter host chooses state"
+    );
   });
 
   it("throws error if round state is not PLAYERS_CHOOSE", async () => {
     game.rounds[0].state = RoundState.before;
     await game.save();
 
-    await expect(
-      enterHostChoosesState(game.gameCode, "abc123")
-    ).rejects.toThrow("Cannot enter state");
-  });
-
-  it("throws error if player is not the round host", async () => {
-    game.rounds[0].host = "abcd1234";
-    await game.save();
-
-    await expect(
-      enterHostChoosesState(game.gameCode, "abc123")
-    ).rejects.toThrow("Cannot enter state");
+    await expect(enterHostChoosesState(game.gameCode)).rejects.toThrow(
+      "Cannot enter host chooses state"
+    );
   });
 });
