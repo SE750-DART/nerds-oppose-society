@@ -1,15 +1,15 @@
 import mongoose from "mongoose";
 import {
+  authenticatePlayer,
   createPlayer,
   getPlayer,
   incrementScore,
   initialisePlayer,
   removePlayer,
-  validatePlayerId,
 } from "../player.service";
 import { createGame, getGame } from "../game.service";
 import * as GameServices from "../game.service";
-import { validate as validateUUID } from "uuid";
+import { validate as validateUUID, v4 as uuid } from "uuid";
 
 beforeAll(async () => {
   await mongoose.connect(global.__MONGO_URI__, {
@@ -71,12 +71,13 @@ describe("removePlayer Service", () => {
     const gameCode = await createGame();
     const { playerId } = await createPlayer(gameCode, "Dave");
 
-    await expect(validatePlayerId(gameCode, playerId)).resolves.toBeTruthy();
+    let game = await getGame(gameCode);
+    expect(game.players.id(playerId)).not.toBeNull();
 
-    const game = await getGame(gameCode);
     await removePlayer(game, playerId);
 
-    await expect(validatePlayerId(gameCode, playerId)).resolves.toBeFalsy();
+    game = await getGame(gameCode);
+    expect(game.players.id(playerId)).toBeNull();
   });
 
   it("throws error when provided an invalid playerId", async () => {
@@ -93,14 +94,15 @@ describe("removePlayer Service", () => {
     const { playerId } = await createPlayer(gameCode, "Dave");
 
     let game = await getGame(gameCode);
-    await incrementScore(game, playerId);
+    expect(game.players.id(playerId)).not.toBeNull();
 
-    await expect(validatePlayerId(gameCode, playerId)).resolves.toBeTruthy();
+    await incrementScore(game, playerId);
 
     game = await getGame(gameCode);
     await removePlayer(game, playerId);
 
-    await expect(validatePlayerId(gameCode, playerId)).resolves.toBeTruthy();
+    game = await getGame(gameCode);
+    expect(game.players.id(playerId)).not.toBeNull();
   });
 });
 
@@ -156,21 +158,22 @@ describe("getPlayer Service", () => {
   });
 });
 
-describe("validatePlayerId Service", () => {
+describe("authenticatePlayer Service", () => {
   it("returns true for a valid gameCode and playerId", async () => {
     const gameCode = await createGame();
 
-    const { playerId } = await createPlayer(gameCode, "Dave");
+    const { playerId, token } = await createPlayer(gameCode, "Dave");
 
-    const result = await validatePlayerId(gameCode, playerId);
+    const result = await authenticatePlayer(gameCode, playerId, token);
 
     expect(result).toBeTruthy();
   });
 
   it("returns false for an invalid gameCode", async () => {
-    const result = await validatePlayerId(
+    const result = await authenticatePlayer(
       "9846541654",
-      mongoose.Types.ObjectId().toHexString()
+      mongoose.Types.ObjectId().toHexString(),
+      uuid()
     );
 
     expect(result).toBeFalsy();
@@ -179,9 +182,10 @@ describe("validatePlayerId Service", () => {
   it("returns false for an invalid playerId", async () => {
     const gameCode = await createGame();
 
-    const result = await validatePlayerId(
+    const result = await authenticatePlayer(
       gameCode,
-      mongoose.Types.ObjectId().toHexString()
+      mongoose.Types.ObjectId().toHexString(),
+      uuid()
     );
 
     expect(result).toBeFalsy();
