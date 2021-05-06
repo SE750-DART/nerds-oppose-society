@@ -3,7 +3,7 @@ import { getGame } from "./game.service";
 import { RoundState } from "../models/round.model";
 import { ErrorType, ServiceError } from "../util";
 
-export const beginRound = async (
+export const enterPlayersChooseState = async (
   gameCode: Game["gameCode"],
   playerId: Player["id"]
 ): Promise<void> => {

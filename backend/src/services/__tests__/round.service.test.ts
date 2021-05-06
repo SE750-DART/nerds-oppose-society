@@ -1,7 +1,7 @@
 import { createGame, getGame } from "../game.service";
 import { Game, Player, SetupType } from "../../models";
 import {
-  beginRound,
+  enterPlayersChooseState,
   enterHostChoosesState,
   playerChoosePunchlines,
 } from "../round.service";
@@ -19,7 +19,7 @@ afterAll(async () => {
   await mongoose.connection.close();
 });
 
-describe("beginRound Service", () => {
+describe("enterPlayersChooseState Service", () => {
   let game: Game;
 
   beforeEach(async () => {
@@ -35,10 +35,10 @@ describe("beginRound Service", () => {
     });
   });
 
-  it("begins round", async () => {
+  it("enters playersChoose state", async () => {
     await game.save();
 
-    await beginRound(game.gameCode, "abc123");
+    await enterPlayersChooseState(game.gameCode, "abc123");
 
     game = await getGame(game.gameCode);
     expect(game.rounds[0].state).toBe(RoundState.playersChoose);
@@ -48,27 +48,27 @@ describe("beginRound Service", () => {
     game.rounds.pop();
     await game.save();
 
-    await expect(beginRound(game.gameCode, "abc123")).rejects.toThrow(
-      "Cannot begin round"
-    );
+    await expect(
+      enterPlayersChooseState(game.gameCode, "abc123")
+    ).rejects.toThrow("Cannot begin round");
   });
 
   it("throws error if round state is not BEFORE", async () => {
     game.rounds[0].state = RoundState.playersChoose;
     await game.save();
 
-    await expect(beginRound(game.gameCode, "abc123")).rejects.toThrow(
-      "Cannot begin round"
-    );
+    await expect(
+      enterPlayersChooseState(game.gameCode, "abc123")
+    ).rejects.toThrow("Cannot begin round");
   });
 
   it("throws error if player is not the round host", async () => {
     game.rounds[0].host = "abcd1234";
     await game.save();
 
-    await expect(beginRound(game.gameCode, "abc123")).rejects.toThrow(
-      "Cannot begin round"
-    );
+    await expect(
+      enterPlayersChooseState(game.gameCode, "abc123")
+    ).rejects.toThrow("Cannot begin round");
   });
 });
 
@@ -273,7 +273,7 @@ describe("enterHostChoosesState Service", () => {
     });
   });
 
-  it("enters host chooses state", async () => {
+  it("enters hostChooses state", async () => {
     await game.save();
 
     const punchlines = await enterHostChoosesState(game.gameCode, "abc123");
