@@ -35,7 +35,7 @@ export default (
             await setRoundLimitService(game, value);
             break;
         }
-        socket.emit("settings:update", setting, value);
+        socket.to(gameCode).emit("settings:update", setting, value);
       }
     } catch (e) {
       if (e instanceof ServiceError) {
