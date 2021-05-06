@@ -1,20 +1,33 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import Button from "../../components/Button";
 import PlayerList from "../../components/PlayerList";
 import styles from "./style.module.css";
 import TextField from "../../components/TextField";
 import Dropdown from "../../components/Dropdown";
+import { Settings } from "../../../../backend/src/models";
 
 type Props = {
   gameCode: string;
+  settings?: Settings;
 };
 
-const LobbyPage = ({ gameCode }: Props) => {
+const LobbyPage = ({ gameCode, settings }: Props) => {
   const memoryHistory = useHistory();
 
-  const [scoreToWin, setScoreToWin] = useState("");
+  const [maxPlayers, setMaxPlayers] = useState("");
   const [roundLimit, setRoundLimit] = useState("");
+
+  useEffect(() => {
+    if (settings) {
+      if (settings.maxPlayers) {
+        setRoundLimit(settings.maxPlayers.toString());
+      }
+      if (settings.roundLimit) {
+        setRoundLimit(settings.roundLimit.toString());
+      }
+    }
+  }, [settings]);
 
   const gameCodeNodes: React.ReactNode = (
     <>
@@ -36,11 +49,11 @@ const LobbyPage = ({ gameCode }: Props) => {
   const gameSettingsNodes: React.ReactNode = (
     <>
       <div className={styles.setting}>
-        <p>Score to win</p>
+        <p>Max players</p>
         <TextField
-          textValue={scoreToWin}
+          textValue={maxPlayers}
           size="small"
-          onChangeHandler={setScoreToWin}
+          onChangeHandler={setMaxPlayers}
         />
       </div>
       <div className={styles.setting}>
