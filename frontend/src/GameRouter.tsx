@@ -1,22 +1,22 @@
 import React from "react";
-import {
-  MemoryRouter,
-  Switch,
-  Route,
-  Redirect,
-  useParams,
-} from "react-router-dom";
+import { Router, Switch, Route, Redirect, useParams } from "react-router-dom";
+import { createMemoryHistory } from "history";
 import { BasicPage, NicknamePage, LobbyPage } from "./pages";
+import socket from "./socket";
 
 type PathParams = {
   gameCode: string;
 };
 
+const memoryHistory = createMemoryHistory();
+
 const GameRouter = () => {
   const { gameCode } = useParams<PathParams>();
 
+  socket.on("navigate", (route) => memoryHistory.push(route));
+
   return (
-    <MemoryRouter>
+    <Router history={memoryHistory}>
       <Switch>
         <Route path="/nickname">
           <NicknamePage gameCode={gameCode} />
@@ -50,7 +50,7 @@ const GameRouter = () => {
           <Redirect to="/nickname" />
         </Route>
       </Switch>
-    </MemoryRouter>
+    </Router>
   );
 };
 
