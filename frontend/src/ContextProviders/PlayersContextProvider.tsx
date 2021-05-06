@@ -12,16 +12,20 @@ type Context = {
   host: string;
   setHost: (host: string) => void;
   players: Player[];
-  initialisePlayers?: (arg0: Player[]) => void;
-  addPlayer?: (arg0: string) => void;
-  removePlayer?: (arg0: string) => void;
-  incrementPlayerScore?: (arg0: string) => void;
+  initialisePlayers: (players: Player[]) => void;
+  addPlayer: (nickname: string) => void;
+  removePlayer: (nickname: string) => void;
+  incrementPlayerScore: (nickname: string) => void;
 };
 
 const PlayersContext = React.createContext<Context>({
   host: "",
   setHost: () => null,
   players: [],
+  initialisePlayers: () => null,
+  addPlayer: () => null,
+  removePlayer: () => null,
+  incrementPlayerScore: () => null,
 });
 
 const PlayersContextProvider = ({

@@ -13,10 +13,15 @@ const memoryHistory = createMemoryHistory();
 
 const GameRouter = () => {
   const { gameCode } = useParams<PathParams>();
-  const { setHost } = useContext(PlayersContext);
+  const { setHost, initialisePlayers, addPlayer, removePlayer } = useContext(
+    PlayersContext
+  );
 
-  socket.on("navigate", (route) => memoryHistory.push(route));
+  socket.on("navigate", (route: string) => memoryHistory.push(route));
   socket.on("host", (host: string) => setHost(host));
+  socket.on("players:initial", (players) => initialisePlayers(players));
+  socket.on("players:add", (nickname: string) => addPlayer(nickname));
+  socket.on("players:remove", (nickname: string) => removePlayer(nickname));
 
   return (
     <Router history={memoryHistory}>
