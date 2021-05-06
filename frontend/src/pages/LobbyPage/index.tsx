@@ -6,7 +6,7 @@ import PlayerList from "../../components/PlayerList";
 import styles from "./style.module.css";
 import TextField from "../../components/TextField";
 import Dropdown from "../../components/Dropdown";
-import { Settings } from "../../../../backend/src/models";
+import { Settings } from "../../GameRouter";
 import socket from "../../socket";
 
 type Props = {

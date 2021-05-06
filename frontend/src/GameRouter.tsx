@@ -7,7 +7,11 @@ import {
   Player,
   PlayersContext,
 } from "./ContextProviders/PlayersContextProvider";
-import { Settings } from "../../backend/src/models";
+
+export type Settings = {
+  roundLimit?: number;
+  maxPlayers?: number;
+};
 
 type PathParams = {
   gameCode: string;
