@@ -9,6 +9,7 @@ import {
 } from "../player.service";
 import { createGame, getGame } from "../game.service";
 import * as GameServices from "../game.service";
+import { validate as validateUUID } from "uuid";
 
 beforeAll(async () => {
   await mongoose.connect(global.__MONGO_URI__, {
@@ -34,11 +35,15 @@ describe("createPlayer Service", () => {
   it("creates a player and returns its playerId", async () => {
     const gameCode = await createGame();
 
-    const playerId = await createPlayer(gameCode, "Bob");
+    const { playerId, token } = await createPlayer(gameCode, "Bob");
 
     const game = await getGame(gameCode);
 
-    expect(game.players.id(playerId)).not.toBeNull();
+    const player = game.players.id(playerId);
+    expect(player).toBeDefined();
+    if (player === null) return;
+    expect(token).toBe(player.token);
+    expect(validateUUID(token)).toBeTruthy();
   });
 
   it("throws an error when provided an invalid gameCode", async () => {
@@ -63,7 +68,7 @@ describe("createPlayer Service", () => {
 describe("removePlayer Service", () => {
   it("removes a player from a game is score is zero", async () => {
     const gameCode = await createGame();
-    const playerId = await createPlayer(gameCode, "Dave");
+    const { playerId } = await createPlayer(gameCode, "Dave");
 
     await expect(validatePlayerId(gameCode, playerId)).resolves.toBeTruthy();
 
@@ -84,7 +89,7 @@ describe("removePlayer Service", () => {
 
   it("does not remove a player from the game if score is greater than zero", async () => {
     const gameCode = await createGame();
-    const playerId = await createPlayer(gameCode, "Dave");
+    const { playerId } = await createPlayer(gameCode, "Dave");
 
     let game = await getGame(gameCode);
     await incrementScore(game, playerId);
@@ -116,7 +121,7 @@ describe("getPlayer Service", () => {
   it("returns a Player object retrieving Game from gameCode", async () => {
     const gameCode = await createGame();
 
-    const playerId = await createPlayer(gameCode, "James");
+    const { playerId } = await createPlayer(gameCode, "James");
 
     spy = jest.spyOn(GameServices, "getGame");
 
@@ -130,7 +135,7 @@ describe("getPlayer Service", () => {
   it("returns a Player object using provided Game", async () => {
     const gameCode = await createGame();
 
-    const playerId = await createPlayer(gameCode, "James");
+    const { playerId } = await createPlayer(gameCode, "James");
 
     const game = await getGame(gameCode);
 
@@ -154,7 +159,7 @@ describe("validatePlayerId Service", () => {
   it("returns true for a valid gameCode and playerId", async () => {
     const gameCode = await createGame();
 
-    const playerId = await createPlayer(gameCode, "Dave");
+    const { playerId } = await createPlayer(gameCode, "Dave");
 
     const result = await validatePlayerId(gameCode, playerId);
 
@@ -185,7 +190,7 @@ describe("validatePlayerId Service", () => {
 describe("initialisePlayer service", () => {
   it("sets player.new to false", async () => {
     const gameCode = await createGame();
-    const playerId = await createPlayer(gameCode, "Jimbo");
+    const { playerId } = await createPlayer(gameCode, "Jimbo");
 
     const game = await getGame(gameCode);
     let player = await getPlayer(gameCode, playerId);
@@ -210,7 +215,7 @@ describe("initialisePlayer service", () => {
 describe("incrementScore service", () => {
   it("increments a players score", async () => {
     const gameCode = await createGame();
-    const playerId = await createPlayer(gameCode, "Jimbo");
+    const { playerId } = await createPlayer(gameCode, "Jimbo");
 
     let player = await getPlayer(gameCode, playerId);
     expect(player.score).toBe(0);

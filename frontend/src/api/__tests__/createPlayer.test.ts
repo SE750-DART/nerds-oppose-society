@@ -1,6 +1,6 @@
 import mockAxios from "jest-mock-axios";
 import { AxiosError, AxiosResponse } from "axios";
-import createPlayer from "../createPlayer";
+import createPlayer, { Response } from "../createPlayer";
 import { BASE_URL } from "../axiosCall";
 
 const testPlayer = {
@@ -13,8 +13,11 @@ afterEach(() => {
 });
 
 test("should return user id on successful creation", async () => {
-  const mockResponse: AxiosResponse<string> = {
-    data: "1a2b3c",
+  const mockResponse: AxiosResponse<Response> = {
+    data: {
+      playerId: "abc123",
+      token: "f7d01fef-cd47-496a-b7eb-5dd26f771721",
+    },
     status: 201,
     statusText: "CREATED",
     headers: {},
@@ -35,7 +38,10 @@ test("should return user id on successful creation", async () => {
   expect(res).toEqual({
     success: true,
     status: 201,
-    data: "1a2b3c",
+    data: {
+      playerId: "abc123",
+      token: "f7d01fef-cd47-496a-b7eb-5dd26f771721",
+    },
   });
 });
 
