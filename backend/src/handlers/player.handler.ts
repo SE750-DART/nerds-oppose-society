@@ -101,7 +101,10 @@ export const playerJoin = async (io: Server, socket: Socket): Promise<void> => {
           };
         })
     );
-    socket.emit("settings:initial", game.settings);
+    socket.emit("settings:initial", {
+      roundLimit: game.settings.roundLimit,
+      maxPlayers: game.settings.maxPlayers,
+    });
     emitNavigate(socket, game);
 
     const sockets = await io.in(gameCode).fetchSockets();
