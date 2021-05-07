@@ -13,7 +13,7 @@ type Context = {
   setHost: (host: string) => void;
   players: Player[];
   initialisePlayers: (players: Player[]) => void;
-  addPlayer: (nickname: string, id: string) => void;
+  addPlayer: (id: string, nickname: string) => void;
   removePlayer: (playerId: string) => void;
   incrementPlayerScore: (playerId: string) => void;
 };
@@ -43,7 +43,7 @@ const PlayersContextProvider = ({
     updateItem,
   } = useCrud<Player>(equals);
 
-  const addPlayer = (nickname: string, id: string) =>
+  const addPlayer = (id: string, nickname: string) =>
     addItem({
       nickname,
       id,

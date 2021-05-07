@@ -31,33 +31,36 @@ const GameRouter = () => {
   socket.on("players:initial", (players: Player[]) =>
     initialisePlayers(players)
   );
-  socket.on("players:add", (nickname: string, id: string) =>
-    addPlayer(nickname, id)
+  socket.on("players:add", (id: string, nickname: string) =>
+    addPlayer(id, nickname)
   );
   socket.on("players:remove", (playerId: string) => removePlayer(playerId));
   socket.on("settings:initial", (initialSettings: Settings) =>
     setSettings(initialSettings)
   );
-  socket.on("settings:update", (setting, value) => {
-    let key;
-    switch (setting) {
-      case "MAX_PLAYERS":
-        key = "maxPlayers";
-        break;
-      case "ROUND_LIMIT":
-        key = "roundLimit";
-        break;
-      default:
-        key = null;
+  socket.on(
+    "settings:update",
+    ({ setting, value }: { setting: string; value: number }) => {
+      let key;
+      switch (setting) {
+        case "MAX_PLAYERS":
+          key = "maxPlayers";
+          break;
+        case "ROUND_LIMIT":
+          key = "roundLimit";
+          break;
+        default:
+          key = null;
+      }
+      if (key !== null) {
+        const newSettings = {
+          ...settings,
+          [key]: value,
+        };
+        setSettings(newSettings);
+      }
     }
-    if (key !== null) {
-      const newSettings = {
-        ...settings,
-        [key]: value,
-      };
-      setSettings(newSettings);
-    }
-  });
+  );
 
   return (
     <Router history={memoryHistory}>
