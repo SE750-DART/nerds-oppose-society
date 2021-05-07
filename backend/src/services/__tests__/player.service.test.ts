@@ -41,7 +41,7 @@ describe("createPlayer Service", () => {
 
     const player = game.players.id(playerId);
     expect(player).toBeDefined();
-    if (player === null) return;
+    if (player === null) return fail("missing player");
     expect(token).toBe(player.token);
     expect(validateUUID(token)).toBeTruthy();
     expect(mongoose.Types.ObjectId.isValid(playerId));

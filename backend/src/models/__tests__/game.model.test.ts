@@ -162,6 +162,7 @@ describe("Game Model", () => {
 
     try {
       await game.save();
+      fail("nicknames are required");
     } catch (e) {
       expect(e).toBeInstanceOf(mongoose.Error.ValidationError);
       expect(e.errors.players).toBeDefined();
@@ -175,6 +176,7 @@ describe("Game Model", () => {
 
     try {
       await game.save();
+      fail("unique nicknames are required");
     } catch (e) {
       expect(e).toBeInstanceOf(mongoose.Error.ValidationError);
       expect(e.errors.players).toBeDefined();
