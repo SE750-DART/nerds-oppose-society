@@ -1,4 +1,4 @@
-import { Document, Schema } from "mongoose";
+import { Document, Schema, Types } from "mongoose";
 import { SetupSchema, Setup } from "./setup.model";
 import { Player } from "./player.model";
 
@@ -18,7 +18,7 @@ export interface Round extends Document {
 
 export const RoundSchema: Schema = new Schema({
   setup: { type: SetupSchema, required: true },
-  host: { type: String, required: true },
+  host: { type: Types.ObjectId, required: true },
   punchlinesByPlayer: { type: Map, of: [String], default: () => ({}) },
   state: {
     type: String,

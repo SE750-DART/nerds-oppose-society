@@ -208,7 +208,7 @@ describe("Game Model", () => {
           setup: "Why did the chicken cross the road?",
           type: SetupType.pickOne,
         },
-        host: "abc123",
+        host: "6094a2e1d7909d84ae35819c",
       },
     ];
 

@@ -32,14 +32,14 @@ describe("enterPlayersChooseState Service", () => {
         setup: "Why did the chicken cross the road?",
         type: SetupType.pickOne,
       },
-      host: "abc123",
+      host: "6094a2e1d7909d84ae35819c",
     });
   });
 
   it("enters playersChoose state", async () => {
     await game.save();
 
-    await enterPlayersChooseState(game.gameCode, "abc123");
+    await enterPlayersChooseState(game.gameCode, "6094a2e1d7909d84ae35819c");
 
     game = await getGame(game.gameCode);
     expect(game.rounds[0].state).toBe(RoundState.playersChoose);
@@ -50,7 +50,7 @@ describe("enterPlayersChooseState Service", () => {
     await game.save();
 
     await expect(
-      enterPlayersChooseState(game.gameCode, "abc123")
+      enterPlayersChooseState(game.gameCode, "6094a2e1d7909d84ae35819c")
     ).rejects.toThrow("Cannot enter players choose state");
   });
 
@@ -59,16 +59,16 @@ describe("enterPlayersChooseState Service", () => {
     await game.save();
 
     await expect(
-      enterPlayersChooseState(game.gameCode, "abc123")
+      enterPlayersChooseState(game.gameCode, "6094a2e1d7909d84ae35819c")
     ).rejects.toThrow("Cannot enter players choose state");
   });
 
   it("throws error if player is not the round host", async () => {
-    game.rounds[0].host = "abcd1234";
+    game.rounds[0].host = "6094a31d25335f84c32a12ff";
     await game.save();
 
     await expect(
-      enterPlayersChooseState(game.gameCode, "abc123")
+      enterPlayersChooseState(game.gameCode, "6094a2e1d7909d84ae35819c")
     ).rejects.toThrow("Cannot enter players choose state");
   });
 });
@@ -89,7 +89,7 @@ describe("playersChoosePunchline Service", () => {
         setup: "Why did the chicken cross the road?",
         type: SetupType.pickOne,
       },
-      host: "abc123",
+      host: "6094a2e1d7909d84ae35819c",
       state: RoundState.playersChoose,
     });
     const player = game.players.id(playerId);
@@ -181,7 +181,9 @@ describe("playersChoosePunchline Service", () => {
     await game.save();
 
     await expect(
-      playerChoosePunchlines(gameCode, "abc123", ["To get to the other side"])
+      playerChoosePunchlines(gameCode, "6094a2e1d7909d84ae35819c", [
+        "To get to the other side",
+      ])
     ).rejects.toThrow("Cannot choose punchlines");
   });
 
@@ -266,7 +268,7 @@ describe("enterHostChoosesState Service", () => {
         setup: "Why did the chicken cross the road?",
         type: SetupType.pickOne,
       },
-      host: "abc123",
+      host: "6094a2e1d7909d84ae35819c",
       state: RoundState.playersChoose,
       punchlinesByPlayer: new Map([
         ["abc123", ["To get to the other side"]],
@@ -321,7 +323,7 @@ describe("hostChoosesWinner Service", () => {
         setup: "Why did the chicken cross the road?",
         type: SetupType.pickOne,
       },
-      host: "abc123",
+      host: "6094a2e1d7909d84ae35819c",
       state: RoundState.hostChooses,
       punchlinesByPlayer: new Map([
         ["def456", ["To get to the other side"]],
@@ -333,9 +335,11 @@ describe("hostChoosesWinner Service", () => {
   it("returns winner", async () => {
     await game.save();
 
-    const winningEntry = await hostChoosesWinner(game.gameCode, "abc123", [
-      "It was feeling cocky",
-    ]);
+    const winningEntry = await hostChoosesWinner(
+      game.gameCode,
+      "6094a2e1d7909d84ae35819c",
+      ["It was feeling cocky"]
+    );
 
     game = await getGame(game.gameCode);
     expect(game.rounds[0].state).toBe(RoundState.after);
@@ -350,7 +354,9 @@ describe("hostChoosesWinner Service", () => {
     await game.save();
 
     await expect(
-      hostChoosesWinner(game.gameCode, "abc123", ["It was feeling cocky"])
+      hostChoosesWinner(game.gameCode, "6094a2e1d7909d84ae35819c", [
+        "It was feeling cocky",
+      ])
     ).rejects.toThrow("Cannot choose winner");
   });
 
@@ -359,16 +365,20 @@ describe("hostChoosesWinner Service", () => {
     await game.save();
 
     await expect(
-      hostChoosesWinner(game.gameCode, "abc123", ["It was feeling cocky"])
+      hostChoosesWinner(game.gameCode, "6094a2e1d7909d84ae35819c", [
+        "It was feeling cocky",
+      ])
     ).rejects.toThrow("Cannot choose winner");
   });
 
   it("throws error if player is not the round host", async () => {
-    game.rounds[0].host = "abcd1234";
+    game.rounds[0].host = "6094a31d25335f84c32a12ff";
     await game.save();
 
     await expect(
-      hostChoosesWinner(game.gameCode, "abc123", ["It was feeling cocky"])
+      hostChoosesWinner(game.gameCode, "6094a2e1d7909d84ae35819c", [
+        "It was feeling cocky",
+      ])
     ).rejects.toThrow("Cannot choose winner");
   });
 
@@ -376,7 +386,9 @@ describe("hostChoosesWinner Service", () => {
     await game.save();
 
     await expect(
-      hostChoosesWinner(game.gameCode, "abc123", ["It was feeling bold"])
+      hostChoosesWinner(game.gameCode, "6094a2e1d7909d84ae35819c", [
+        "It was feeling bold",
+      ])
     ).rejects.toThrow("Cannot choose winner");
   });
 });

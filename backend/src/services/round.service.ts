@@ -13,7 +13,7 @@ export const enterPlayersChooseState = async (
   if (
     round !== undefined &&
     round.state === RoundState.before &&
-    playerId === round.host
+    round.host.toString() === playerId
   ) {
     round.state = RoundState.playersChoose;
 
@@ -98,7 +98,7 @@ export const hostChoosesWinner = async (
   if (
     round !== undefined &&
     round.state === RoundState.hostChooses &&
-    round.host === playerId
+    round.host.toString() === playerId
   ) {
     const winningEntry = Array.from(round.punchlinesByPlayer.entries()).find(
       (entry) =>
