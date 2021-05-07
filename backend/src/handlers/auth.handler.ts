@@ -10,8 +10,13 @@ export default async (
   socket.data.gameCode = gameCode;
   socket.data.playerId = playerId;
 
-  if (await validatePlayerId(gameCode, playerId)) {
-    return next();
+  const error = new Error("Invalid player credentials");
+  try {
+    if (await validatePlayerId(gameCode, playerId)) {
+      return next();
+    }
+  } catch {
+    return next(error);
   }
-  next(new Error("Invalid player credentials"));
+  next(error);
 };

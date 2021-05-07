@@ -35,7 +35,7 @@ describe("auth Handler", () => {
     expect(socket.data).toMatchObject(socket.handshake.auth);
   });
 
-  it("calls next() with an error with invalid credentials", async () => {
+  it("calls next() with an error if validatePlayerId returns false", async () => {
     spy.mockReturnValue(false);
 
     const next = jest.fn();
@@ -44,5 +44,16 @@ describe("auth Handler", () => {
 
     expect(next).toHaveBeenCalledTimes(1);
     expect(next).toHaveBeenCalledWith(new Error("Invalid player credentials"));
+  });
+
+  it("calls next() with an error if validatePlayerId throws an error", async () => {
+    spy.mockRejectedValue(Error());
+
+    const next = jest.fn();
+
+    await Auth(socket, next);
+
+    expect(next).toHaveBeenCalledTimes(1);
+    expect(next).toHaveBeenCalledWith(Error("Invalid player credentials"));
   });
 });

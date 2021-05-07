@@ -4,6 +4,7 @@ import * as PlayerService from "../../services/player.service";
 import * as GameHandler from "../game.handler";
 import registerPlayerHandler, { playerJoin } from "../player.handler";
 import { Game, GameState, Player } from "../../models";
+import { ErrorType, ServiceError } from "../../util";
 
 describe("playerJoin handler", () => {
   let getGameSpy: jest.SpyInstance;
@@ -62,7 +63,10 @@ describe("playerJoin handler", () => {
         { nickname: "Fred", score: 0, new: true },
         { nickname: "James", score: 1, new: false },
       ],
-      settings: "{SETTINGS}",
+      settings: {
+        roundLimit: 69,
+        maxPlayers: 25,
+      },
     } as unknown) as Game;
 
     getGameSpy = jest
@@ -104,10 +108,13 @@ describe("playerJoin handler", () => {
 
     expect(emitMock).toHaveBeenCalledTimes(2);
     expect(emitMock).toHaveBeenCalledWith("players:initial", [
-      { nickname: "Bob", score: 0, new: false },
-      { nickname: "James", score: 1, new: false },
+      { nickname: "Bob", score: 0 },
+      { nickname: "James", score: 1 },
     ]);
-    expect(emitMock).toHaveBeenCalledWith("settings:initial", "{SETTINGS}");
+    expect(emitMock).toHaveBeenCalledWith("settings:initial", {
+      roundLimit: 69,
+      maxPlayers: 25,
+    });
 
     expect(emitNavigateSpy).toHaveBeenCalledTimes(1);
     expect(emitNavigateSpy).toHaveBeenCalledWith(socket, game);
@@ -209,6 +216,66 @@ describe("playerJoin handler", () => {
     await playerJoin(io, socket);
 
     expect(socket.data.nickname).toBe("Bob");
+  });
+
+  it("catches error thrown by getGame and disconnects player", async () => {
+    const player: Player = ({
+      nickname: "Bob",
+      new: true,
+    } as unknown) as Player;
+    getPlayerSpy.mockReturnValue(player);
+
+    fetchMock.mockReturnValue(["1"]);
+
+    getGameSpy.mockRejectedValue(
+      new ServiceError(ErrorType.gameCode, "Game does not exist")
+    );
+    socket.disconnect = jest.fn();
+
+    await playerJoin(io, socket);
+
+    expect(socket.disconnect).toHaveBeenCalledTimes(1);
+    expect(socket.disconnect).toHaveBeenCalledWith(true);
+  });
+
+  it("catches error thrown by getPlayer and disconnects player", async () => {
+    const player: Player = ({
+      nickname: "Bob",
+      new: true,
+    } as unknown) as Player;
+    getPlayerSpy.mockReturnValue(player);
+
+    fetchMock.mockReturnValue(["1"]);
+
+    getPlayerSpy.mockRejectedValue(
+      new ServiceError(ErrorType.playerName, "Player does not exist")
+    );
+    socket.disconnect = jest.fn();
+
+    await playerJoin(io, socket);
+
+    expect(socket.disconnect).toHaveBeenCalledTimes(1);
+    expect(socket.disconnect).toHaveBeenCalledWith(true);
+  });
+
+  it("catches error thrown by initialisePlayer and disconnects player", async () => {
+    const player: Player = ({
+      nickname: "Bob",
+      new: true,
+    } as unknown) as Player;
+    getPlayerSpy.mockReturnValue(player);
+
+    fetchMock.mockReturnValue(["1"]);
+
+    initialisePlayerSpy.mockRejectedValue(
+      new ServiceError(ErrorType.playerName, "Player does not exist")
+    );
+    socket.disconnect = jest.fn();
+
+    await playerJoin(io, socket);
+
+    expect(socket.disconnect).toHaveBeenCalledTimes(1);
+    expect(socket.disconnect).toHaveBeenCalledWith(true);
   });
 });
 
@@ -317,6 +384,36 @@ describe("Player handlers", () => {
       expect(toMock).toHaveBeenCalledTimes(0);
 
       expect(emitMock).toHaveBeenCalledTimes(0);
+    });
+
+    it("catches error thrown by getGame", async () => {
+      gameSpy.mockRejectedValue(
+        new ServiceError(ErrorType.gameCode, "Game does not exist")
+      );
+
+      removeSpy.mockReturnValue({
+        nickname: "Bob",
+      });
+
+      await handlers.playerLeave();
+
+      expect(gameSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it("catches error thrown by removePlayer", async () => {
+      const game = ({
+        gameCode: "42069",
+        state: GameState.lobby,
+      } as unknown) as Game;
+      gameSpy.mockReturnValue(game);
+
+      removeSpy.mockRejectedValue(
+        new ServiceError(ErrorType.playerName, "Player does not exist")
+      );
+
+      await handlers.playerLeave();
+
+      expect(removeSpy).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -464,6 +561,33 @@ describe("Player handlers", () => {
       });
     });
 
+    it("assigns new host skipping non-active players", async () => {
+      const socket = ({
+        data: {
+          gameCode: "42069",
+          playerId: "1",
+          nickname: "Steve",
+        },
+        on: jest.fn(),
+      } as unknown) as Socket;
+
+      fetchMock.mockReturnValue([
+        { data: { playerId: "1" } },
+        { data: { playerId: "3", nickname: "Dave" } },
+      ]);
+
+      handlers = await registerPlayerHandler(io, socket);
+
+      isHostSpy.mockReturnValue(true);
+
+      await handlers.playerLeaving();
+
+      expect(setHostSpy).toHaveBeenCalledTimes(1);
+      expect(setHostSpy).toHaveBeenCalledWith(io, {
+        data: { playerId: "3", nickname: "Dave" },
+      });
+    });
+
     it("does not set host if new host socket is somehow undefined", async () => {
       const socket = ({
         data: {
@@ -487,6 +611,26 @@ describe("Player handlers", () => {
       await handlers.playerLeaving();
 
       expect(setHostSpy).toHaveBeenCalledTimes(0);
+    });
+
+    it("catches error thrown by getGame", async () => {
+      const socket = ({
+        data: {
+          gameCode: "42069",
+          playerId: "1",
+        },
+        on: jest.fn(),
+      } as unknown) as Socket;
+
+      fetchMock.mockReturnValue([{ data: { playerId: "1" } }]);
+
+      handlers = await registerPlayerHandler(io, socket);
+
+      isHostSpy.mockReturnValue(true);
+
+      await handlers.playerLeaving();
+
+      expect(gameSpy).toHaveBeenCalledTimes(1);
     });
   });
 });
