@@ -59,7 +59,7 @@ export default (
 
       if (game.state === GameState.lobby) {
         const player = await removePlayer(game, playerId);
-        socket.to(game.gameCode).emit("players:remove", player.nickname);
+        socket.to(game.gameCode).emit("players:remove", player.id);
       }
       /* Empty catch block to keep console clean during testing.
        * Could use proper logging here such as winston
@@ -86,7 +86,7 @@ export const playerJoin = async (io: Server, socket: Socket): Promise<void> => {
     const player = await getPlayer(game.gameCode, playerId, game);
     if (player.new) {
       await initialisePlayer(game, playerId);
-      socket.to(game.gameCode).emit("players:add", player.nickname);
+      socket.to(game.gameCode).emit("players:add", player.id, player.nickname);
     }
     socket.data.nickname = player.nickname;
 
