@@ -80,7 +80,8 @@ describe("playersChoosePunchline Service", () => {
 
   beforeEach(async () => {
     gameCode = await createGame();
-    playerId = await createPlayer(gameCode, "Bob");
+    const response = await createPlayer(gameCode, "Bob");
+    playerId = response.playerId;
 
     game = await getGame(gameCode);
     game.rounds.push({
@@ -125,7 +126,8 @@ describe("playersChoosePunchline Service", () => {
   it("handles multiple players choosing cards", async () => {
     await game.save();
 
-    const player2Id = await createPlayer(gameCode, "Fred");
+    const response = await createPlayer(gameCode, "Fred");
+    const player2Id = response.playerId;
     game = await getGame(gameCode);
     const player2 = game.players.id(player2Id);
     if (player2 !== null) {

@@ -31,7 +31,7 @@ export const enterPlayersChooseState = async (
 export const playerChoosePunchlines = async (
   gameCode: Game["gameCode"],
   playerId: Player["id"],
-  punchlines: string[]
+  chosenPunchlines: string[]
 ): Promise<void> => {
   const game = await getGame(gameCode);
   const round = game.rounds.slice(-1)[0];
@@ -40,24 +40,28 @@ export const playerChoosePunchlines = async (
   if (
     round !== undefined &&
     round.state === RoundState.playersChoose &&
-    playerId !== round.host &&
+    round.host !== playerId &&
+    // Check the player has not already chosen punchlines for this round
     !round.punchlinesByPlayer.has(playerId) &&
-    ((round.setup.type === SetupType.pickOne && punchlines.length === 1) ||
-      (round.setup.type === SetupType.pickTwo && punchlines.length === 2) ||
+    // Check the number of punchlines chosen matches the setup type
+    ((round.setup.type === SetupType.pickOne &&
+      chosenPunchlines.length === 1) ||
+      (round.setup.type === SetupType.pickTwo &&
+        chosenPunchlines.length === 2) ||
       (round.setup.type === SetupType.drawTwoPickThree &&
-        punchlines.length === 3)) &&
+        chosenPunchlines.length === 3)) &&
     player !== null &&
-    punchlines.reduce(
-      (contains, punchline) =>
-        contains && player.punchlines.includes(punchline),
-      true
-    )
+    // Player has chosen punchlines in their hand
+    chosenPunchlines.every((punchline) => player.punchlines.includes(punchline))
   ) {
+    // Remove chosen punchlines from players hand
     player.punchlines = player.punchlines.filter(
-      (p) => !punchlines.includes(p)
+      (punchline) => !chosenPunchlines.includes(punchline)
     );
-    round.punchlinesByPlayer.set(playerId, punchlines);
-    game.discardedPunchlines.push(...punchlines);
+    // Discard players chosen punchlines
+    game.discardedPunchlines.push(...chosenPunchlines);
+    // Save players chosen punchlines
+    round.punchlinesByPlayer.set(playerId, chosenPunchlines);
 
     await game.save();
     return;
