@@ -5,6 +5,7 @@ import {
   setMaxPlayers as setMaxPlayersService,
   setRoundLimit as setRoundLimitService,
 } from "../services/game.service";
+import { ServiceError } from "../util";
 
 export default (
   io: Server,
@@ -12,26 +13,36 @@ export default (
 ): {
   updateSetting: (
     setting: "MAX_PLAYERS" | "ROUND_LIMIT",
-    value: number | undefined
+    value: number | undefined,
+    callback: (data: string) => void
   ) => Promise<void>;
 } => {
   const { gameCode } = socket.data;
 
   const updateSetting = async (
     setting: "MAX_PLAYERS" | "ROUND_LIMIT",
-    value: number | undefined
+    value: number | undefined,
+    callback: (data: string) => void
   ): Promise<void> => {
-    if (isHost(socket, gameCode)) {
-      const game = await getGame(gameCode);
-      switch (setting) {
-        case "MAX_PLAYERS":
-          await setMaxPlayersService(game, value);
-          break;
-        case "ROUND_LIMIT":
-          await setRoundLimitService(game, value);
-          break;
+    try {
+      if (isHost(socket, gameCode)) {
+        const game = await getGame(gameCode);
+        switch (setting) {
+          case "MAX_PLAYERS":
+            await setMaxPlayersService(game, value);
+            break;
+          case "ROUND_LIMIT":
+            await setRoundLimitService(game, value);
+            break;
+        }
+        socket.to(gameCode).emit("settings:update", setting, value);
       }
-      socket.emit("settings:update", setting, value);
+    } catch (e) {
+      if (e instanceof ServiceError) {
+        callback(e.message);
+      } else {
+        callback("Server error");
+      }
     }
   };
 

@@ -1,18 +1,18 @@
 import { Server, Socket } from "socket.io";
 import { Game, GameState } from "../../models";
 import * as GameService from "../../services/game.service";
-import {
+import registerGameHandler, {
   emitHost,
   emitNavigate,
   getHost,
   isHost,
   setHost,
 } from "../game.handler";
-import registerGameHandler from "../game.handler";
+import { ErrorType, ServiceError } from "../../util";
 
 describe("Game handler", () => {
   const io = ("io" as unknown) as Server;
-  let socket: Socket = ({
+  const socket: Socket = ({
     data: {
       gameCode: "42069",
       playerId: "12345",
@@ -23,7 +23,8 @@ describe("Game handler", () => {
   let handlers: {
     updateSetting: (
       setting: "MAX_PLAYERS" | "ROUND_LIMIT",
-      value: number | undefined
+      value: number | undefined,
+      callback: (data: string) => void
     ) => Promise<void>;
   };
 
@@ -42,6 +43,10 @@ describe("Game handler", () => {
     let maxPlayerSpy: jest.SpyInstance;
     let roundLimitSpy: jest.SpyInstance;
 
+    let emitMock: jest.Mock;
+
+    let socket: Socket;
+
     beforeEach(() => {
       gameSpy = jest
         .spyOn(GameService, "getGame")
@@ -52,6 +57,20 @@ describe("Game handler", () => {
       roundLimitSpy = jest
         .spyOn(GameService, "setRoundLimit")
         .mockImplementation();
+
+      emitMock = jest.fn();
+      socket = ({
+        data: { gameCode: "42069" },
+        rooms: new Set(["<socket-1>", "42069", "42069:host"]),
+        on: jest.fn(),
+        to: jest.fn(() => {
+          return {
+            emit: emitMock,
+          };
+        }),
+      } as unknown) as Socket;
+
+      handlers = registerGameHandler(io, socket);
     });
 
     afterEach(() => {
@@ -61,42 +80,29 @@ describe("Game handler", () => {
     });
 
     it("does nothing if player is not host", async () => {
-      socket = ({
-        data: { gameCode: "42069" },
-        rooms: new Set(["<socket-1>", "42069"]),
-        on: jest.fn(),
-        emit: jest.fn(),
-      } as unknown) as Socket;
+      socket.rooms.delete("42069:host");
 
-      handlers = registerGameHandler(io, socket);
-
-      await handlers.updateSetting("MAX_PLAYERS", 100);
+      await handlers.updateSetting("MAX_PLAYERS", 100, jest.fn());
 
       expect(maxPlayerSpy).toHaveBeenCalledTimes(0);
       expect(roundLimitSpy).toHaveBeenCalledTimes(0);
 
-      expect(socket.emit).toHaveBeenCalledTimes(0);
+      expect(socket.to).toHaveBeenCalledTimes(0);
+      expect(emitMock).toHaveBeenCalledTimes(0);
     });
 
     it("sets max players if player is host", async () => {
-      socket = ({
-        data: { gameCode: "42069" },
-        rooms: new Set(["<socket-1>", "42069", "42069:host"]),
-        on: jest.fn(),
-        emit: jest.fn(),
-      } as unknown) as Socket;
-
-      handlers = registerGameHandler(io, socket);
-
-      await handlers.updateSetting("MAX_PLAYERS", 30);
+      await handlers.updateSetting("MAX_PLAYERS", 30, jest.fn());
 
       expect(maxPlayerSpy).toHaveBeenCalledTimes(1);
       expect(maxPlayerSpy).toHaveBeenCalledWith({ settings: {} }, 30);
 
       expect(roundLimitSpy).toHaveBeenCalledTimes(0);
 
-      expect(socket.emit).toHaveBeenCalledTimes(1);
-      expect(socket.emit).toHaveBeenCalledWith(
+      expect(socket.to).toHaveBeenCalledTimes(1);
+      expect(socket.to).toHaveBeenCalledWith("42069");
+      expect(emitMock).toHaveBeenCalledTimes(1);
+      expect(emitMock).toHaveBeenCalledWith(
         "settings:update",
         "MAX_PLAYERS",
         30
@@ -104,28 +110,75 @@ describe("Game handler", () => {
     });
 
     it("sets round limit if player is host", async () => {
-      socket = ({
-        data: { gameCode: "42069" },
-        rooms: new Set(["<socket-1>", "42069", "42069:host"]),
-        on: jest.fn(),
-        emit: jest.fn(),
-      } as unknown) as Socket;
-
-      handlers = registerGameHandler(io, socket);
-
-      await handlers.updateSetting("ROUND_LIMIT", 100);
+      await handlers.updateSetting("ROUND_LIMIT", 100, jest.fn());
 
       expect(roundLimitSpy).toHaveBeenCalledTimes(1);
       expect(roundLimitSpy).toHaveBeenCalledWith({ settings: {} }, 100);
 
       expect(maxPlayerSpy).toHaveBeenCalledTimes(0);
 
-      expect(socket.emit).toHaveBeenCalledTimes(1);
-      expect(socket.emit).toHaveBeenCalledWith(
+      expect(socket.to).toHaveBeenCalledTimes(1);
+      expect(socket.to).toHaveBeenCalledWith("42069");
+      expect(emitMock).toHaveBeenCalledTimes(1);
+      expect(emitMock).toHaveBeenCalledWith(
         "settings:update",
         "ROUND_LIMIT",
         100
       );
+    });
+
+    it("calls back with error message if getGame throws ServiceError", async () => {
+      gameSpy.mockRejectedValue(
+        new ServiceError(ErrorType.gameCode, "Game does not exist")
+      );
+
+      const callback = jest.fn();
+      await handlers.updateSetting("MAX_PLAYERS", 100, callback);
+
+      expect(socket.to).toHaveBeenCalledTimes(0);
+      expect(emitMock).toHaveBeenCalledTimes(0);
+
+      expect(callback).toHaveBeenCalledTimes(1);
+      expect(callback).toHaveBeenCalledWith("Game does not exist");
+    });
+
+    it("calls back with error message if getGame throws Error", async () => {
+      gameSpy.mockRejectedValue(new Error("Server error"));
+
+      const callback = jest.fn();
+      await handlers.updateSetting("ROUND_LIMIT", 100, callback);
+
+      expect(socket.to).toHaveBeenCalledTimes(0);
+      expect(emitMock).toHaveBeenCalledTimes(0);
+
+      expect(callback).toHaveBeenCalledTimes(1);
+      expect(callback).toHaveBeenCalledWith("Server error");
+    });
+
+    it("calls back with error message if setMaxPlayersService throws Error", async () => {
+      maxPlayerSpy.mockRejectedValue(new Error("Server error"));
+
+      const callback = jest.fn();
+      await handlers.updateSetting("MAX_PLAYERS", 100, callback);
+
+      expect(socket.to).toHaveBeenCalledTimes(0);
+      expect(emitMock).toHaveBeenCalledTimes(0);
+
+      expect(callback).toHaveBeenCalledTimes(1);
+      expect(callback).toHaveBeenCalledWith("Server error");
+    });
+
+    it("calls back with error message if setRoundLimitService throws Error", async () => {
+      roundLimitSpy.mockRejectedValue(new Error("Server error"));
+
+      const callback = jest.fn();
+      await handlers.updateSetting("ROUND_LIMIT", 100, callback);
+
+      expect(socket.to).toHaveBeenCalledTimes(0);
+      expect(emitMock).toHaveBeenCalledTimes(0);
+
+      expect(callback).toHaveBeenCalledTimes(1);
+      expect(callback).toHaveBeenCalledWith("Server error");
     });
   });
 });
