@@ -96,6 +96,7 @@ export const playerJoin = async (io: Server, socket: Socket): Promise<void> => {
         .filter((player) => !player.new)
         .map((player) => {
           return {
+            id: player.id,
             nickname: player.nickname,
             score: player.score,
           };

@@ -59,9 +59,24 @@ describe("playerJoin handler", () => {
     game = ({
       gameCode: "42069",
       players: [
-        { nickname: "Bob", score: 0, new: false },
-        { nickname: "Fred", score: 0, new: true },
-        { nickname: "James", score: 1, new: false },
+        {
+          id: "abc123",
+          nickname: "Bob",
+          score: 0,
+          new: false,
+        },
+        {
+          id: "def456",
+          nickname: "Fred",
+          score: 0,
+          new: true,
+        },
+        {
+          id: "ghi789",
+          nickname: "James",
+          score: 1,
+          new: false,
+        },
       ],
       settings: {
         roundLimit: 69,
@@ -108,8 +123,16 @@ describe("playerJoin handler", () => {
 
     expect(emitMock).toHaveBeenCalledTimes(2);
     expect(emitMock).toHaveBeenCalledWith("players:initial", [
-      { nickname: "Bob", score: 0 },
-      { nickname: "James", score: 1 },
+      {
+        id: "abc123",
+        nickname: "Bob",
+        score: 0,
+      },
+      {
+        id: "ghi789",
+        nickname: "James",
+        score: 1,
+      },
     ]);
     expect(emitMock).toHaveBeenCalledWith("settings:initial", {
       roundLimit: 69,
