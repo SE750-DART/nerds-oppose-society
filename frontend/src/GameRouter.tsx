@@ -19,7 +19,7 @@ const GameRouter = () => {
     <MemoryRouter>
       <Switch>
         <Route path="/nickname">
-          <NicknamePage />
+          <NicknamePage gameCode={gameCode} />
         </Route>
 
         <Route path="/lobby">

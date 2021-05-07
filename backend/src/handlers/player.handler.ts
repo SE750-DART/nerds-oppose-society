@@ -18,42 +18,54 @@ export default (
   const { gameCode, playerId } = socket.data;
 
   const playerLeaving = async (): Promise<void> => {
-    if (isHost(socket, gameCode)) {
-      const game = await getGame(gameCode);
+    try {
+      if (isHost(socket, gameCode)) {
+        const sockets = ((await io
+          .in(gameCode)
+          .fetchSockets()) as unknown) as Socket[];
 
-      const sockets = ((await io
-        .in(gameCode)
-        .fetchSockets()) as unknown) as Socket[];
+        const game = await getGame(gameCode);
 
-      const playerIdToSocket = new Map<Player["id"], Socket>(
-        sockets.map((socket) => [socket.data.playerId, socket])
-      );
-      const activePlayers = game.players.filter((player) =>
-        playerIdToSocket.has(player.id)
-      );
-
-      if (activePlayers.length > 1) {
-        const leavingHostIndex = activePlayers.findIndex(
-          (player) => player.id === playerId
+        const playerIdToSocket = new Map<Player["id"], Socket>(
+          sockets.map((socket) => [socket.data.playerId, socket])
         );
-        let nextHostIndex = leavingHostIndex + 1;
-        if (nextHostIndex === activePlayers.length) nextHostIndex = 0;
+        const activePlayers = game.players.filter((player) =>
+          playerIdToSocket.has(player.id)
+        );
 
-        const newHost = game.players[nextHostIndex];
-        const newHostSocket = playerIdToSocket.get(newHost.id);
+        if (activePlayers.length > 1) {
+          const leavingHostIndex = activePlayers.findIndex(
+            (player) => player.id === playerId
+          );
+          let nextHostIndex = leavingHostIndex + 1;
+          if (nextHostIndex === activePlayers.length) nextHostIndex = 0;
 
-        if (newHostSocket !== undefined) setHost(io, newHostSocket);
+          const newHost = activePlayers[nextHostIndex];
+          const newHostSocket = playerIdToSocket.get(newHost.id);
+
+          if (newHostSocket !== undefined) setHost(io, newHostSocket);
+        }
       }
-    }
+      /* Empty catch block to keep console clean during testing.
+       * Could use proper logging here such as winston
+       * https://github.com/winstonjs/winston */
+      // eslint-disable-next-line no-empty
+    } catch {}
   };
 
   const playerLeave = async (): Promise<void> => {
-    const game = await getGame(gameCode);
+    try {
+      const game = await getGame(gameCode);
 
-    if (game.state === GameState.lobby) {
-      const player = await removePlayer(game, playerId);
-      socket.to(game.gameCode).emit("players:remove", player.nickname);
-    }
+      if (game.state === GameState.lobby) {
+        const player = await removePlayer(game, playerId);
+        socket.to(game.gameCode).emit("players:remove", player.nickname);
+      }
+      /* Empty catch block to keep console clean during testing.
+       * Could use proper logging here such as winston
+       * https://github.com/winstonjs/winston */
+      // eslint-disable-next-line no-empty
+    } catch (e) {}
   };
 
   socket.on("disconnect", playerLeave);
@@ -66,29 +78,44 @@ export default (
 };
 
 export const playerJoin = async (io: Server, socket: Socket): Promise<void> => {
-  const { gameCode, playerId } = socket.data;
+  try {
+    const { gameCode, playerId } = socket.data;
 
-  const game = await getGame(gameCode);
+    const game = await getGame(gameCode);
 
-  socket.emit(
-    "players:initial",
-    game.players.filter((v) => !v.new)
-  );
-  socket.emit("settings:initial", game.settings);
-  emitNavigate(socket, game);
+    const player = await getPlayer(game.gameCode, playerId, game);
+    if (player.new) {
+      await initialisePlayer(game, playerId);
+      socket.to(game.gameCode).emit("players:add", player.nickname);
+    }
+    socket.data.nickname = player.nickname;
 
-  const player = await getPlayer(game.gameCode, playerId, game);
-  if (player.new) {
-    await initialisePlayer(game, playerId);
-    socket.to(game.gameCode).emit("players:add", player.nickname);
-  }
-  socket.data.nickname = player.nickname;
+    socket.emit(
+      "players:initial",
+      game.players
+        .filter((player) => !player.new)
+        .map((player) => {
+          return {
+            id: player.id,
+            nickname: player.nickname,
+            score: player.score,
+          };
+        })
+    );
+    socket.emit("settings:initial", {
+      roundLimit: game.settings.roundLimit,
+      maxPlayers: game.settings.maxPlayers,
+    });
+    emitNavigate(socket, game);
 
-  const sockets = await io.in(gameCode).fetchSockets();
-  await socket.join(game.gameCode);
-  if (sockets.length === 0) {
-    setHost(io, socket);
-  } else {
-    await emitHost(io, socket);
+    const sockets = await io.in(gameCode).fetchSockets();
+    await socket.join(game.gameCode);
+    if (sockets.length === 0) {
+      setHost(io, socket);
+    } else {
+      await emitHost(io, socket);
+    }
+  } catch (e) {
+    socket.disconnect(true);
   }
 };

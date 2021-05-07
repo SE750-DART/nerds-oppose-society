@@ -2,10 +2,15 @@ import { getGame } from "./game.service";
 import { Game, GameModel, Player } from "../models";
 import { ErrorType, ServiceError } from "../util";
 
+type CreatePlayerResponse = {
+  playerId: Player["id"];
+  token: Player["token"];
+};
+
 export const createPlayer = async (
   gameCode: Game["gameCode"],
   nickname: string
-): Promise<Player["id"]> => {
+): Promise<CreatePlayerResponse> => {
   const game = await getGame(gameCode);
 
   const length = game.players.push({
@@ -19,7 +24,10 @@ export const createPlayer = async (
     throw new ServiceError(ErrorType.playerName, "Duplicate player nickname");
   }
 
-  return player.id;
+  return {
+    playerId: player.id,
+    token: player.token,
+  };
 };
 
 export const removePlayer = async (
@@ -51,13 +59,14 @@ export const getPlayer = async (
   throw new ServiceError(ErrorType.playerName, "Player does not exist");
 };
 
-export const validatePlayerId = async (
+export const authenticatePlayer = async (
   gameCode: Game["gameCode"],
-  playerId: Player["id"]
+  playerId: Player["id"],
+  token: Player["token"]
 ): Promise<boolean> => {
   return await GameModel.exists({
     gameCode: gameCode,
-    players: { $elemMatch: { _id: playerId } },
+    players: { $elemMatch: { _id: playerId, token: token } },
   });
 };
 

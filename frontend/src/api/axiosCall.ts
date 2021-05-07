@@ -42,22 +42,10 @@ const axiosCall = async <Type>({
         error: err.response.data,
       };
     }
-    if (err.request) {
-      /*
-       * The request was made but no response was received, `error.request`
-       * is an instance of XMLHttpRequest in the browser and an instance
-       * of http.ClientRequest in Node.js
-       */
-      return {
-        success: false,
-        status: SERVER_ERROR_500,
-        error: err.request,
-      };
-    }
     return {
       success: false,
       status: SERVER_ERROR_500,
-      error: err.message,
+      error: "Server error, please try again.",
     };
   }
 };

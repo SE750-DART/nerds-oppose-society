@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { GameModel, GameState, SetupType } from "../../models";
 import { RoundState } from "../round.model";
+import { validate as validateUUID } from "uuid";
 
 describe("Game Model", () => {
   let gameCode = 42069;
@@ -130,7 +131,7 @@ describe("Game Model", () => {
     }
   });
 
-  it("inserts a player with new defaulting to true and score defaulting to zero", async () => {
+  it("inserts a player with new defaulting to true, score defaulting to zero and assigning a random UUID", async () => {
     gameData.players = [
       { nickname: "Bob" },
       { nickname: "Fred" },
@@ -146,6 +147,26 @@ describe("Game Model", () => {
     expect(savedGame.players[2].punchlines).toHaveProperty("length", 0);
     expect([...savedGame.players]).toMatchObject(Array(3).fill({ new: true }));
     expect([...savedGame.players]).toMatchObject(Array(3).fill({ score: 0 }));
+    expect(validateUUID(savedGame.players[0].token)).toBeTruthy();
+    expect(validateUUID(savedGame.players[1].token)).toBeTruthy();
+    expect(validateUUID(savedGame.players[2].token)).toBeTruthy();
+  });
+
+  it("throws a ValidationError if a player is added without a nickname", async () => {
+    gameData.players = [
+      { punchlines: ["To get to the other side"] },
+      { punchlines: ["To go to KFC"] },
+    ];
+
+    const game = new GameModel(gameData);
+
+    try {
+      await game.save();
+      fail("nicknames are required");
+    } catch (e) {
+      expect(e).toBeInstanceOf(mongoose.Error.ValidationError);
+      expect(e.errors.players).toBeDefined();
+    }
   });
 
   it("throws a ValidationError if two players with the same nickname are added to the same game", async () => {
@@ -155,6 +176,7 @@ describe("Game Model", () => {
 
     try {
       await game.save();
+      fail("unique nicknames are required");
     } catch (e) {
       expect(e).toBeInstanceOf(mongoose.Error.ValidationError);
       expect(e.errors.players).toBeDefined();

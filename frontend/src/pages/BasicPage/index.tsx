@@ -14,7 +14,7 @@ const BasicPage = ({ path, gameCode }: Props) => {
   const memoryHistory = useHistory();
   const browserHistory = useContext(BrowserHistoryContext);
 
-  const [gameCodeNew, setGameCode] = useState("");
+  const [gameCodeNew, setGameCodeNew] = useState(gameCode);
   const [apiResponse, setApiResponse] = useState("");
 
   const handleCreateGame = async () => {
@@ -22,7 +22,7 @@ const BasicPage = ({ path, gameCode }: Props) => {
     setApiResponse(JSON.stringify(res));
 
     if (res.success && res.data) {
-      setGameCode(res.data);
+      setGameCodeNew(res.data);
     }
   };
 

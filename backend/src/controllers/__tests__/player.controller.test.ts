@@ -36,7 +36,10 @@ describe("Player controller", () => {
 
     const next: any = jest.fn();
 
-    createSpy.mockReturnValue("69eb420cg69");
+    createSpy.mockReturnValue({
+      playerId: "69eb420cg69",
+      token: "62410075-a9f8-4557-acd5-41c6b8bb039e",
+    });
 
     await createPlayer(req, res, next);
 
@@ -46,7 +49,10 @@ describe("Player controller", () => {
     expect(status).toHaveBeenCalledWith(201);
 
     expect(send).toHaveBeenCalledTimes(1);
-    expect(send).toHaveBeenCalledWith("69eb420cg69");
+    expect(send).toHaveBeenCalledWith({
+      playerId: "69eb420cg69",
+      token: "62410075-a9f8-4557-acd5-41c6b8bb039e",
+    });
   });
 
   it("Responds with a 400 if the game code is invalid", async () => {
