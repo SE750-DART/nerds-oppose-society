@@ -7,13 +7,17 @@ describe("auth Handler", () => {
 
   const socket = ({
     handshake: {
-      auth: { gameCode: "42069", playerId: "abc123" },
+      auth: {
+        gameCode: "42069",
+        playerId: "abc123",
+        token: "ac99723a-66be-4ecc-ba40-14dcaa73a441",
+      },
     },
     data: {},
   } as unknown) as Socket;
 
   beforeEach(() => {
-    spy = jest.spyOn(PlayerService, "validatePlayerId");
+    spy = jest.spyOn(PlayerService, "authenticatePlayer");
   });
 
   afterEach(() => {
@@ -28,14 +32,21 @@ describe("auth Handler", () => {
     await Auth(socket, next);
 
     expect(spy).toHaveBeenCalledTimes(1);
-    expect(spy).toHaveBeenCalledWith("42069", "abc123");
+    expect(spy).toHaveBeenCalledWith(
+      "42069",
+      "abc123",
+      "ac99723a-66be-4ecc-ba40-14dcaa73a441"
+    );
     expect(next).toHaveBeenCalledTimes(1);
     expect(next).toHaveBeenCalledWith();
 
-    expect(socket.data).toMatchObject(socket.handshake.auth);
+    expect(socket.data).toMatchObject({
+      gameCode: "42069",
+      playerId: "abc123",
+    });
   });
 
-  it("calls next() with an error with invalid credentials", async () => {
+  it("calls next() with an error if validatePlayerId returns false", async () => {
     spy.mockReturnValue(false);
 
     const next = jest.fn();
@@ -44,5 +55,16 @@ describe("auth Handler", () => {
 
     expect(next).toHaveBeenCalledTimes(1);
     expect(next).toHaveBeenCalledWith(new Error("Invalid player credentials"));
+  });
+
+  it("calls next() with an error if validatePlayerId throws an error", async () => {
+    spy.mockRejectedValue(Error());
+
+    const next = jest.fn();
+
+    await Auth(socket, next);
+
+    expect(next).toHaveBeenCalledTimes(1);
+    expect(next).toHaveBeenCalledWith(Error("Invalid player credentials"));
   });
 });

@@ -9,6 +9,7 @@ import createPlayer from "../../api/createPlayer";
 import socket from "../../socket";
 
 const usePlayerIdState = createPersistedState("playerId");
+const useTokenState = createPersistedState("token");
 
 type Props = {
   gameCode: string;
@@ -17,8 +18,8 @@ type Props = {
 const NicknamePage = ({ gameCode }: Props) => {
   const [nickname, setNickname] = useState("");
   const [error, setError] = useState("");
-
   const [playerId, setPlayerId] = usePlayerIdState("");
+  const [token, setToken] = useTokenState("");
   const browserHistory = useContext(BrowserHistoryContext);
 
   useEffect(() => {
@@ -27,18 +28,18 @@ const NicknamePage = ({ gameCode }: Props) => {
 
       const gameCodeIsValid = res.success;
       if (gameCodeIsValid) {
-        if (playerId) {
+        if (playerId && token) {
           socket.auth = { gameCode, playerId };
           socket.connect();
           // If the connection here, it means the playerId is invalid so need to remove it
           // It reruns this useEffect since playerId changed, but it does not connect again because playerId is falsy
-          socket.on("connect_error", () => setPlayerId(""));
+          socket.on("connect_error", () => setToken(""));
         }
       } else {
         browserHistory.push("/");
       }
     })();
-  }, [gameCode, playerId]);
+  }, [gameCode, token]);
 
   const handleSubmit = async () => {
     const res = await createPlayer({ gameCode, nickname });
@@ -46,7 +47,8 @@ const NicknamePage = ({ gameCode }: Props) => {
     if (res.success) {
       if (res.data) {
         // This triggers the useEffect to connect to socket.io
-        setPlayerId(res.data);
+        setPlayerId(res.data.playerId);
+        setToken(res.data.token);
       } else {
         setError("Unknown Error, please try again");
       }
