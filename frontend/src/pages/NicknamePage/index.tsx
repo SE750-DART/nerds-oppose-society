@@ -29,11 +29,14 @@ const NicknamePage = ({ gameCode }: Props) => {
       const gameCodeIsValid = res.success;
       if (gameCodeIsValid) {
         if (playerId && token) {
-          socket.auth = { gameCode, playerId };
+          socket.auth = { gameCode, playerId, token };
           socket.connect();
           // If the connection here, it means the playerId is invalid so need to remove it
           // It reruns this useEffect since playerId changed, but it does not connect again because playerId is falsy
-          socket.on("connect_error", () => setToken(""));
+          socket.on("connect_error", () => {
+            setPlayerId("");
+            setToken("");
+          });
         }
       } else {
         browserHistory.push("/");
