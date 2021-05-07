@@ -109,6 +109,7 @@ describe("playerJoin handler", () => {
 
   it("broadcasts player to game room if player is new", async () => {
     const player: Player = ({
+      id: "abc123",
       nickname: "Bob",
       new: true,
     } as unknown) as Player;
@@ -152,7 +153,7 @@ describe("playerJoin handler", () => {
     expect(toMock).toHaveBeenCalledWith(game.gameCode);
 
     expect(toEmitMock).toHaveBeenCalledTimes(1);
-    expect(toEmitMock).toHaveBeenCalledWith("players:add", "Bob");
+    expect(toEmitMock).toHaveBeenCalledWith("players:add", "abc123", "Bob");
 
     expect(joinMock).toHaveBeenCalledTimes(1);
     expect(joinMock).toHaveBeenCalledWith(game.gameCode);
@@ -374,7 +375,7 @@ describe("Player handlers", () => {
       gameSpy.mockReturnValue(game);
 
       removeSpy.mockReturnValue({
-        nickname: "Bob",
+        id: "abc123",
       });
 
       await handlers.playerLeave();
@@ -386,7 +387,7 @@ describe("Player handlers", () => {
       expect(toMock).toHaveBeenCalledWith("42069");
 
       expect(emitMock).toHaveBeenCalledTimes(1);
-      expect(emitMock).toHaveBeenCalledWith("players:remove", "Bob");
+      expect(emitMock).toHaveBeenCalledWith("players:remove", "abc123");
     });
 
     it("does not removes player from game if game state is not lobby", async () => {
