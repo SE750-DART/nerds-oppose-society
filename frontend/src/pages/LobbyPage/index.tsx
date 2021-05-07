@@ -1,5 +1,6 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
+import createPersistedState from "use-persisted-state";
 import debounce from "lodash/debounce";
 import Button from "../../components/Button";
 import PlayerList from "../../components/PlayerList";
@@ -8,6 +9,9 @@ import TextField from "../../components/TextField";
 import Dropdown from "../../components/Dropdown";
 import { Settings } from "../../GameRouter";
 import socket from "../../socket";
+import { PlayersContext } from "../../ContextProviders/PlayersContextProvider";
+
+const usePlayerIdState = createPersistedState("playerId");
 
 type Props = {
   gameCode: string;
@@ -16,6 +20,9 @@ type Props = {
 
 const LobbyPage = ({ gameCode, settings }: Props) => {
   const memoryHistory = useHistory();
+  const { host, players } = useContext(PlayersContext);
+  const [playerId] = usePlayerIdState("");
+  const playerIsHost = playerId === host;
 
   const [maxPlayers, setMaxPlayers] = useState("");
   const [roundLimit, setRoundLimit] = useState("");
@@ -23,7 +30,7 @@ const LobbyPage = ({ gameCode, settings }: Props) => {
   useEffect(() => {
     if (settings) {
       if (settings.maxPlayers) {
-        setRoundLimit(settings.maxPlayers.toString());
+        setMaxPlayers(settings.maxPlayers.toString());
       }
       if (settings.roundLimit) {
         setRoundLimit(settings.roundLimit.toString());
@@ -52,7 +59,7 @@ const LobbyPage = ({ gameCode, settings }: Props) => {
 
   const handleChangeRoundLimit = (newRoundLimit: string) => {
     setRoundLimit(newRoundLimit);
-    updateSettings("ROUND_LIMIT", roundLimit);
+    updateSettings("ROUND_LIMIT", newRoundLimit);
   };
 
   const gameCodeNodes: React.ReactNode = (
@@ -80,6 +87,7 @@ const LobbyPage = ({ gameCode, settings }: Props) => {
           textValue={maxPlayers}
           size="small"
           onChangeHandler={handleChangeMaxPlayers}
+          disabled={!playerIsHost}
         />
       </div>
       <div className={styles.setting}>
@@ -88,6 +96,7 @@ const LobbyPage = ({ gameCode, settings }: Props) => {
           textValue={roundLimit}
           size="small"
           onChangeHandler={handleChangeRoundLimit}
+          disabled={!playerIsHost}
         />
       </div>
     </>
@@ -102,7 +111,7 @@ const LobbyPage = ({ gameCode, settings }: Props) => {
       />
       <div className={styles.container}>
         <div className={styles.main}>
-          <h2>Players (X)</h2>
+          <h2>Players ({players.length})</h2>
           <PlayerList gameState="lobby" />
         </div>
 

@@ -1,64 +1,45 @@
-import React from "react";
+import React, { useContext } from "react";
+import createPersistedState from "use-persisted-state";
 import Player from "./Player";
 import styles from "./style.module.css";
+import {
+  Player as PlayerType,
+  PlayersContext,
+} from "../../ContextProviders/PlayersContextProvider";
+
+const usePlayerIdState = createPersistedState("playerId");
 
 interface PlayerListProps {
   gameState: "lobby" | "midround" | "endround" | "endgame";
 }
 
 const PlayerList = ({ gameState }: PlayerListProps) => {
+  const { host, players } = useContext(PlayersContext);
+  const [playerId] = usePlayerIdState("");
+
+  const isHost = (player: PlayerType) => player.id === host;
+  const isMe = (player: PlayerType) => player.id === playerId;
+
   let showScores: boolean = true;
 
   if (gameState === "lobby") {
     showScores = false;
   }
 
-  // TODO: Retrieve players from backend
-  const me: string = "AlexVerkerk";
-
-  const dummyPlayers: {
-    id: string;
-    nickname: string;
-    score: number;
-    host?: boolean;
-  }[] = [
-    {
-      id: "94fb6b63-754d-4674-952a-014e6ac95803",
-      nickname: "DonkeyKongDonkeyKongDonkeyKong",
-      score: 3,
-    },
-    {
-      id: "db3c8cc7-9b01-4490-b5ad-9a5a9c8b6955",
-      nickname: "AlexVerkerk",
-      score: 2,
-    },
-    {
-      id: "f4eeab06-37d9-46ce-afc4-cfedbe327a2c",
-      nickname: "RawiriHohepa",
-      score: 2,
-    },
-    {
-      id: "85d22d4c-3fff-49f3-bdbf-480f08cdab5a",
-      nickname: "TaitFuller",
-      score: 0,
-      host: true,
-    },
-  ];
-
   return (
     <div className={styles.playerlist}>
-      {dummyPlayers.map((player, index) => (
+      {players.map((player, index) => (
         <Player
           key={player.id}
           nickname={player.nickname}
           score={showScores ? player.score : undefined}
-          highlight={me === player.nickname}
+          highlight={isMe(player)}
           divider={
-            index + 1 < dummyPlayers.length && // player not last
-            me !== player.nickname && // player not me
-            dummyPlayers[index + 1].nickname !== me // next player not me
+            index + 1 < players.length && // player not last
+            !isMe(player) && // player not me
+            !isMe(players[index + 1]) // next player not me
           }
-          isHost={player.host}
+          isHost={isHost(player)}
         />
       ))}
     </div>
