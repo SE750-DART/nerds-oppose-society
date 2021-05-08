@@ -1,4 +1,4 @@
-import { Game, GameModel, Player, Settings, Setup } from "../models";
+import { Game, GameModel, GameState, Player, Settings, Setup } from "../models";
 import { digitShortCode, ErrorType, ServiceError, shuffle } from "../util";
 import { PUNCHLINES, SETUPS } from "../resources";
 
@@ -60,6 +60,7 @@ export const initialiseNextRound = async (
       setup: setup,
       host: host,
     });
+    game.state = GameState.active;
 
     await game.save();
     return {

@@ -30,7 +30,7 @@ const GameSchema: Schema = new Schema({
   },
   setups: {
     type: [SetupSchema],
-    validate: (v: Game["setups"]) => Array.isArray(v) && v.length > 0,
+    validate: (v: Game["setups"]) => Array.isArray(v),
   },
   discardedSetups: [SetupSchema],
   punchlines: {

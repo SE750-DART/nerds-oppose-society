@@ -115,7 +115,7 @@ describe("Player controller", () => {
     const next: any = jest.fn();
 
     createSpy.mockImplementation(() => {
-      throw new ServiceError(ErrorType.playerName, "Nickname taken");
+      throw new ServiceError(ErrorType.playerId, "Nickname taken");
     });
 
     await createPlayer(req, res, next);

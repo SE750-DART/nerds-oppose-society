@@ -1,14 +1,18 @@
 import {
   createGame,
   getGame,
+  initialiseNextRound,
   setMaxPlayers,
   setRoundLimit,
   validateGameCode,
 } from "../game.service";
-import { Game, GameModel, Setup } from "../../models";
+import { Game, GameModel, GameState, Setup } from "../../models";
 import mongoose from "mongoose";
 import { PUNCHLINES, SETUPS } from "../../resources";
 import * as Util from "../../util";
+import { createPlayer } from "../player.service";
+import { RoundState } from "../../models/round.model";
+import { ErrorType, ServiceError } from "../../util";
 
 beforeAll(async () => {
   await mongoose.connect(global.__MONGO_URI__, {
@@ -123,5 +127,60 @@ describe("setMaxPlayers Service", () => {
 
     game = await getGame(gameCode);
     expect(game.settings.maxPlayers).toBe(50);
+  });
+});
+
+describe("nextRound Service", () => {
+  let gameCode: string;
+
+  let playerId: string;
+
+  beforeEach(async () => {
+    gameCode = await createGame();
+
+    playerId = (await createPlayer(gameCode, "Bob")).playerId;
+  });
+
+  it("initialises the next round", async () => {
+    let game = await getGame(gameCode);
+    const setup = game.setups.pop();
+    if (setup === undefined) return fail();
+
+    await expect(
+      initialiseNextRound(gameCode, playerId)
+    ).resolves.toMatchObject({
+      roundNumber: 1,
+      setup: {
+        setup: setup.setup,
+        type: setup.type,
+      },
+    });
+
+    game = await getGame(gameCode);
+    expect(game.rounds[0].setup).toMatchObject({
+      setup: setup.setup,
+      type: setup.type,
+    });
+    expect(game.rounds[0].host.toString()).toBe(playerId);
+    expect(game.rounds[0].state).toBe(RoundState.before);
+    expect(game.state).toBe(GameState.active);
+  });
+
+  it("throws error if game does not exist", async () => {
+    await expect(initialiseNextRound("987654321", playerId)).rejects.toThrow(
+      new ServiceError(ErrorType.gameCode, "Game does not exist")
+    );
+  });
+  it("throws error if game has no setups", async () => {
+    const game = await getGame(gameCode);
+
+    while (game.setups.length > 0) {
+      game.setups.pop();
+    }
+    await game.save();
+
+    await expect(initialiseNextRound(gameCode, playerId)).rejects.toThrow(
+      ServiceError
+    );
   });
 });
