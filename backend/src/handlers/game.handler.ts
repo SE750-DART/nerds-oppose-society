@@ -15,13 +15,29 @@ export default (
   io: Server,
   socket: Socket
 ): {
+  startGame: (callback: (data: string) => void) => Promise<void>;
   updateSetting: (
     setting: "MAX_PLAYERS" | "ROUND_LIMIT",
     value: number | undefined,
     callback: (data: string) => void
   ) => Promise<void>;
 } => {
-  const { gameCode } = socket.data;
+  const { gameCode, playerId } = socket.data;
+
+  const startGame = async (callback: (data: string) => void): Promise<void> => {
+    try {
+      if (isHost(socket, gameCode)) {
+        await initialiseNextRound(io, gameCode, playerId);
+      }
+    } catch (e) {
+      console.log(e);
+      if (e instanceof ServiceError) {
+        callback(e.message);
+      } else {
+        callback("Server error");
+      }
+    }
+  };
 
   const updateSetting = async (
     setting: "MAX_PLAYERS" | "ROUND_LIMIT",
@@ -50,9 +66,11 @@ export default (
     }
   };
 
+  socket.on("start", startGame);
   socket.on("settings:update", updateSetting);
 
   return {
+    startGame,
     updateSetting,
   };
 };

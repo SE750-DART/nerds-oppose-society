@@ -165,10 +165,10 @@ export default (
   socket.on("round:host-next", hostNextRound);
 
   return {
-    hostStartRound: hostStartRound,
-    playerChoosePunchlines: playerChoosePunchlines,
-    hostViewPunchline: hostViewPunchline,
-    hostChooseWinner: hostChooseWinner,
-    hostNextRound: hostNextRound,
+    hostStartRound,
+    playerChoosePunchlines,
+    hostViewPunchline,
+    hostChooseWinner,
+    hostNextRound,
   };
 };

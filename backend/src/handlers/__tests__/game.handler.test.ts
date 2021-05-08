@@ -25,6 +25,7 @@ describe("Game handler", () => {
   } as unknown) as Socket;
 
   let handlers: {
+    startGame: (callback: (data: string) => void) => Promise<void>;
     updateSetting: (
       setting: "MAX_PLAYERS" | "ROUND_LIMIT",
       value: number | undefined,
@@ -35,11 +36,122 @@ describe("Game handler", () => {
   it("registers each game handler", async () => {
     handlers = registerGameHandler(io, socket);
 
-    expect(socket.on).toHaveBeenCalledTimes(1);
+    expect(socket.on).toHaveBeenCalledTimes(2);
+    expect(socket.on).toHaveBeenCalledWith("start", handlers.startGame);
     expect(socket.on).toHaveBeenCalledWith(
       "settings:update",
       handlers.updateSetting
     );
+  });
+
+  describe("startGame handler", () => {
+    let initialiseSpy: jest.SpyInstance;
+
+    let callback: jest.Mock;
+
+    let emitMock: jest.Mock;
+    let io: Server;
+    let socket: Socket;
+
+    beforeEach(() => {
+      initialiseSpy = jest.spyOn(GameService, "initialiseNextRound");
+      initialiseSpy.mockReturnValue({
+        roundNumber: 69,
+        setup: {
+          setup: "Why did the chicken cross the road?",
+          type: SetupType.pickOne,
+        },
+      });
+
+      callback = jest.fn();
+
+      emitMock = jest.fn();
+      io = ({
+        to: jest.fn(() => {
+          return {
+            emit: emitMock,
+          };
+        }),
+      } as unknown) as Server;
+
+      socket = ({
+        data: {
+          gameCode: "42069",
+          playerId: "12345",
+        },
+        rooms: new Set(["<socket asdadas>", "42069", "42069:host"]),
+        on: jest.fn(),
+      } as unknown) as Socket;
+
+      handlers = registerGameHandler(io, socket);
+    });
+
+    afterEach(() => {
+      initialiseSpy.mockRestore();
+    });
+
+    it("non-host calls handler and nothing happens", async () => {
+      socket.rooms.delete("42069:host");
+
+      await handlers.startGame(callback);
+
+      expect(callback).toHaveBeenCalledTimes(0);
+      expect(initialiseSpy).toHaveBeenCalledTimes(0);
+
+      expect(io.to).toHaveBeenCalledTimes(0);
+      expect(emitMock).toHaveBeenCalledTimes(0);
+    });
+
+    it("assigns new host and initialises next round", async () => {
+      await handlers.startGame(callback);
+
+      expect(callback).toHaveBeenCalledTimes(0);
+
+      expect(initialiseSpy).toHaveBeenCalledTimes(1);
+
+      expect(io.to).toHaveBeenCalledTimes(3);
+      expect(io.to).toHaveBeenNthCalledWith(1, "42069");
+      expect(io.to).toHaveBeenNthCalledWith(2, "42069");
+      expect(io.to).toHaveBeenNthCalledWith(3, "42069");
+
+      expect(emitMock).toHaveBeenCalledTimes(3);
+      expect(emitMock).toHaveBeenNthCalledWith(1, "round:number", 69);
+      expect(emitMock).toHaveBeenNthCalledWith(2, "round:setup", {
+        setup: "Why did the chicken cross the road?",
+        type: SetupType.pickOne,
+      });
+      expect(emitMock).toHaveBeenNthCalledWith(
+        3,
+        "navigate",
+        RoundState.before
+      );
+    });
+
+    it("catches ServiceError thrown by initialiseNextRound", async () => {
+      initialiseSpy.mockRejectedValue(
+        new ServiceError(ErrorType.gameCode, "Game does not exist")
+      );
+
+      await handlers.startGame(callback);
+
+      expect(callback).toHaveBeenCalledTimes(1);
+      expect(callback).toHaveBeenCalledWith("Game does not exist");
+
+      expect(io.to).toHaveBeenCalledTimes(0);
+      expect(emitMock).toHaveBeenCalledTimes(0);
+    });
+
+    it("catches Error thrown by initialiseNextRound", async () => {
+      initialiseSpy.mockRejectedValue(Error());
+
+      await handlers.startGame(callback);
+
+      expect(callback).toHaveBeenCalledTimes(1);
+      expect(callback).toHaveBeenCalledWith("Server error");
+
+      expect(io.to).toHaveBeenCalledTimes(0);
+      expect(emitMock).toHaveBeenCalledTimes(0);
+    });
   });
 
   describe("updateSetting handler", () => {
