@@ -1,20 +1,66 @@
-import React, { useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
+import createPersistedState from "use-persisted-state";
+import debounce from "lodash/debounce";
 import Button from "../../components/Button";
 import PlayerList from "../../components/PlayerList";
 import styles from "./style.module.css";
 import TextField from "../../components/TextField";
 import Dropdown from "../../components/Dropdown";
+import { Settings } from "../../GameRouter";
+import socket from "../../socket";
+import { PlayersContext } from "../../ContextProviders/PlayersContextProvider";
+
+const usePlayerIdState = createPersistedState("playerId");
 
 type Props = {
   gameCode: string;
+  settings?: Settings;
 };
 
-const LobbyPage = ({ gameCode }: Props) => {
+const LobbyPage = ({ gameCode, settings }: Props) => {
   const memoryHistory = useHistory();
+  const { host, players } = useContext(PlayersContext);
+  const [playerId] = usePlayerIdState("");
+  const playerIsHost = playerId === host;
 
-  const [scoreToWin, setScoreToWin] = useState("");
+  const [maxPlayers, setMaxPlayers] = useState("");
   const [roundLimit, setRoundLimit] = useState("");
+
+  useEffect(() => {
+    if (settings) {
+      if (settings.maxPlayers) {
+        setMaxPlayers(settings.maxPlayers.toString());
+      }
+      if (settings.roundLimit) {
+        setRoundLimit(settings.roundLimit.toString());
+      }
+    }
+  }, [settings]);
+
+  // Wait until 500ms after last input before emitting setting update
+  const msDebounceDelay = 500;
+  const updateSettings = useCallback(
+    debounce((setting: string, value: string) => {
+      if (value.match(/^\d+$/)) {
+        socket.emit("settings:update", {
+          setting,
+          value: parseInt(value, 10),
+        });
+      }
+    }, msDebounceDelay),
+    []
+  );
+
+  const handleChangeMaxPlayers = (newMaxPlayers: string) => {
+    setMaxPlayers(newMaxPlayers);
+    updateSettings("MAX_PLAYERS", newMaxPlayers);
+  };
+
+  const handleChangeRoundLimit = (newRoundLimit: string) => {
+    setRoundLimit(newRoundLimit);
+    updateSettings("ROUND_LIMIT", newRoundLimit);
+  };
 
   const gameCodeNodes: React.ReactNode = (
     <>
@@ -36,11 +82,12 @@ const LobbyPage = ({ gameCode }: Props) => {
   const gameSettingsNodes: React.ReactNode = (
     <>
       <div className={styles.setting}>
-        <p>Score to win</p>
+        <p>Max players</p>
         <TextField
-          textValue={scoreToWin}
+          textValue={maxPlayers}
           size="small"
-          onChangeHandler={setScoreToWin}
+          onChangeHandler={handleChangeMaxPlayers}
+          disabled={!playerIsHost}
         />
       </div>
       <div className={styles.setting}>
@@ -48,7 +95,8 @@ const LobbyPage = ({ gameCode }: Props) => {
         <TextField
           textValue={roundLimit}
           size="small"
-          onChangeHandler={setRoundLimit}
+          onChangeHandler={handleChangeRoundLimit}
+          disabled={!playerIsHost}
         />
       </div>
     </>
@@ -63,7 +111,7 @@ const LobbyPage = ({ gameCode }: Props) => {
       />
       <div className={styles.container}>
         <div className={styles.main}>
-          <h2>Players (X)</h2>
+          <h2>Players ({players.length})</h2>
           <PlayerList gameState="lobby" />
         </div>
 

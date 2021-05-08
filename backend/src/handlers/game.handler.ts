@@ -69,15 +69,15 @@ export const emitHost = async (io: Server, socket: Socket): Promise<void> => {
 export const getHost = async (
   io: Server,
   gameCode: Game["gameCode"]
-): Promise<Player["nickname"] | undefined> => {
+): Promise<Player["id"] | undefined> => {
   const sockets = await io.in(`${gameCode}:host`).fetchSockets();
-  return sockets[0]?.data.nickname;
+  return sockets[0]?.data.playerId;
 };
 
 export const setHost = (io: Server, socket: Socket): void => {
   const { gameCode } = socket.data;
   socket.join(`${gameCode}:host`);
-  io.to(gameCode).emit("host", socket.data.nickname);
+  io.to(gameCode).emit("host", socket.data.playerId);
 };
 
 export const isHost = (socket: Socket, gameCode: Game["gameCode"]): boolean => {

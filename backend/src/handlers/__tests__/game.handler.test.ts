@@ -241,12 +241,12 @@ describe("emitHost handler", () => {
   });
 
   it("emits the current host", async () => {
-    fetchMock.mockReturnValue([{ data: { nickname: "Bob" } }]);
+    fetchMock.mockReturnValue([{ data: { playerId: "abc123" } }]);
 
     await emitHost(io, socket);
 
     expect(socket.emit).toHaveBeenCalledTimes(1);
-    expect(socket.emit).toHaveBeenCalledWith("host", "Bob");
+    expect(socket.emit).toHaveBeenCalledWith("host", "abc123");
   });
 });
 
@@ -269,12 +269,12 @@ describe("getHost handler", () => {
     } as unknown) as Server;
   });
 
-  it("gets the nickname of the current host", async () => {
-    fetchMock.mockReturnValue([{ data: { nickname: "Jim" } }]);
+  it("gets the id of the current host", async () => {
+    fetchMock.mockReturnValue([{ data: { playerId: "abc123" } }]);
 
     const host = await getHost(io, "69420");
 
-    expect(host).toBe("Jim");
+    expect(host).toBe("abc123");
 
     expect(inMock).toHaveBeenCalledTimes(1);
     expect(inMock).toHaveBeenCalledWith("69420:host");
@@ -320,6 +320,7 @@ describe("setHost handler", () => {
     socket = ({
       data: {
         gameCode: "42069",
+        playerId: "abc123",
         nickname: "Bob",
       },
       join: joinMock,
@@ -336,7 +337,7 @@ describe("setHost handler", () => {
     expect(toMock).toHaveBeenCalledWith("42069");
 
     expect(emitMock).toHaveBeenCalledTimes(1);
-    expect(emitMock).toHaveBeenCalledWith("host", "Bob");
+    expect(emitMock).toHaveBeenCalledWith("host", "abc123");
   });
 });
 
