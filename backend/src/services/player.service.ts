@@ -19,7 +19,7 @@ export const createPlayer = async (
   try {
     await game.save();
   } catch (e) {
-    throw new ServiceError(ErrorType.playerId, "Duplicate player nickname");
+    throw new ServiceError(ErrorType.playerName, "Duplicate player nickname");
   }
 
   return {
