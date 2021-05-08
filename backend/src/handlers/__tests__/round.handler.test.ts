@@ -15,6 +15,7 @@ describe("Round handler", () => {
   } as unknown) as Socket;
 
   let handlers: {
+    hostStartRound: (callback: (data: string) => void) => void;
     playerChoosePunchlines: (
       punchlines: string[],
       callback: (data: string) => void
@@ -32,7 +33,11 @@ describe("Round handler", () => {
   it("registers each round handler", async () => {
     handlers = registerRoundHandler(io, socket);
 
-    expect(socket.on).toHaveBeenCalledTimes(3);
+    expect(socket.on).toHaveBeenCalledTimes(4);
+    expect(socket.on).toHaveBeenCalledWith(
+      "round:host-begin",
+      handlers.hostStartRound
+    );
     expect(socket.on).toHaveBeenCalledWith(
       "round:player-choose",
       handlers.playerChoosePunchlines
@@ -45,6 +50,99 @@ describe("Round handler", () => {
       "round:host-choose",
       handlers.hostChooseWinner
     );
+  });
+
+  describe("hostStartRound handler", () => {
+    let stateSpy: jest.SpyInstance;
+
+    let callback: jest.Mock;
+    let emitMock: jest.Mock;
+
+    let io: Server;
+    let socket: Socket;
+
+    beforeEach(() => {
+      stateSpy = jest.spyOn(RoundService, "enterPlayersChooseState");
+      stateSpy.mockImplementation();
+
+      callback = jest.fn();
+
+      emitMock = jest.fn();
+      io = ({
+        to: jest.fn(() => {
+          return {
+            emit: emitMock,
+          };
+        }),
+      } as unknown) as Server;
+
+      socket = ({
+        data: {
+          gameCode: "42069",
+          playerId: "abc123",
+        },
+        rooms: new Set(["<socket afjshfiou>", "42069", "42069:host"]),
+        on: jest.fn(),
+      } as unknown) as Socket;
+
+      handlers = registerRoundHandler(io, socket);
+    });
+
+    afterEach(() => {
+      stateSpy.mockRestore();
+    });
+
+    it("starts the next round", async () => {
+      await handlers.hostStartRound(callback);
+
+      expect(callback).toHaveBeenCalledTimes(0);
+
+      expect(io.to).toHaveBeenCalledTimes(1);
+      expect(io.to).toHaveBeenCalledWith("42069");
+
+      expect(emitMock).toHaveBeenCalledTimes(1);
+      expect(emitMock).toHaveBeenCalledWith(
+        "navigate",
+        RoundState.playersChoose
+      );
+    });
+
+    it("non-host calls handler and nothing happens", async () => {
+      socket.rooms.delete("42069:host");
+
+      await handlers.hostStartRound(callback);
+
+      expect(callback).toHaveBeenCalledTimes(0);
+
+      expect(io.to).toHaveBeenCalledTimes(0);
+      expect(emitMock).toHaveBeenCalledTimes(0);
+    });
+
+    it("catches ServiceError thrown by playerChoosePunchlines service", async () => {
+      stateSpy.mockRejectedValue(
+        new ServiceError(ErrorType.gameCode, "Game does not exist")
+      );
+
+      await handlers.hostStartRound(callback);
+
+      expect(callback).toHaveBeenCalledTimes(1);
+      expect(callback).toHaveBeenCalledWith("Game does not exist");
+
+      expect(io.to).toHaveBeenCalledTimes(0);
+      expect(emitMock).toHaveBeenCalledTimes(0);
+    });
+
+    it("catches generic Error thrown by playerChoosePunchlines service", async () => {
+      stateSpy.mockRejectedValue(Error());
+
+      await handlers.hostStartRound(callback);
+
+      expect(callback).toHaveBeenCalledTimes(1);
+      expect(callback).toHaveBeenCalledWith("Server error");
+
+      expect(io.to).toHaveBeenCalledTimes(0);
+      expect(emitMock).toHaveBeenCalledTimes(0);
+    });
   });
 
   describe("handlePlayerChoosePunchlines handler", () => {

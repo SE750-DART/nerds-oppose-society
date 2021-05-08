@@ -3,6 +3,7 @@ import {
   enterHostChoosesState,
   playerChoosePunchlines as playerChoosePunchlinesService,
   hostChooseWinner as hostChooseWinnerService,
+  enterPlayersChooseState,
 } from "../services/round.service";
 import { ServiceError } from "../util";
 import { RoundState } from "../models/round.model";
@@ -12,6 +13,7 @@ export default (
   io: Server,
   socket: Socket
 ): {
+  hostStartRound: (callback: (data: string) => void) => void;
   playerChoosePunchlines: (
     punchlines: string[],
     callback: (data: string) => void
@@ -23,6 +25,24 @@ export default (
   ) => Promise<void>;
 } => {
   const { gameCode, playerId } = socket.data;
+
+  const hostStartRound = async (callback: (data: string) => void) => {
+    try {
+      if (isHost(socket, gameCode)) {
+        await enterPlayersChooseState(gameCode, playerId);
+
+        // TODO Allocate player cards
+
+        io.to(gameCode).emit("navigate", RoundState.playersChoose);
+      }
+    } catch (e) {
+      if (e instanceof ServiceError) {
+        callback(e.message);
+      } else {
+        callback("Server error");
+      }
+    }
+  };
 
   const playerChoosePunchlines = async (
     punchlines: string[],
@@ -96,11 +116,13 @@ export default (
     }
   };
 
+  socket.on("round:host-begin", hostStartRound);
   socket.on("round:player-choose", playerChoosePunchlines);
   socket.on("round:host-view", hostViewPunchline);
   socket.on("round:host-choose", hostChooseWinner);
 
   return {
+    hostStartRound: hostStartRound,
     playerChoosePunchlines: playerChoosePunchlines,
     hostViewPunchline: hostViewPunchline,
     hostChooseWinner: hostChooseWinner,
