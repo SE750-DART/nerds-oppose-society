@@ -205,10 +205,10 @@ describe("allocateCards Service", () => {
       playerId,
       punchlineLimit
     );
-    expect(newCards.length).toBe(punchlineLimit);
+    expect(newCards.length).toBe(10);
   });
 
-  it("should successfully only allocate 1 punchline on a normal setup if a player has 8 punchlines", async () => {
+  it("should successfully only allocate 1 punchline on a normal setup if a player has 9 punchlines", async () => {
     const game: Game = await getGame(gameCode);
     const player: Player = await getPlayer(gameCode, playerId, game);
     const punchlines = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
@@ -222,7 +222,7 @@ describe("allocateCards Service", () => {
     expect(newCards.length).toBe(1);
   });
 
-  it("should successfully only allocate 1 punchline on a play 2 setup if a player has 8 punchlines", async () => {
+  it("should successfully only allocate 2 punchlines on a play 2 setup if a player has 8 punchlines", async () => {
     const game: Game = await getGame(gameCode);
     const player: Player = await getPlayer(gameCode, playerId, game);
     const punchlines = ["1", "2", "3", "4", "5", "6", "7", "8"];
@@ -242,11 +242,7 @@ describe("allocateCards Service", () => {
     const punchlines = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
     player.punchlines.push(...punchlines);
     await game.save();
-    const newCards = await allocatePlayerPunchlines(
-      game,
-      playerId,
-      punchlineLimit + 2
-    );
+    const newCards = await allocatePlayerPunchlines(game, playerId, 12);
     expect(newCards.length).toBe(3);
   });
 
