@@ -2,15 +2,13 @@ import { getGame } from "./game.service";
 import { Game, GameModel, Player } from "../models";
 import { ErrorType, ServiceError } from "../util";
 
-type CreatePlayerResponse = {
-  playerId: Player["id"];
-  token: Player["token"];
-};
-
 export const createPlayer = async (
   gameCode: Game["gameCode"],
   nickname: string
-): Promise<CreatePlayerResponse> => {
+): Promise<{
+  playerId: Player["id"];
+  token: Player["token"];
+}> => {
   const game = await getGame(gameCode);
 
   const length = game.players.push({
