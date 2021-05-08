@@ -272,7 +272,7 @@ describe("playerJoin handler", () => {
     fetchMock.mockReturnValue(["1"]);
 
     getPlayerSpy.mockRejectedValue(
-      new ServiceError(ErrorType.playerName, "Player does not exist")
+      new ServiceError(ErrorType.playerId, "Player does not exist")
     );
     socket.disconnect = jest.fn();
 
@@ -292,7 +292,7 @@ describe("playerJoin handler", () => {
     fetchMock.mockReturnValue(["1"]);
 
     initialisePlayerSpy.mockRejectedValue(
-      new ServiceError(ErrorType.playerName, "Player does not exist")
+      new ServiceError(ErrorType.playerId, "Player does not exist")
     );
     socket.disconnect = jest.fn();
 
@@ -432,7 +432,7 @@ describe("Player handlers", () => {
       gameSpy.mockReturnValue(game);
 
       removeSpy.mockRejectedValue(
-        new ServiceError(ErrorType.playerName, "Player does not exist")
+        new ServiceError(ErrorType.playerId, "Player does not exist")
       );
 
       await handlers.playerLeave();
