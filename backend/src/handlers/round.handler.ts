@@ -7,7 +7,14 @@ import {
 } from "../services/round.service";
 import { ServiceError } from "../util";
 import { RoundState } from "../models/round.model";
-import { assignNextHost, initialiseNextRound, isHost } from "./game.handler";
+import {
+  assignNextHost,
+  getActivePlayers,
+  initialiseNextRound,
+  isHost,
+} from "./game.handler";
+import { allocatePlayerPunchlines } from "../services/game.service";
+import { SetupType } from "../models";
 
 export default (
   io: Server,
@@ -32,7 +39,24 @@ export default (
       if (isHost(socket, gameCode)) {
         await enterPlayersChooseState(gameCode, playerId);
 
-        // TODO Allocate player cards
+        const {
+          activePlayers,
+          game,
+          socketsByPlayerId,
+        } = await getActivePlayers(io, gameCode);
+
+        const round = game.rounds.slice(-1)[0];
+        if (round === undefined) throw Error();
+
+        activePlayers.map(async (player) => {
+          const punchlines = await allocatePlayerPunchlines(
+            game,
+            player.id,
+            round.setup.type === SetupType.drawTwoPickThree ? 12 : 10
+          );
+          socketsByPlayerId.get(player.id)?.emit("punchlines:add", punchlines);
+        });
+        await game.save();
 
         io.to(gameCode).emit("navigate", RoundState.playersChoose);
       }

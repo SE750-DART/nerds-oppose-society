@@ -1,9 +1,11 @@
 import { Server, Socket } from "socket.io";
 import registerRoundHandler from "../round.handler";
 import * as GameHandler from "../game.handler";
+import * as GameService from "../../services/game.service";
 import * as RoundService from "../../services/round.service";
 import { RoundState } from "../../models/round.model";
 import { ErrorType, ServiceError } from "../../util";
+import { Game, Player, SetupType } from "../../models";
 
 describe("Round handler", () => {
   const io = ("io" as unknown) as Server;
@@ -60,16 +62,26 @@ describe("Round handler", () => {
 
   describe("hostStartRound handler", () => {
     let stateSpy: jest.SpyInstance;
+    let activeSpy: jest.SpyInstance;
+    let allocateSpy: jest.SpyInstance;
 
     let callback: jest.Mock;
     let emitMock: jest.Mock;
+    let socketMock: jest.Mock;
+    let saveMock: jest.Mock;
 
     let io: Server;
     let socket: Socket;
 
+    let activePlayers: Player[];
+    let game: Game;
+    let socketsByPlayerId: Map<Player["id"], Socket>;
+
     beforeEach(() => {
       stateSpy = jest.spyOn(RoundService, "enterPlayersChooseState");
       stateSpy.mockImplementation();
+      activeSpy = jest.spyOn(GameHandler, "getActivePlayers");
+      allocateSpy = jest.spyOn(GameService, "allocatePlayerPunchlines");
 
       callback = jest.fn();
 
@@ -82,6 +94,9 @@ describe("Round handler", () => {
         }),
       } as unknown) as Server;
 
+      socketMock = jest.fn();
+      saveMock = jest.fn();
+
       socket = ({
         data: {
           gameCode: "42069",
@@ -92,16 +107,52 @@ describe("Round handler", () => {
       } as unknown) as Socket;
 
       handlers = registerRoundHandler(io, socket);
+
+      activePlayers = ([{ id: "1" }] as unknown) as Player[];
+      game = ({
+        gameId: "42069",
+        save: saveMock,
+        rounds: [
+          {
+            setup: {
+              type: SetupType.pickOne,
+            },
+          },
+        ],
+      } as unknown) as Game;
+      socketsByPlayerId = (new Map([
+        ["1", { emit: socketMock }],
+      ]) as unknown) as Map<Player["id"], Socket>;
+
+      activeSpy.mockReturnValue({
+        activePlayers: activePlayers,
+        game: game,
+        socketsByPlayerId: socketsByPlayerId,
+      });
+      allocateSpy.mockReturnValue(["To get to the other side", "To go to KFC"]);
     });
 
     afterEach(() => {
       stateSpy.mockRestore();
+      activeSpy.mockRestore();
+      allocateSpy.mockRestore();
     });
 
     it("starts the next round", async () => {
       await handlers.hostStartRound(callback);
 
       expect(callback).toHaveBeenCalledTimes(0);
+
+      expect(activeSpy).toHaveBeenCalledTimes(1);
+      expect(allocateSpy).toHaveBeenCalledTimes(1);
+      expect(allocateSpy).toHaveBeenCalledWith(game, "1", 10);
+
+      expect(socketMock).toHaveBeenCalledTimes(1);
+      expect(socketMock).toHaveBeenCalledWith("punchlines:add", [
+        "To get to the other side",
+        "To go to KFC",
+      ]);
+      expect(saveMock).toHaveBeenCalledTimes(1);
 
       expect(io.to).toHaveBeenCalledTimes(1);
       expect(io.to).toHaveBeenCalledWith("42069");
@@ -111,6 +162,59 @@ describe("Round handler", () => {
         "navigate",
         RoundState.playersChoose
       );
+    });
+
+    it("calls allocatePlayerPunchlines with limit of 12 for setup type of DRAW_TWO_PICK_THREE", async () => {
+      game.rounds[0].setup.type = SetupType.drawTwoPickThree;
+
+      await handlers.hostStartRound(callback);
+
+      expect(callback).toHaveBeenCalledTimes(0);
+
+      expect(activeSpy).toHaveBeenCalledTimes(1);
+      expect(allocateSpy).toHaveBeenCalledTimes(1);
+      expect(allocateSpy).toHaveBeenCalledWith(game, "1", 12);
+
+      expect(socketMock).toHaveBeenCalledTimes(1);
+      expect(socketMock).toHaveBeenCalledWith("punchlines:add", [
+        "To get to the other side",
+        "To go to KFC",
+      ]);
+      expect(saveMock).toHaveBeenCalledTimes(1);
+
+      expect(io.to).toHaveBeenCalledTimes(1);
+      expect(io.to).toHaveBeenCalledWith("42069");
+
+      expect(emitMock).toHaveBeenCalledTimes(1);
+      expect(emitMock).toHaveBeenCalledWith(
+        "navigate",
+        RoundState.playersChoose
+      );
+    });
+
+    it("throws error due to round not being defined", async () => {
+      game = ({
+        rounds: [],
+      } as unknown) as Game;
+      activeSpy.mockReturnValue({
+        activePlayers: activePlayers,
+        game: game,
+        socketsByPlayerId: socketsByPlayerId,
+      });
+
+      await handlers.hostStartRound(callback);
+
+      expect(callback).toHaveBeenCalledTimes(1);
+      expect(callback).toHaveBeenCalledWith("Server error");
+
+      expect(activeSpy).toHaveBeenCalledTimes(1);
+
+      expect(allocateSpy).toHaveBeenCalledTimes(0);
+      expect(socketMock).toHaveBeenCalledTimes(0);
+      expect(saveMock).toHaveBeenCalledTimes(0);
+
+      expect(io.to).toHaveBeenCalledTimes(0);
+      expect(emitMock).toHaveBeenCalledTimes(0);
     });
 
     it("non-host calls handler and nothing happens", async () => {

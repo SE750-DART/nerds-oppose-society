@@ -638,14 +638,14 @@ describe("getActivePlayers handler", () => {
     gameSpy.mockRestore();
   });
 
-  it("does not assign new host if player is host but the only player", async () => {
+  it("returns activePlayers, game and socketsByPlayerId", async () => {
     fetchMock.mockReturnValue([
       { data: { playerId: "1" } },
       { data: { playerId: "2" } },
       { data: { playerId: "4" } },
     ]);
 
-    const { activePlayers, game, socketByPlayerId } = await getActivePlayers(
+    const { activePlayers, game, socketsByPlayerId } = await getActivePlayers(
       io,
       "42069"
     );
@@ -667,7 +667,7 @@ describe("getActivePlayers handler", () => {
       ])
     );
     expect(game).toBe(gameSpy.mock.results[0].value);
-    expect(socketByPlayerId).toEqual(
+    expect(socketsByPlayerId).toEqual(
       new Map([
         ["1", { data: { playerId: "1" } }],
         ["2", { data: { playerId: "2" } }],

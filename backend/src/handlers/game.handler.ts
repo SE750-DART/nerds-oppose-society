@@ -109,7 +109,7 @@ export const assignNextHost = async (
 ): Promise<Player["id"]> => {
   const { gameCode, playerId } = socket.data;
   if (isHost(socket, gameCode)) {
-    const { activePlayers, socketByPlayerId } = await getActivePlayers(
+    const { activePlayers, socketsByPlayerId } = await getActivePlayers(
       io,
       gameCode
     );
@@ -122,7 +122,7 @@ export const assignNextHost = async (
       if (nextHostIndex === activePlayers.length) nextHostIndex = 0;
 
       const newHost = activePlayers[nextHostIndex];
-      const newHostSocket = socketByPlayerId.get(newHost.id);
+      const newHostSocket = socketsByPlayerId.get(newHost.id);
 
       if (newHostSocket !== undefined) setHost(io, newHostSocket);
       return newHost.id;
@@ -136,7 +136,7 @@ export const getActivePlayers = async (
 ): Promise<{
   activePlayers: Player[];
   game: Game;
-  socketByPlayerId: Map<Player["id"], Socket>;
+  socketsByPlayerId: Map<Player["id"], Socket>;
 }> => {
   const sockets = ((await io
     .in(gameCode)
@@ -152,6 +152,6 @@ export const getActivePlayers = async (
       socketByPlayerId.has(player.id)
     ),
     game: game,
-    socketByPlayerId: socketByPlayerId,
+    socketsByPlayerId: socketByPlayerId,
   };
 };
