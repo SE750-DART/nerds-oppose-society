@@ -5,6 +5,8 @@ import {
   initialiseNextRound,
   setMaxPlayers,
   setRoundLimit,
+  shuffleDiscardedPunchlines,
+  shuffleDiscardedSetups,
   validateGameCode,
 } from "../game.service";
 import { Game, GameModel, GameState, Player, Setup } from "../../models";
@@ -14,6 +16,7 @@ import * as Util from "../../util";
 import { ErrorType, ServiceError } from "../../util";
 import { createPlayer, getPlayer } from "../player.service";
 import { RoundState } from "../../models/round.model";
+import { MaxPlayers } from "../../models/game.model";
 
 beforeAll(async () => {
   await mongoose.connect(global.__MONGO_URI__, {
@@ -265,5 +268,74 @@ describe("allocateCards Service", () => {
     ).rejects.toThrow(
       new ServiceError(ErrorType.playerId, "Player does not exist")
     );
+  });
+});
+
+describe("reshuffle setups/punchlines service", () => {
+  let gameCode: string;
+  let setupNum: number;
+  let punchlineNum: number;
+
+  beforeEach(async () => {
+    gameCode = await createGame();
+    const game: Game = await getGame(gameCode);
+    setupNum = game.setups.length;
+    punchlineNum = game.punchlines.length;
+  });
+
+  describe("setups shuffling", () => {
+    it("should shuffle the deck when there are only 5 setups left", async () => {
+      const game: Game = await getGame(gameCode);
+      const setups = game.setups;
+      const discards = setups.splice(5, setups.length);
+      console.log(`discards: ${discards.length}, setups:${setups.length}`);
+      game.setups = setups;
+      game.discardedSetups.push(...discards);
+      await game.save();
+      await shuffleDiscardedSetups(game);
+      expect(game.setups.length).toBe(setupNum);
+      expect(game.discardedSetups.length).toBe(0);
+    });
+    it("should not shuffle the deck when there are more than 5 setups left", async () => {
+      const game: Game = await getGame(gameCode);
+      const setups = game.setups;
+      const discards = setups.splice(6, setups.length);
+      console.log(`discards: ${discards.length}, setups:${setups.length}`);
+      game.setups = setups;
+      game.discardedSetups.push(...discards);
+      await game.save();
+      await shuffleDiscardedSetups(game);
+      expect(game.setups.length).toBe(6);
+      expect(game.discardedSetups.length).toBe(setupNum - 6);
+    });
+  });
+
+  describe("punchlines shuffling", () => {
+    it(`should shuffle the punchlines when there are less than ${MaxPlayers} punchlines left`, async () => {
+      const game: Game = await getGame(gameCode);
+      const punchlines = game.punchlines;
+      const discards = punchlines.splice(MaxPlayers, punchlines.length);
+      console.log(`discards: ${discards.length}, setups:${punchlines.length}`);
+      game.punchlines = punchlines;
+      game.discardedPunchlines.push(...discards);
+      await game.save();
+      await shuffleDiscardedPunchlines(game);
+      expect(game.punchlines.length).toBe(punchlineNum);
+      expect(game.discardedPunchlines.length).toBe(0);
+    });
+    it(`should not shuffle punchlines when there are more than ${MaxPlayers} punchlines`, async () => {
+      const game: Game = await getGame(gameCode);
+      const punchlines = game.punchlines;
+      const discards = punchlines.splice(MaxPlayers + 1, punchlines.length);
+      console.log(`discards: ${discards.length}, setups:${punchlines.length}`);
+      game.punchlines = punchlines;
+      game.discardedPunchlines.push(...discards);
+      await game.save();
+      await shuffleDiscardedPunchlines(game);
+      expect(game.punchlines.length).toBe(MaxPlayers + 1);
+      expect(game.discardedPunchlines.length).toBe(
+        punchlineNum - MaxPlayers - 1
+      );
+    });
   });
 });

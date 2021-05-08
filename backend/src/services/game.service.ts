@@ -1,6 +1,7 @@
 import { Game, GameModel, GameState, Player, Settings, Setup } from "../models";
 import { digitShortCode, ErrorType, ServiceError, shuffle } from "../util";
 import { PUNCHLINES, SETUPS } from "../resources";
+import { MaxPlayers } from "../models/game.model";
 
 export const createGame = async (): Promise<Game["gameCode"]> => {
   const gameCode: number = digitShortCode(6);
@@ -71,6 +72,8 @@ export const initialiseNextRound = async (
   throw new ServiceError(ErrorType.invalidAction, "Could not start round");
 };
 
+/* TODO - rewrite this to pop from the punchlines and pushes onto player if less than max but if greater than max, then remove the excess
+ */
 export const allocatePlayerPunchlines = async (
   game: Game,
   playerId: Player["id"],
@@ -96,4 +99,20 @@ export const allocatePlayerPunchlines = async (
   }
 
   throw new ServiceError(ErrorType.playerId, "Player does not exist");
+};
+export const shuffleDiscardedSetups = async (game: Game): Promise<void> => {
+  if (game.setups.length <= 5) {
+    const discardedSetups: Setup[] = game.discardedSetups;
+    game.setups.push(...shuffle(discardedSetups));
+    game.discardedSetups.remove(...discardedSetups);
+    await game.save();
+  }
+};
+export const shuffleDiscardedPunchlines = async (game: Game): Promise<void> => {
+  if (game.punchlines.length <= MaxPlayers) {
+    const discardedPunchlines: string[] = game.discardedPunchlines;
+    game.punchlines.push(...shuffle(discardedPunchlines));
+    game.discardedPunchlines = [];
+    await game.save();
+  }
 };
