@@ -7,7 +7,8 @@ import {
 } from "../services/round.service";
 import { ServiceError } from "../util";
 import { RoundState } from "../models/round.model";
-import { isHost } from "./game.handler";
+import { assignNextHost, isHost } from "./game.handler";
+import { initialiseNextRound } from "../services/game.service";
 
 export default (
   io: Server,
@@ -23,6 +24,7 @@ export default (
     winningPunchline: string[],
     callback: (data: string) => void
   ) => Promise<void>;
+  hostNextRound: (callback: (data: string) => void) => void;
 } => {
   const { gameCode, playerId } = socket.data;
 
@@ -116,15 +118,40 @@ export default (
     }
   };
 
+  const hostNextRound = async (callback: (data: string) => void) => {
+    try {
+      if (isHost(socket, gameCode)) {
+        const newHostId = await assignNextHost(io, socket);
+
+        const { roundNumber, setup } = await initialiseNextRound(
+          gameCode,
+          newHostId
+        );
+
+        io.to(gameCode).emit("round:number", roundNumber);
+        io.to(gameCode).emit("round:setup", setup);
+        io.to(gameCode).emit("navigate", RoundState.before);
+      }
+    } catch (e) {
+      if (e instanceof ServiceError) {
+        callback(e.message);
+      } else {
+        callback("Server error");
+      }
+    }
+  };
+
   socket.on("round:host-begin", hostStartRound);
   socket.on("round:player-choose", playerChoosePunchlines);
   socket.on("round:host-view", hostViewPunchline);
   socket.on("round:host-choose", hostChooseWinner);
+  socket.on("round:host-next", hostNextRound);
 
   return {
     hostStartRound: hostStartRound,
     playerChoosePunchlines: playerChoosePunchlines,
     hostViewPunchline: hostViewPunchline,
     hostChooseWinner: hostChooseWinner,
+    hostNextRound: hostNextRound,
   };
 };
