@@ -45,7 +45,7 @@ const NicknamePage = ({ gameCode }: Props) => {
     return () => {
       mounted = false;
     };
-  }, [gameCode, playerId, token]);
+  }, [gameCode, token]);
 
   const handleSubmit = async () => {
     const res = await createPlayer({ gameCode, nickname });
