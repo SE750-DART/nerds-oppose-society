@@ -30,12 +30,12 @@ const GameSchema: Schema = new Schema({
   },
   setups: {
     type: [SetupSchema],
-    validate: (v: Game["setups"]) => Array.isArray(v) && v.length > 0,
+    validate: (v: Game["setups"]) => Array.isArray(v),
   },
   discardedSetups: [SetupSchema],
   punchlines: {
     type: [String],
-    validate: (v: Game["punchlines"]) => Array.isArray(v) && v.length > 0,
+    validate: (v: Game["punchlines"]) => Array.isArray(v),
   },
   discardedPunchlines: [String],
   players: {
