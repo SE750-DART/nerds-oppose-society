@@ -85,7 +85,7 @@ const GameRouter = () => {
       socket.off("settings:update", handleSettingsUpdate);
       socket.off("connect_error", handleConnectError);
     };
-  });
+  }, [socket]);
 
   return (
     <Router history={memoryHistory}>
