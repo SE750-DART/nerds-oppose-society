@@ -40,6 +40,6 @@ describe("Connection handler", () => {
     expect(roundSpy).toHaveBeenCalledWith("io", "socket");
 
     expect(joinSpy).toHaveBeenCalledTimes(1);
-    expect(joinSpy).toHaveBeenCalledWith(io, socket);
+    expect(joinSpy).toHaveBeenCalledWith("io", "socket");
   });
 });

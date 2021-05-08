@@ -5,6 +5,7 @@ import {
 } from "../services/round.service";
 import { ServiceError } from "../util";
 import { RoundState } from "../models/round.model";
+import { isHost } from "./game.handler";
 
 export default (
   io: Server,
@@ -14,6 +15,7 @@ export default (
     punchlines: string[],
     callback: (data: string) => void
   ) => Promise<void>;
+  hostViewPunchline: (index: number) => void;
 } => {
   const { gameCode, playerId } = socket.data;
 
@@ -49,9 +51,17 @@ export default (
     }
   };
 
+  const hostViewPunchline = (index: number) => {
+    if (isHost(socket, gameCode)) {
+      socket.to(gameCode).emit("round:host-view", index);
+    }
+  };
+
   socket.on("round:player-choose", playerChoosePunchlines);
+  socket.on("round:host-view", hostViewPunchline);
 
   return {
     playerChoosePunchlines: playerChoosePunchlines,
+    hostViewPunchline: hostViewPunchline,
   };
 };

@@ -19,15 +19,20 @@ describe("Round handler", () => {
       punchlines: string[],
       callback: (data: string) => void
     ) => Promise<void>;
+    hostViewPunchline: (index: number) => void;
   };
 
   it("registers each round handler", async () => {
     handlers = registerRoundHandler(io, socket);
 
-    expect(socket.on).toHaveBeenCalledTimes(1);
+    expect(socket.on).toHaveBeenCalledTimes(2);
     expect(socket.on).toHaveBeenCalledWith(
       "round:player-choose",
       handlers.playerChoosePunchlines
+    );
+    expect(socket.on).toHaveBeenCalledWith(
+      "round:host-view",
+      handlers.hostViewPunchline
     );
   });
 
@@ -187,6 +192,61 @@ describe("Round handler", () => {
       expect(socketMock).toHaveBeenCalledTimes(0);
       expect(io.to).toHaveBeenCalledTimes(0);
       expect(ioMock).toHaveBeenCalledTimes(0);
+    });
+  });
+
+  describe("hostViewPunchline handler", () => {
+    let emitMock: jest.Mock;
+
+    let io: Server;
+    let socket: Socket;
+
+    beforeEach(() => {
+      emitMock = jest.fn();
+      socket = ({
+        data: {
+          gameCode: "42069",
+          playerId: "abc123",
+        },
+        rooms: new Set(["<socket cqwdqcd>", "42069", "42069:host"]),
+        on: jest.fn(),
+        to: jest.fn(() => {
+          return {
+            emit: emitMock,
+          };
+        }),
+      } as unknown) as Socket;
+
+      handlers = registerRoundHandler(io, socket);
+    });
+
+    it("host views punchline 0 and transmits index to clients", () => {
+      handlers.hostViewPunchline(0);
+
+      expect(socket.to).toHaveBeenCalledTimes(1);
+      expect(socket.to).toHaveBeenCalledWith("42069");
+
+      expect(emitMock).toHaveBeenCalledTimes(1);
+      expect(emitMock).toHaveBeenCalledWith("round:host-view", 0);
+    });
+
+    it("host views punchline 5 and transmits index to clients", () => {
+      handlers.hostViewPunchline(5);
+
+      expect(socket.to).toHaveBeenCalledTimes(1);
+      expect(socket.to).toHaveBeenCalledWith("42069");
+
+      expect(emitMock).toHaveBeenCalledTimes(1);
+      expect(emitMock).toHaveBeenCalledWith("round:host-view", 5);
+    });
+
+    it("non-host calls socket and nothing happens", () => {
+      socket.rooms.delete("42069:host");
+
+      handlers.hostViewPunchline(0);
+
+      expect(socket.to).toHaveBeenCalledTimes(0);
+      expect(emitMock).toHaveBeenCalledTimes(0);
     });
   });
 });
