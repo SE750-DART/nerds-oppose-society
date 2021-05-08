@@ -20,7 +20,7 @@ const LobbyPage = () => {
       {isTheMan ? (
         <Button
           text="Leshgo!"
-          handleOnClick={() => memoryHistory.push("/selectPunchline")}
+          handleOnClick={() => memoryHistory.push("/submitPunchline")}
         />
       ) : (
         <p className={styles.waitingMsg}>Waiting on X to start the round...</p>
