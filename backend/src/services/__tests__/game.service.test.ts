@@ -172,6 +172,7 @@ describe("nextRound Service", () => {
       new ServiceError(ErrorType.gameCode, "Game does not exist")
     );
   });
+
   it("throws error if game has no setups", async () => {
     const game = await getGame(gameCode);
 
@@ -206,6 +207,7 @@ describe("allocateCards Service", () => {
     );
     expect(newCards.length).toBe(punchlineLimit);
   });
+
   it("should successfully only allocate 1 punchline on a normal setup if a player has 8 punchlines", async () => {
     const game: Game = await getGame(gameCode);
     const player: Player = await getPlayer(gameCode, playerId, game);
@@ -219,6 +221,7 @@ describe("allocateCards Service", () => {
     );
     expect(newCards.length).toBe(1);
   });
+
   it("should successfully only allocate 1 punchline on a play 2 setup if a player has 8 punchlines", async () => {
     const game: Game = await getGame(gameCode);
     const player: Player = await getPlayer(gameCode, playerId, game);
@@ -232,6 +235,7 @@ describe("allocateCards Service", () => {
     );
     expect(newCards.length).toBe(2);
   });
+
   it("should successfully only allocate 3 punchlines on a draw 2 pick 3 setup with a normal hand", async () => {
     const game: Game = await getGame(gameCode);
     const player: Player = await getPlayer(gameCode, playerId, game);
@@ -245,6 +249,7 @@ describe("allocateCards Service", () => {
     );
     expect(newCards.length).toBe(3);
   });
+
   it("should throw ServiceError if there are no punchlines left in the deck", async () => {
     let game: Game = await getGame(gameCode);
     while (game.punchlines.length > 0) {
@@ -256,6 +261,7 @@ describe("allocateCards Service", () => {
       new ServiceError(ErrorType.gameError, "No punchlines in deck")
     );
   });
+
   it("should throw ServiceError if player id is incorrect", async () => {
     const game: Game = await getGame(gameCode);
     await expect(
