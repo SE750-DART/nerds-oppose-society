@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import { Router, Switch, Route, Redirect, useParams } from "react-router-dom";
 import { createMemoryHistory } from "history";
 import createPersistedState from "use-persisted-state";
@@ -28,58 +28,60 @@ const GameRouter = () => {
   );
   const [settings, setSettings] = useState<Settings>();
 
-  const handleUpdateSettings = ({
-    setting,
-    value,
-  }: {
-    setting: string;
-    value: number;
-  }) => {
-    let key;
-    switch (setting) {
-      case "MAX_PLAYERS":
-        key = "maxPlayers";
-        break;
-      case "ROUND_LIMIT":
-        key = "roundLimit";
-        break;
-      default:
-        key = null;
-    }
-    if (key !== null) {
-      const newSettings = {
-        ...settings,
-        [key]: value,
-      };
-      setSettings(newSettings);
-    }
-  };
-
-  const clearPlayerCredentials = () => {
+  const handleNavigate = useCallback(memoryHistory.push, []);
+  const handleHost = useCallback(setHost, []);
+  const handlePlayersInitial = useCallback(initialisePlayers, []);
+  const handlePlayersAdd = useCallback(addPlayer, []);
+  const handlePlayersRemove = useCallback(removePlayer, []);
+  const handleSettingsInitial = useCallback(setSettings, []);
+  const handleSettingsUpdate = useCallback(
+    ({ setting, value }: { setting: string; value: number }) => {
+      let key;
+      switch (setting) {
+        case "MAX_PLAYERS":
+          key = "maxPlayers";
+          break;
+        case "ROUND_LIMIT":
+          key = "roundLimit";
+          break;
+        default:
+          key = null;
+      }
+      if (key !== null) {
+        const newSettings = {
+          ...settings,
+          [key]: value,
+        };
+        setSettings(newSettings);
+      }
+    },
+    []
+  );
+  const handleConnectError = useCallback(() => {
     setPlayerId("");
     setToken("");
-  };
+  }, []);
 
   useEffect(() => {
-    socket.on("navigate", memoryHistory.push);
-    socket.on("host", setHost);
-    socket.on("players:initial", initialisePlayers);
-    socket.on("players:add", addPlayer);
-    socket.on("players:remove", removePlayer);
-    socket.on("settings:initial", setSettings);
-    socket.on("settings:update", handleUpdateSettings);
-    socket.on("connect_error", clearPlayerCredentials);
+    socket.on("navigate", handleNavigate);
+    socket.on("host", handleHost);
+    socket.on("players:initial", handlePlayersInitial);
+    socket.on("players:add", handlePlayersAdd);
+    socket.on("players:remove", handlePlayersRemove);
+    socket.on("settings:initial", handleSettingsInitial);
+    socket.on("settings:update", handleSettingsUpdate);
+    socket.on("connect_error", handleConnectError);
 
     return () => {
       // Remove event handlers when component is unmounted to prevent buildup of identical handlers
-      socket.off("navigate", memoryHistory.push);
-      socket.off("host", setHost);
-      socket.off("players:initial", initialisePlayers);
-      socket.off("players:add", addPlayer);
-      socket.off("players:remove", removePlayer);
-      socket.off("settings:initial", setSettings);
-      socket.off("settings:update", handleUpdateSettings);
-      socket.off("connect_error", clearPlayerCredentials);
+      socket.off("navigate", handleNavigate);
+      socket.off("host", handleHost);
+      socket.off("players:initial", handlePlayersInitial);
+      socket.off("players:add", handlePlayersAdd);
+      socket.off("players:remove", handlePlayersRemove);
+      socket.off("settings:initial", handleSettingsInitial);
+      socket.off("settings:update", handleSettingsUpdate);
+      socket.off("connect_error", handleConnectError);
     };
   });
 
