@@ -23,7 +23,7 @@ const Dropdown = ({ aboveDrop, belowDrop, header }: DropdownProps) => {
       <div className={styles.main}>
         {aboveDrop}
         <div className={styles.heading}>
-          <h4>{header}</h4>
+          <p>{header}</p>
           <IconButton
             icon={faAngleDown}
             handleOnClick={toggleDrop}
