@@ -5,6 +5,7 @@ import registerGameHandler, {
   assignNextHost,
   emitHost,
   emitNavigate,
+  getActivePlayers,
   getHost,
   initialiseNextRound,
   isHost,
@@ -601,5 +602,77 @@ describe("assignNextHost handler", () => {
 
     expect(io.to).toHaveBeenCalledTimes(0);
     expect(emitMock).toHaveBeenCalledTimes(0);
+  });
+});
+
+describe("getActivePlayers handler", () => {
+  let io: Server;
+
+  let fetchMock: jest.Mock;
+
+  let gameSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    fetchMock = jest.fn();
+    io = ({
+      in: jest.fn(() => {
+        return {
+          fetchSockets: fetchMock,
+        };
+      }),
+    } as unknown) as Server;
+
+    gameSpy = jest.spyOn(GameService, "getGame");
+    gameSpy.mockReturnValue({
+      players: [
+        { id: "1", nickname: "Bob" },
+        { id: "2", nickname: "Fred" },
+        { id: "3", nickname: "Dave" },
+        { id: "4", nickname: "Jim" },
+        { id: "5", nickname: "Steve" },
+      ],
+    });
+  });
+
+  afterEach(() => {
+    gameSpy.mockRestore();
+  });
+
+  it("does not assign new host if player is host but the only player", async () => {
+    fetchMock.mockReturnValue([
+      { data: { playerId: "1" } },
+      { data: { playerId: "2" } },
+      { data: { playerId: "4" } },
+    ]);
+
+    const { activePlayers, game, socketByPlayerId } = await getActivePlayers(
+      io,
+      "42069"
+    );
+
+    expect(gameSpy).toHaveBeenCalledTimes(1);
+
+    expect(io.in).toHaveBeenCalledTimes(1);
+    expect(io.in).toHaveBeenCalledWith("42069");
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    expect(activePlayers).toEqual(
+      expect.arrayContaining([
+        { id: "1", nickname: "Bob" },
+        {
+          id: "2",
+          nickname: "Fred",
+        },
+        { id: "4", nickname: "Jim" },
+      ])
+    );
+    expect(game).toBe(gameSpy.mock.results[0].value);
+    expect(socketByPlayerId).toEqual(
+      new Map([
+        ["1", { data: { playerId: "1" } }],
+        ["2", { data: { playerId: "2" } }],
+        ["4", { data: { playerId: "4" } }],
+      ])
+    );
   });
 });
