@@ -28,12 +28,14 @@ const GameRouter = () => {
   );
   const [settings, setSettings] = useState<Settings>();
 
-  const handleNavigate = useCallback(memoryHistory.push, []);
-  const handleHost = useCallback(setHost, []);
-  const handlePlayersInitial = useCallback(initialisePlayers, []);
-  const handlePlayersAdd = useCallback(addPlayer, []);
-  const handlePlayersRemove = useCallback(removePlayer, []);
-  const handleSettingsInitial = useCallback(setSettings, []);
+  const handleNavigate = useCallback(memoryHistory.push, [memoryHistory.push]);
+  const handleHost = useCallback(setHost, [setHost]);
+  const handlePlayersInitial = useCallback(initialisePlayers, [
+    initialisePlayers,
+  ]);
+  const handlePlayersAdd = useCallback(addPlayer, [addPlayer]);
+  const handlePlayersRemove = useCallback(removePlayer, [removePlayer]);
+  const handleSettingsInitial = useCallback(setSettings, [setSettings]);
   const handleSettingsUpdate = useCallback(
     ({ setting, value }: { setting: string; value: number }) => {
       let key;
@@ -55,12 +57,12 @@ const GameRouter = () => {
         setSettings(newSettings);
       }
     },
-    []
+    [setSettings]
   );
   const handleConnectError = useCallback(() => {
     setPlayerId("");
     setToken("");
-  }, []);
+  }, [setPlayerId, setToken]);
 
   useEffect(() => {
     socket.on("navigate", handleNavigate);
