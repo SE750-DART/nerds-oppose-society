@@ -6,6 +6,7 @@ import socket from "./socket";
 import { PlayersContext } from "./ContextProviders/PlayersContextProvider";
 import {
   BasicPage,
+  EndRoundPage,
   NicknamePage,
   LobbyPage,
   SelectPunchlinePage,
@@ -118,7 +119,7 @@ const GameRouter = () => {
         </Route>
 
         <Route path="/postRound">
-          <BasicPage gameCode={gameCode} path="postRound" />
+          <EndRoundPage />
         </Route>
 
         <Route path="/scoreboard">
