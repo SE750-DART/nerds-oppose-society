@@ -1,4 +1,5 @@
 import {
+  allocatePlayerPunchlines,
   createGame,
   getGame,
   initialiseNextRound,
@@ -6,13 +7,13 @@ import {
   setRoundLimit,
   validateGameCode,
 } from "../game.service";
-import { Game, GameModel, GameState, Setup } from "../../models";
+import { Game, GameModel, GameState, Player, Setup } from "../../models";
 import mongoose from "mongoose";
 import { PUNCHLINES, SETUPS } from "../../resources";
 import * as Util from "../../util";
-import { createPlayer } from "../player.service";
-import { RoundState } from "../../models/round.model";
 import { ErrorType, ServiceError } from "../../util";
+import { createPlayer, getPlayer } from "../player.service";
+import { RoundState } from "../../models/round.model";
 
 beforeAll(async () => {
   await mongoose.connect(global.__MONGO_URI__, {
@@ -180,7 +181,87 @@ describe("nextRound Service", () => {
     await game.save();
 
     await expect(initialiseNextRound(gameCode, playerId)).rejects.toThrow(
-      ServiceError
+      new ServiceError(ErrorType.invalidAction, "Could not start round")
+    );
+  });
+});
+
+describe("allocateCards Service", () => {
+  let gameCode: string;
+  let playerId: Player["id"];
+  let punchlineLimit: number;
+
+  beforeEach(async () => {
+    gameCode = await createGame();
+    playerId = (await createPlayer(gameCode, "bob")).playerId;
+    punchlineLimit = 10;
+  });
+
+  it("should successfully allocate new cards at the start of the game", async () => {
+    const game: Game = await getGame(gameCode);
+    const newCards = await allocatePlayerPunchlines(
+      game,
+      playerId,
+      punchlineLimit
+    );
+    expect(newCards.length).toBe(punchlineLimit);
+  });
+  it("should successfully only allocate 1 punchline on a normal setup if a player has 8 punchlines", async () => {
+    const game: Game = await getGame(gameCode);
+    const player: Player = await getPlayer(gameCode, playerId, game);
+    const punchlines = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
+    player.punchlines.push(...punchlines);
+    await game.save();
+    const newCards = await allocatePlayerPunchlines(
+      game,
+      playerId,
+      punchlineLimit
+    );
+    expect(newCards.length).toBe(1);
+  });
+  it("should successfully only allocate 1 punchline on a play 2 setup if a player has 8 punchlines", async () => {
+    const game: Game = await getGame(gameCode);
+    const player: Player = await getPlayer(gameCode, playerId, game);
+    const punchlines = ["1", "2", "3", "4", "5", "6", "7", "8"];
+    player.punchlines.push(...punchlines);
+    await game.save();
+    const newCards = await allocatePlayerPunchlines(
+      game,
+      playerId,
+      punchlineLimit
+    );
+    expect(newCards.length).toBe(2);
+  });
+  it("should successfully only allocate 3 punchlines on a draw 2 pick 3 setup with a normal hand", async () => {
+    const game: Game = await getGame(gameCode);
+    const player: Player = await getPlayer(gameCode, playerId, game);
+    const punchlines = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
+    player.punchlines.push(...punchlines);
+    await game.save();
+    const newCards = await allocatePlayerPunchlines(
+      game,
+      playerId,
+      punchlineLimit + 2
+    );
+    expect(newCards.length).toBe(3);
+  });
+  it("should throw ServiceError if there are no punchlines left in the deck", async () => {
+    let game: Game = await getGame(gameCode);
+    while (game.punchlines.length > 0) {
+      game.punchlines.pop();
+    }
+    await game.save();
+    game = await getGame(gameCode);
+    await expect(allocatePlayerPunchlines(game, playerId)).rejects.toThrow(
+      new ServiceError(ErrorType.gameError, "No punchlines in deck")
+    );
+  });
+  it("should throw ServiceError if player id is incorrect", async () => {
+    const game: Game = await getGame(gameCode);
+    await expect(
+      allocatePlayerPunchlines(game, "12345", punchlineLimit)
+    ).rejects.toThrow(
+      new ServiceError(ErrorType.playerId, "Player does not exist")
     );
   });
 });

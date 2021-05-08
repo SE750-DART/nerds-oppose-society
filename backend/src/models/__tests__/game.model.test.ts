@@ -117,13 +117,8 @@ describe("Game Model", () => {
 
     const game = new GameModel(gameData);
 
-    try {
-      await game.save();
-      fail("punchlines are required");
-    } catch (e) {
-      expect(e).toBeInstanceOf(mongoose.Error.ValidationError);
-      expect(e.errors.punchlines).toBeDefined();
-    }
+    await game.save();
+    expect(game.punchlines).toBeDefined();
   });
 
   it("inserts a player with new defaulting to true, score defaulting to zero and assigning a random UUID", async () => {
