@@ -361,16 +361,16 @@ describe("Round handler", () => {
       expect(io.to).toHaveBeenNthCalledWith(2, "42069");
 
       expect(ioMock).toHaveBeenCalledTimes(2);
-      expect(ioMock).toHaveBeenNthCalledWith(
-        1,
-        "navigate",
-        RoundState.hostChooses
-      );
-      expect(ioMock).toHaveBeenNthCalledWith(2, "round:chosen-punchlines", [
+      expect(ioMock).toHaveBeenNthCalledWith(1, "round:chosen-punchlines", [
         ["To get to the other side"],
         ["To avoid bad jokes"],
         ["To go to KFC"],
       ]);
+      expect(ioMock).toHaveBeenNthCalledWith(
+        2,
+        "navigate",
+        RoundState.hostChooses
+      );
     });
 
     it("catches ServiceError thrown by playerChoosePunchlines service", async () => {
@@ -540,13 +540,15 @@ describe("Round handler", () => {
 
       expect(callback).toHaveBeenCalledTimes(0);
 
-      expect(io.to).toHaveBeenCalledTimes(1);
-      expect(io.to).toHaveBeenCalledWith("42069");
+      expect(io.to).toHaveBeenCalledTimes(2);
+      expect(io.to).toHaveBeenNthCalledWith(1, "42069");
+      expect(io.to).toHaveBeenNthCalledWith(2, "42069");
 
-      expect(emitMock).toHaveBeenCalledTimes(1);
-      expect(emitMock).toHaveBeenCalledWith("round:winner", "def456", [
+      expect(emitMock).toHaveBeenCalledTimes(2);
+      expect(emitMock).toHaveBeenNthCalledWith(1, "round:winner", "def456", [
         "To go to KFC",
       ]);
+      expect(emitMock).toHaveBeenNthCalledWith(2, "navigate", RoundState.after);
     });
 
     it("hostChooseWinner service throws ServiceError", async () => {

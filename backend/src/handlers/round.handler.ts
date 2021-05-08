@@ -89,8 +89,8 @@ export default (
       if (sockets.every((socket) => chosenPlayers.has(socket.data.playerId))) {
         const chosenPunchlines = await enterHostChoosesState(gameCode);
 
-        io.to(gameCode).emit("navigate", RoundState.hostChooses);
         io.to(gameCode).emit("round:chosen-punchlines", chosenPunchlines);
+        io.to(gameCode).emit("navigate", RoundState.hostChooses);
       }
     } catch (e) {
       if (e instanceof ServiceError) {
@@ -131,6 +131,7 @@ export default (
           winningPlayerId,
           winningPunchlines
         );
+        io.to(gameCode).emit("navigate", RoundState.after);
       }
     } catch (e) {
       if (e instanceof ServiceError) {
