@@ -1,5 +1,7 @@
-export { default as GameModel, Game, GameState } from "./game.model";
-export { Player } from "./player.model";
-export { Round } from "./round.model";
-export { Settings } from "./settings.model";
-export { Setup, SetupType } from "./setup.model";
+export { default as GameModel, GameState } from "./game.model";
+export type { Game } from "./game.model";
+export type { Player } from "./player.model";
+export type { Round } from "./round.model";
+export type { Settings } from "./settings.model";
+export { SetupType } from "./setup.model";
+export type { Setup } from "./setup.model";
