@@ -4,7 +4,7 @@ import { SettingsSchema, Settings } from "./settings.model";
 import { PlayerSchema, Player } from "./player.model";
 import { RoundSchema, Round } from "./round.model";
 
-export const MaxPlayers = 50;
+export const MaxPlayers = 40;
 
 export enum GameState {
   lobby = "LOBBY",

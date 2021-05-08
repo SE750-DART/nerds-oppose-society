@@ -1,4 +1,12 @@
-import { Game, GameModel, GameState, Player, Settings, Setup } from "../models";
+import {
+  Game,
+  GameModel,
+  GameState,
+  Player,
+  Settings,
+  Setup,
+  SetupType,
+} from "../models";
 import { digitShortCode, ErrorType, ServiceError, shuffle } from "../util";
 import { PUNCHLINES, SETUPS } from "../resources";
 import { MaxPlayers } from "../models/game.model";
@@ -108,10 +116,34 @@ export const shuffleDiscardedSetups = async (game: Game): Promise<void> => {
     await game.save();
   }
 };
-export const shuffleDiscardedPunchlines = async (game: Game): Promise<void> => {
-  if (game.punchlines.length <= MaxPlayers) {
+export const shuffleDiscardedPunchlines = async (
+  game: Game,
+  maxPlayers: number = MaxPlayers
+): Promise<void> => {
+  // Get the next card in the setups pile
+  const topSetup: Setup = game.setups[game.setups.length - 1];
+
+  // Get the size of the first player in the lobby (should be representative of all players)
+  const handSize = game.players[0].punchlines.length;
+
+  let requiredDeckSize: number;
+  // In the case of draw2pick 3, players may need to draw up to 4 cards
+  if (topSetup.type === SetupType.drawTwoPickThree) {
+    requiredDeckSize = handSize === 8 ? 4 * maxPlayers : 3 * maxPlayers;
+  } else {
+    requiredDeckSize = handSize === 8 ? 2 * maxPlayers : maxPlayers;
+  }
+
+  console.log(`req deck: ${requiredDeckSize}`);
+  if (game.punchlines.length <= requiredDeckSize) {
     const discardedPunchlines: string[] = game.discardedPunchlines;
-    game.punchlines.push(...shuffle(discardedPunchlines));
+    const shuffledDiscard: string[] = shuffle(discardedPunchlines);
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    game.punchlines.push({
+      $each: shuffledDiscard,
+      $position: 0,
+    });
     game.discardedPunchlines = [];
     await game.save();
   }
