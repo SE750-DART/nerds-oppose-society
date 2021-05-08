@@ -3,18 +3,20 @@ import { useHistory } from "react-router-dom";
 import styles from "./style.module.css";
 import Dropdown from "../../components/Dropdown";
 import PlayerList from "../../components/PlayerList";
-// import ProgressBar from "../../components/ProgressBar";
+import ProgressBar from "../../components/ProgressBar";
 import PunchlineCard from "../../components/PunchlineCard";
 import Button from "../../components/Button";
+
+interface Punchline {
+  id: string;
+  text: string;
+  blurred: boolean;
+}
 
 const SelectPunchlinePage = () => {
   const memoryHistory = useHistory();
 
-  const dummyPunchlines: {
-    id: string;
-    text: string;
-    blurred: boolean;
-  }[] = [
+  const dummyPunchlines: Punchline[] = [
     {
       id: "1",
       text: "Me time.",
@@ -70,20 +72,55 @@ const SelectPunchlinePage = () => {
   ];
 
   const [punchlineSelected, setPunchlineSelected] = useState("");
-  const [punchlines, setPunchlines] = useState(dummyPunchlines);
+  const [punchlines, setPunchlines] = useState([] as Punchline[]);
+  const [waiting, setWaiting] = useState(true);
   const [finishedReading, setFinishedReading] = useState(false);
 
+  // This is only to demonstrate the full user flow without the backend connected.
+  // This can be a little buggy sometimes (usually when you edit something and hot reload),
+  // but I figure it won't matter because it's about to be deleted.
+  // TODO: Load in the real punchlines via setPunchlines from the backend and delete this hook
   useEffect(() => {
-    if (punchlines.every((value) => !value.blurred)) {
-      setFinishedReading(true);
+    const loadPunchlines = setTimeout(
+      () => setPunchlines(dummyPunchlines),
+      3000
+    );
+    return () => clearTimeout(loadPunchlines);
+  }, [waiting]);
+
+  useEffect(() => {
+    if (punchlines.length !== 0) {
+      setWaiting(false);
+
+      if (punchlines.every((value) => !value.blurred)) {
+        setFinishedReading(true);
+      }
     }
   }, [punchlines]);
 
-  const selectPunchline = (text: string) => {
-    if (text === punchlineSelected) {
-      setPunchlineSelected("");
+  let promptMessage: string = "";
+  if (waiting) {
+    promptMessage = "Waiting on players to choose punchlines...";
+  } else if (!finishedReading) {
+    promptMessage = "Tap to reveal each punchline!";
+  } else {
+    promptMessage = "Choose the best punchline!";
+  }
+
+  const selectPunchline = (text: string, index: number) => {
+    if (finishedReading) {
+      if (text === punchlineSelected) {
+        setPunchlineSelected("");
+      } else {
+        setPunchlineSelected(text);
+      }
     } else {
-      setPunchlineSelected(text);
+      const newPunchlines = [...punchlines];
+      newPunchlines[index] = {
+        ...punchlines[index],
+        blurred: false,
+      };
+      setPunchlines(newPunchlines);
     }
   };
 
@@ -97,38 +134,33 @@ const SelectPunchlinePage = () => {
 
       <div className={styles.container}>
         <p className={styles.theManText}>You are The Man™.</p>
-        <p style={{ fontStyle: `italic` }}>Tap to reveal each punchline!</p>
+        <p style={{ fontStyle: `italic` }}>{promptMessage}</p>
 
-        <div className={styles.setup}>
+        <div
+          className={`${styles.setup} ${
+            waiting ? styles.setupNoGradient : undefined
+          }`}
+        >
           <h5>The Setup:</h5>
           <h2>Daddy, why is mommy crying?</h2>
         </div>
 
-        {/* <div className={styles.progress}> */}
-        {/*   <ProgressBar playersChosen={0} playersTotal={0} /> */}
-        {/* </div> */}
+        {waiting && <ProgressBar playersChosen={0} playersTotal={0} />}
 
-        {punchlines.map((punchline, index) => (
-          <PunchlineCard
-            key={punchline.id}
-            text={punchline.text}
-            handleOnClick={() => {
-              if (finishedReading) {
-                selectPunchline(punchline.text);
-              } else {
-                const newPunchlines = [...punchlines];
-                newPunchlines[index] = { ...punchlines[index], blurred: false };
-                setPunchlines(newPunchlines);
+        {punchlines &&
+          punchlines.map((punchline, index) => (
+            <PunchlineCard
+              key={punchline.id}
+              text={punchline.text}
+              handleOnClick={() => selectPunchline(punchline.text, index)}
+              status={
+                finishedReading && punchline.text === punchlineSelected
+                  ? "selected"
+                  : "available"
               }
-            }}
-            status={
-              finishedReading && punchline.text === punchlineSelected
-                ? "selected"
-                : "available"
-            }
-            blurred={punchline.blurred}
-          />
-        ))}
+              blurred={punchline.blurred}
+            />
+          ))}
       </div>
 
       {punchlineSelected && (

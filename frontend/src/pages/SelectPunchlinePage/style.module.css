@@ -21,8 +21,9 @@
   z-index: 5;
 }
 
-.progress {
-  margin: -12px 0 24px 0;
+.setupNoGradient {
+  background: #bbdefb;
+  padding-bottom: 24px;
 }
 
 .theManText {
