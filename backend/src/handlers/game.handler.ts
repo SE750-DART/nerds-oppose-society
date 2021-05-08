@@ -1,11 +1,15 @@
 import { Game, GameState, Player } from "../models";
 import { Server, Socket } from "socket.io";
-import { getGame } from "../services/game.service";
+import {
+  getGame,
+  initialiseNextRound as initialiseNextRoundService,
+} from "../services/game.service";
 import {
   setMaxPlayers as setMaxPlayersService,
   setRoundLimit as setRoundLimitService,
 } from "../services/game.service";
 import { ServiceError } from "../util";
+import { RoundState } from "../models/round.model";
 
 export default (
   io: Server,
@@ -51,6 +55,21 @@ export default (
   return {
     updateSetting,
   };
+};
+
+export const initialiseNextRound = async (
+  io: Server,
+  gameCode: Game["gameCode"],
+  hostId: Player["id"]
+): Promise<void> => {
+  const { roundNumber, setup } = await initialiseNextRoundService(
+    gameCode,
+    hostId
+  );
+
+  io.to(gameCode).emit("round:number", roundNumber);
+  io.to(gameCode).emit("round:setup", setup);
+  io.to(gameCode).emit("navigate", RoundState.before);
 };
 
 export const emitNavigate = (socket: Socket, game: Game): void => {

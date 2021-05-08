@@ -1,15 +1,17 @@
 import { Server, Socket } from "socket.io";
-import { Game, GameState } from "../../models";
+import { Game, GameState, SetupType } from "../../models";
 import * as GameService from "../../services/game.service";
 import registerGameHandler, {
   assignNextHost,
   emitHost,
   emitNavigate,
   getHost,
+  initialiseNextRound,
   isHost,
   setHost,
 } from "../game.handler";
 import { ErrorType, ServiceError } from "../../util";
+import { RoundState } from "../../models/round.model";
 
 describe("Game handler", () => {
   const io = ("io" as unknown) as Server;
@@ -181,6 +183,56 @@ describe("Game handler", () => {
       expect(callback).toHaveBeenCalledTimes(1);
       expect(callback).toHaveBeenCalledWith("Server error");
     });
+  });
+});
+
+describe("intialiseNextRound handler", () => {
+  let initialiseSpy: jest.SpyInstance;
+
+  let emitMock: jest.Mock;
+
+  let io: Server;
+
+  beforeEach(() => {
+    initialiseSpy = jest.spyOn(GameService, "initialiseNextRound");
+
+    emitMock = jest.fn();
+    io = ({
+      to: jest.fn(() => {
+        return {
+          emit: emitMock,
+        };
+      }),
+    } as unknown) as Server;
+  });
+
+  afterEach(() => {
+    initialiseSpy.mockRestore();
+  });
+
+  it("assigns new host and initialises next round", async () => {
+    initialiseSpy.mockReturnValue({
+      roundNumber: 69,
+      setup: {
+        setup: "Why did the chicken cross the road?",
+        type: SetupType.pickOne,
+      },
+    });
+
+    await initialiseNextRound(io, "42069", "def456");
+
+    expect(io.to).toHaveBeenCalledTimes(3);
+    expect(io.to).toHaveBeenNthCalledWith(1, "42069");
+    expect(io.to).toHaveBeenNthCalledWith(2, "42069");
+    expect(io.to).toHaveBeenNthCalledWith(3, "42069");
+
+    expect(emitMock).toHaveBeenCalledTimes(3);
+    expect(emitMock).toHaveBeenNthCalledWith(1, "round:number", 69);
+    expect(emitMock).toHaveBeenNthCalledWith(2, "round:setup", {
+      setup: "Why did the chicken cross the road?",
+      type: SetupType.pickOne,
+    });
+    expect(emitMock).toHaveBeenNthCalledWith(3, "navigate", RoundState.before);
   });
 });
 

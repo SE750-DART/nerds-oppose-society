@@ -7,8 +7,7 @@ import {
 } from "../services/round.service";
 import { ServiceError } from "../util";
 import { RoundState } from "../models/round.model";
-import { assignNextHost, isHost } from "./game.handler";
-import { initialiseNextRound } from "../services/game.service";
+import { assignNextHost, initialiseNextRound, isHost } from "./game.handler";
 
 export default (
   io: Server,
@@ -123,14 +122,7 @@ export default (
       if (isHost(socket, gameCode)) {
         const newHostId = await assignNextHost(io, socket);
 
-        const { roundNumber, setup } = await initialiseNextRound(
-          gameCode,
-          newHostId
-        );
-
-        io.to(gameCode).emit("round:number", roundNumber);
-        io.to(gameCode).emit("round:setup", setup);
-        io.to(gameCode).emit("navigate", RoundState.before);
+        await initialiseNextRound(io, gameCode, newHostId);
       }
     } catch (e) {
       if (e instanceof ServiceError) {
