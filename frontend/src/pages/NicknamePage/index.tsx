@@ -26,19 +26,14 @@ const NicknamePage = ({ gameCode }: Props) => {
     const res = await validateGame({ gameCode });
 
     const gameCodeIsValid = res.success;
-    if (gameCodeIsValid) {
-      if (playerId && token) {
-        socket.auth = { gameCode, playerId, token };
-        socket.connect();
-        // If the connection fails here, it means the playerId is invalid so need to remove it
-        // It reruns this useEffect since playerId changed, but it does not connect again because playerId is falsy
-        socket.on("connect_error", () => {
-          setPlayerId("");
-          setToken("");
-        });
-      }
-    } else {
+    if (!gameCodeIsValid) {
       browserHistory.push("/");
+    } else if (playerId && token) {
+      socket.auth = { gameCode, playerId, token };
+      // If the connection fails here, playerId and token are cleared by event handler in GameRouter
+      // This reruns this useEffect since playerId and token changed,
+      // but it does not connect again because playerId and token are falsy
+      socket.connect();
     }
   };
 

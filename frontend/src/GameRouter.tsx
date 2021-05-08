@@ -1,12 +1,10 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Router, Switch, Route, Redirect, useParams } from "react-router-dom";
 import { createMemoryHistory } from "history";
+import createPersistedState from "use-persisted-state";
 import { BasicPage, NicknamePage, LobbyPage } from "./pages";
 import socket from "./socket";
-import {
-  Player,
-  PlayersContext,
-} from "./ContextProviders/PlayersContextProvider";
+import { PlayersContext } from "./ContextProviders/PlayersContextProvider";
 
 export type Settings = {
   roundLimit?: number;
@@ -18,49 +16,72 @@ type PathParams = {
 };
 
 const memoryHistory = createMemoryHistory();
+const usePlayerIdState = createPersistedState("playerId");
+const useTokenState = createPersistedState("token");
 
 const GameRouter = () => {
   const { gameCode } = useParams<PathParams>();
+  const [, setPlayerId] = usePlayerIdState("");
+  const [, setToken] = useTokenState("");
   const { setHost, initialisePlayers, addPlayer, removePlayer } = useContext(
     PlayersContext
   );
   const [settings, setSettings] = useState<Settings>();
 
-  socket.on("navigate", (route: string) => memoryHistory.push(route));
-  socket.on("host", (host: string) => setHost(host));
-  socket.on("players:initial", (players: Player[]) =>
-    initialisePlayers(players)
-  );
-  socket.on("players:add", (id: string, nickname: string) =>
-    addPlayer(id, nickname)
-  );
-  socket.on("players:remove", (playerId: string) => removePlayer(playerId));
-  socket.on("settings:initial", (initialSettings: Settings) =>
-    setSettings(initialSettings)
-  );
-  socket.on(
-    "settings:update",
-    ({ setting, value }: { setting: string; value: number }) => {
-      let key;
-      switch (setting) {
-        case "MAX_PLAYERS":
-          key = "maxPlayers";
-          break;
-        case "ROUND_LIMIT":
-          key = "roundLimit";
-          break;
-        default:
-          key = null;
-      }
-      if (key !== null) {
-        const newSettings = {
-          ...settings,
-          [key]: value,
-        };
-        setSettings(newSettings);
-      }
+  const handleUpdateSettings = ({
+    setting,
+    value,
+  }: {
+    setting: string;
+    value: number;
+  }) => {
+    let key;
+    switch (setting) {
+      case "MAX_PLAYERS":
+        key = "maxPlayers";
+        break;
+      case "ROUND_LIMIT":
+        key = "roundLimit";
+        break;
+      default:
+        key = null;
     }
-  );
+    if (key !== null) {
+      const newSettings = {
+        ...settings,
+        [key]: value,
+      };
+      setSettings(newSettings);
+    }
+  };
+
+  const clearPlayerCredentials = () => {
+    setPlayerId("");
+    setToken("");
+  };
+
+  useEffect(() => {
+    socket.on("navigate", memoryHistory.push);
+    socket.on("host", setHost);
+    socket.on("players:initial", initialisePlayers);
+    socket.on("players:add", addPlayer);
+    socket.on("players:remove", removePlayer);
+    socket.on("settings:initial", setSettings);
+    socket.on("settings:update", handleUpdateSettings);
+    socket.on("connect_error", clearPlayerCredentials);
+
+    return () => {
+      // Remove event handlers when component is unmounted to prevent buildup of identical handlers
+      socket.off("navigate", memoryHistory.push);
+      socket.off("host", setHost);
+      socket.off("players:initial", initialisePlayers);
+      socket.off("players:add", addPlayer);
+      socket.off("players:remove", removePlayer);
+      socket.off("settings:initial", setSettings);
+      socket.off("settings:update", handleUpdateSettings);
+      socket.off("connect_error", clearPlayerCredentials);
+    };
+  });
 
   return (
     <Router history={memoryHistory}>
