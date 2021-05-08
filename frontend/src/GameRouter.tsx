@@ -6,10 +6,11 @@ import socket from "./socket";
 import { PlayersContext } from "./ContextProviders/PlayersContextProvider";
 import {
   BasicPage,
-  SubmitPunchlinePage,
   NicknamePage,
   LobbyPage,
+  SelectPunchlinePage,
   StartRoundPage,
+  SubmitPunchlinePage,
 } from "./pages";
 
 export type Settings = {
@@ -113,7 +114,7 @@ const GameRouter = () => {
         </Route>
 
         <Route path="/selectPunchline">
-          <BasicPage gameCode={gameCode} path="selectPunchline" />
+          <SelectPunchlinePage />
         </Route>
 
         <Route path="/postRound">
