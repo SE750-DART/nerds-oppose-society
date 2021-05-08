@@ -313,9 +313,11 @@ describe("enterHostChoosesState Service", () => {
 
 describe("hostChoosesWinner Service", () => {
   let game: Game;
+  let playerId: string;
 
   beforeEach(async () => {
     const gameCode = await createGame();
+    playerId = (await createPlayer(gameCode, "Bob")).playerId;
     game = await getGame(gameCode);
 
     game.rounds.push({
@@ -327,12 +329,12 @@ describe("hostChoosesWinner Service", () => {
       state: RoundState.hostChooses,
       punchlinesByPlayer: new Map([
         ["def456", ["To get to the other side"]],
-        ["ghi789", ["It was feeling cocky"]],
+        [playerId, ["It was feeling cocky"]],
       ]),
     });
   });
 
-  it("returns winner", async () => {
+  it("returns winner playerId and increments their score", async () => {
     await game.save();
 
     const winningPlayerId = await hostChooseWinner(
@@ -343,7 +345,11 @@ describe("hostChoosesWinner Service", () => {
 
     game = await getGame(game.gameCode);
     expect(game.rounds[0].state).toBe(RoundState.after);
-    expect(winningPlayerId).toBe("ghi789");
+    expect(winningPlayerId).toBe(playerId);
+
+    const player = game.players.id(winningPlayerId);
+    if (player === null) fail();
+    expect(player.score).toBe(1);
   });
 
   it("throws error if game contains no rounds", async () => {

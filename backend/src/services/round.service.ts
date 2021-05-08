@@ -2,6 +2,7 @@ import { Game, Player, SetupType } from "../models";
 import { getGame } from "./game.service";
 import { RoundState } from "../models/round.model";
 import { ErrorType, ServiceError } from "../util";
+import { incrementScore } from "./player.service";
 
 export const enterPlayersChooseState = async (
   gameCode: Game["gameCode"],
@@ -111,6 +112,9 @@ export const hostChooseWinner = async (
       round.state = RoundState.after;
 
       await game.save();
+
+      await incrementScore(game, winningEntry[0]);
+
       return winningEntry[0];
     }
   }
