@@ -19,13 +19,20 @@ describe("Round handler", () => {
       punchlines: string[],
       callback: (data: string) => void
     ) => Promise<void>;
-    hostViewPunchline: (index: number) => void;
+    hostViewPunchline: (
+      index: number,
+      callback: (data: string) => void
+    ) => void;
+    hostChooseWinner: (
+      winningPunchlines: string[],
+      callback: (data: string) => void
+    ) => Promise<void>;
   };
 
   it("registers each round handler", async () => {
     handlers = registerRoundHandler(io, socket);
 
-    expect(socket.on).toHaveBeenCalledTimes(2);
+    expect(socket.on).toHaveBeenCalledTimes(3);
     expect(socket.on).toHaveBeenCalledWith(
       "round:player-choose",
       handlers.playerChoosePunchlines
@@ -33,6 +40,10 @@ describe("Round handler", () => {
     expect(socket.on).toHaveBeenCalledWith(
       "round:host-view",
       handlers.hostViewPunchline
+    );
+    expect(socket.on).toHaveBeenCalledWith(
+      "round:host-choose",
+      handlers.hostChooseWinner
     );
   });
 
@@ -197,6 +208,7 @@ describe("Round handler", () => {
 
   describe("hostViewPunchline handler", () => {
     let emitMock: jest.Mock;
+    let callback: jest.Mock;
 
     let io: Server;
     let socket: Socket;
@@ -217,11 +229,15 @@ describe("Round handler", () => {
         }),
       } as unknown) as Socket;
 
+      callback = jest.fn();
+
       handlers = registerRoundHandler(io, socket);
     });
 
     it("host views punchline 0 and transmits index to clients", () => {
-      handlers.hostViewPunchline(0);
+      handlers.hostViewPunchline(0, callback);
+
+      expect(callback).toHaveBeenCalledTimes(0);
 
       expect(socket.to).toHaveBeenCalledTimes(1);
       expect(socket.to).toHaveBeenCalledWith("42069");
@@ -231,7 +247,9 @@ describe("Round handler", () => {
     });
 
     it("host views punchline 5 and transmits index to clients", () => {
-      handlers.hostViewPunchline(5);
+      handlers.hostViewPunchline(5, callback);
+
+      expect(callback).toHaveBeenCalledTimes(0);
 
       expect(socket.to).toHaveBeenCalledTimes(1);
       expect(socket.to).toHaveBeenCalledWith("42069");
@@ -240,12 +258,123 @@ describe("Round handler", () => {
       expect(emitMock).toHaveBeenCalledWith("round:host-view", 5);
     });
 
-    it("non-host calls socket and nothing happens", () => {
+    it("non-host calls handler and nothing happens", () => {
       socket.rooms.delete("42069:host");
 
-      handlers.hostViewPunchline(0);
+      handlers.hostViewPunchline(0, callback);
+
+      expect(callback).toHaveBeenCalledTimes(0);
 
       expect(socket.to).toHaveBeenCalledTimes(0);
+      expect(emitMock).toHaveBeenCalledTimes(0);
+    });
+
+    it("catches error", () => {
+      emitMock.mockImplementation(() => {
+        throw Error();
+      });
+
+      handlers.hostViewPunchline(0, callback);
+
+      expect(callback).toHaveBeenCalledTimes(1);
+      expect(callback).toHaveBeenCalledWith("Server error");
+
+      expect(socket.to).toHaveBeenCalledTimes(1);
+      expect(socket.to).toHaveBeenCalledWith("42069");
+      expect(emitMock).toHaveBeenCalledTimes(1);
+      expect(emitMock).toHaveReturnedTimes(0);
+    });
+  });
+
+  describe("hostChooseWinner handler", () => {
+    let serviceSpy: jest.SpyInstance;
+
+    let emitMock: jest.Mock;
+    let callback: jest.Mock;
+
+    let io: Server;
+    let socket: Socket;
+
+    beforeEach(() => {
+      serviceSpy = jest.spyOn(RoundService, "hostChooseWinner");
+
+      emitMock = jest.fn();
+      io = ({
+        to: jest.fn(() => {
+          return {
+            emit: emitMock,
+          };
+        }),
+      } as unknown) as Server;
+
+      socket = ({
+        data: {
+          gameCode: "42069",
+          playerId: "abc123",
+        },
+        rooms: new Set(["<socket cqwdqcd>", "42069", "42069:host"]),
+        on: jest.fn(),
+      } as unknown) as Socket;
+
+      callback = jest.fn();
+
+      handlers = registerRoundHandler(io, socket);
+    });
+
+    afterEach(() => {
+      serviceSpy.mockRestore();
+    });
+
+    it("host chooses winner", async () => {
+      serviceSpy.mockReturnValue("def456");
+
+      await handlers.hostChooseWinner(["To go to KFC"], callback);
+
+      expect(callback).toHaveBeenCalledTimes(0);
+
+      expect(io.to).toHaveBeenCalledTimes(1);
+      expect(io.to).toHaveBeenCalledWith("42069");
+
+      expect(emitMock).toHaveBeenCalledTimes(1);
+      expect(emitMock).toHaveBeenCalledWith("round:winner", "def456", [
+        "To go to KFC",
+      ]);
+    });
+
+    it("hostChooseWinner service throws ServiceError", async () => {
+      serviceSpy.mockRejectedValue(
+        new ServiceError(ErrorType.gameCode, "Game does not exist")
+      );
+
+      await handlers.hostChooseWinner(["To go to KFC"], callback);
+
+      expect(callback).toHaveBeenCalledTimes(1);
+      expect(callback).toHaveBeenCalledWith("Game does not exist");
+
+      expect(io.to).toHaveBeenCalledTimes(0);
+      expect(emitMock).toHaveBeenCalledTimes(0);
+    });
+
+    it("hostChooseWinner service throws error", async () => {
+      serviceSpy.mockRejectedValue(Error());
+
+      await handlers.hostChooseWinner(["To go to KFC"], callback);
+
+      expect(callback).toHaveBeenCalledTimes(1);
+      expect(callback).toHaveBeenCalledWith("Server error");
+
+      expect(io.to).toHaveBeenCalledTimes(0);
+      expect(emitMock).toHaveBeenCalledTimes(0);
+    });
+
+    it("non-host calls handler and nothing happens", async () => {
+      socket.rooms.delete("42069:host");
+
+      await handlers.hostChooseWinner(["It was feeling cocky"], callback);
+
+      expect(callback).toHaveBeenCalledTimes(0);
+
+      expect(io.to).toHaveBeenCalledTimes(0);
       expect(emitMock).toHaveBeenCalledTimes(0);
     });
   });

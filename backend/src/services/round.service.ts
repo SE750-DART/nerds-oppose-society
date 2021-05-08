@@ -87,11 +87,11 @@ export const enterHostChoosesState = async (
   );
 };
 
-export const hostChoosesWinner = async (
+export const hostChooseWinner = async (
   gameCode: Game["gameCode"],
   playerId: Player["id"],
   winningPunchlines: string[]
-): Promise<{ playerId: Player["id"]; punchlines: string[] }> => {
+): Promise<Player["id"]> => {
   const game = await getGame(gameCode);
   const round = game.rounds.slice(-1)[0];
 
@@ -111,10 +111,7 @@ export const hostChoosesWinner = async (
       round.state = RoundState.after;
 
       await game.save();
-      return {
-        playerId: winningEntry[0],
-        punchlines: winningEntry[1],
-      };
+      return winningEntry[0];
     }
   }
   throw new ServiceError(ErrorType.invalidAction, "Cannot choose winner");
