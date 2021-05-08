@@ -22,27 +22,35 @@ const NicknamePage = ({ gameCode }: Props) => {
   const [token, setToken] = useTokenState("");
   const browserHistory = useContext(BrowserHistoryContext);
 
-  useEffect(() => {
-    (async () => {
-      const res = await validateGame({ gameCode });
+  const tryConnect = async () => {
+    const res = await validateGame({ gameCode });
 
-      const gameCodeIsValid = res.success;
-      if (gameCodeIsValid) {
-        if (playerId && token) {
-          socket.auth = { gameCode, playerId, token };
-          socket.connect();
-          // If the connection here, it means the playerId is invalid so need to remove it
-          // It reruns this useEffect since playerId changed, but it does not connect again because playerId is falsy
-          socket.on("connect_error", () => {
-            setPlayerId("");
-            setToken("");
-          });
-        }
-      } else {
-        browserHistory.push("/");
+    const gameCodeIsValid = res.success;
+    if (gameCodeIsValid) {
+      if (playerId && token) {
+        socket.auth = { gameCode, playerId, token };
+        socket.connect();
+        // If the connection fails here, it means the playerId is invalid so need to remove it
+        // It reruns this useEffect since playerId changed, but it does not connect again because playerId is falsy
+        socket.on("connect_error", () => {
+          setPlayerId("");
+          setToken("");
+        });
       }
-    })();
-  }, [gameCode, token]);
+    } else {
+      browserHistory.push("/");
+    }
+  };
+
+  useEffect(() => {
+    let mounted = true;
+    if (mounted) {
+      tryConnect();
+    }
+    return () => {
+      mounted = false;
+    };
+  }, [gameCode, playerId, token]);
 
   const handleSubmit = async () => {
     const res = await createPlayer({ gameCode, nickname });
