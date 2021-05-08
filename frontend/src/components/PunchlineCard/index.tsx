@@ -9,6 +9,7 @@ interface PunchlineCardProps {
   status?: "available" | "selected" | "submitted";
   newCard?: boolean;
   selectedNum?: 1 | 2 | 3;
+  blurred?: boolean;
 }
 
 const PunchlineCard = ({
@@ -17,6 +18,7 @@ const PunchlineCard = ({
   status = "available",
   newCard = false,
   selectedNum,
+  blurred = false,
 }: PunchlineCardProps) => {
   // Max length of a punchline before it needs to be made smaller to fit
   const textBreakpoint: number = 69;
@@ -51,7 +53,12 @@ const PunchlineCard = ({
           <h5>{selectedNum}</h5>
         </div>
       )}
-      <p className={textStyle}>{text}</p>
+      <p
+        className={`${textStyle} ${blurred ? styles.textBlurred : undefined}`}
+        style={{ transition: `0.3s` }}
+      >
+        {text}
+      </p>
     </div>
   );
 };
