@@ -2,6 +2,7 @@ import { Server, Socket } from "socket.io";
 import { Game, GameState } from "../../models";
 import * as GameService from "../../services/game.service";
 import registerGameHandler, {
+  assignNextHost,
   emitHost,
   emitNavigate,
   getHost,
@@ -356,5 +357,197 @@ describe("isHost handler", () => {
     } as unknown) as Socket;
 
     expect(isHost(socket, "42069")).toBeFalsy();
+  });
+});
+
+describe("assignNextHost handler", () => {
+  let io: Server;
+  let socket: Socket;
+
+  let fetchMock: jest.Mock;
+  let joinMock: jest.Mock;
+  let emitMock: jest.Mock;
+
+  let gameSpy: jest.SpyInstance;
+  let mapSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    fetchMock = jest.fn();
+    joinMock = jest.fn();
+    emitMock = jest.fn();
+    io = ({
+      in: jest.fn(() => {
+        return {
+          fetchSockets: fetchMock,
+        };
+      }),
+      to: jest.fn(() => {
+        return {
+          emit: emitMock,
+        };
+      }),
+    } as unknown) as Server;
+
+    gameSpy = jest.spyOn(GameService, "getGame");
+    gameSpy.mockReturnValue({
+      players: [
+        { id: "1", nickname: "Bob" },
+        { id: "2", nickname: "Fred" },
+        { id: "3", nickname: "Dave" },
+        { id: "4", nickname: "Jim" },
+        { id: "5", nickname: "Steve" },
+      ],
+    });
+    mapSpy = jest.spyOn(Map.prototype, "get");
+  });
+
+  afterEach(() => {
+    gameSpy.mockRestore();
+    mapSpy.mockRestore();
+  });
+
+  it("does nothing if player is not host", async () => {
+    const socket = ({
+      data: {
+        gameCode: "42069",
+        playerId: "1",
+      },
+      rooms: new Set(["<socket fosirghidhfs>", "42069"]),
+      on: jest.fn(),
+    } as unknown) as Socket;
+
+    await assignNextHost(io, socket);
+
+    expect(gameSpy).toHaveBeenCalledTimes(0);
+
+    expect(joinMock).toHaveBeenCalledTimes(0);
+    expect(io.in).toHaveBeenCalledTimes(0);
+    expect(fetchMock).toHaveBeenCalledTimes(0);
+  });
+
+  it("does not assign new host if player is host but the only player", async () => {
+    socket = ({
+      data: {
+        gameCode: "42069",
+        playerId: "1",
+      },
+      rooms: new Set(["<socket fosirghidhfs>", "42069", "42069:host"]),
+    } as unknown) as Socket;
+
+    fetchMock.mockReturnValue([{ data: { playerId: "1" } }]);
+
+    await assignNextHost(io, socket);
+
+    expect(gameSpy).toHaveBeenCalledTimes(1);
+
+    expect(io.in).toHaveBeenCalledTimes(1);
+    expect(io.in).toHaveBeenCalledWith("42069");
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    expect(joinMock).toHaveBeenCalledTimes(0);
+
+    expect(io.to).toHaveBeenCalledTimes(0);
+    expect(emitMock).toHaveBeenCalledTimes(0);
+  });
+
+  it("assigns new host", async () => {
+    socket = ({
+      data: {
+        gameCode: "42069",
+        playerId: "1",
+      },
+      rooms: new Set(["<socket fosirghidhfs>", "42069", "42069:host"]),
+    } as unknown) as Socket;
+
+    fetchMock.mockReturnValue([
+      { data: { playerId: "1" } },
+      { data: { gameCode: "42069", playerId: "2" }, join: joinMock },
+    ]);
+
+    await assignNextHost(io, socket);
+
+    expect(joinMock).toHaveBeenCalledTimes(1);
+    expect(joinMock).toHaveBeenCalledWith("42069:host");
+
+    expect(io.to).toHaveBeenCalledTimes(1);
+    expect(io.to).toHaveBeenCalledWith("42069");
+    expect(emitMock).toHaveBeenCalledTimes(1);
+    expect(emitMock).toHaveBeenCalledWith("host", "2");
+  });
+
+  it("assigns new host looping to start of active players array", async () => {
+    socket = ({
+      data: {
+        gameCode: "42069",
+        playerId: "5",
+        nickname: "Steve",
+      },
+      rooms: new Set(["<socket fosirghidhfs>", "42069", "42069:host"]),
+    } as unknown) as Socket;
+
+    fetchMock.mockReturnValue([
+      { data: { gameCode: "42069", playerId: "1" }, join: joinMock },
+      { data: { playerId: "5" } },
+    ]);
+
+    await assignNextHost(io, socket);
+
+    expect(joinMock).toHaveBeenCalledTimes(1);
+    expect(joinMock).toHaveBeenCalledWith("42069:host");
+
+    expect(io.to).toHaveBeenCalledTimes(1);
+    expect(io.to).toHaveBeenCalledWith("42069");
+    expect(emitMock).toHaveBeenCalledTimes(1);
+    expect(emitMock).toHaveBeenCalledWith("host", "1");
+  });
+
+  it("assigns new host skipping non-active players", async () => {
+    socket = ({
+      data: {
+        gameCode: "42069",
+        playerId: "1",
+        nickname: "Steve",
+      },
+      rooms: new Set(["<socket fosirghidhfs>", "42069", "42069:host"]),
+    } as unknown) as Socket;
+
+    fetchMock.mockReturnValue([
+      { data: { playerId: "1" } },
+      { data: { gameCode: "42069", playerId: "3" }, join: joinMock },
+    ]);
+
+    await assignNextHost(io, socket);
+
+    expect(joinMock).toHaveBeenCalledTimes(1);
+    expect(joinMock).toHaveBeenCalledWith("42069:host");
+
+    expect(io.to).toHaveBeenCalledTimes(1);
+    expect(io.to).toHaveBeenCalledWith("42069");
+    expect(emitMock).toHaveBeenCalledTimes(1);
+    expect(emitMock).toHaveBeenCalledWith("host", "3");
+  });
+
+  it("does not set host if new host socket is somehow undefined", async () => {
+    socket = ({
+      data: {
+        gameCode: "42069",
+        playerId: "5",
+      },
+      rooms: new Set(["<socket fosirghidhfs>", "42069", "42069:host"]),
+    } as unknown) as Socket;
+
+    fetchMock.mockReturnValue([
+      { data: { playerId: "1" } },
+      { data: { playerId: "5" } },
+    ]);
+
+    mapSpy.mockReturnValue(undefined);
+
+    await assignNextHost(io, socket);
+
+    expect(joinMock).toHaveBeenCalledTimes(0);
+
+    expect(io.to).toHaveBeenCalledTimes(0);
+    expect(emitMock).toHaveBeenCalledTimes(0);
   });
 });

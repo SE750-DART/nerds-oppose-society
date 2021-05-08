@@ -83,3 +83,38 @@ export const setHost = (io: Server, socket: Socket): void => {
 export const isHost = (socket: Socket, gameCode: Game["gameCode"]): boolean => {
   return socket.rooms.has(`${gameCode}:host`);
 };
+
+export const assignNextHost = async (
+  io: Server,
+  socket: Socket
+): Promise<Player["id"]> => {
+  const { gameCode, playerId } = socket.data;
+  if (isHost(socket, gameCode)) {
+    const sockets = ((await io
+      .in(gameCode)
+      .fetchSockets()) as unknown) as Socket[];
+
+    const game = await getGame(gameCode);
+
+    const playerIdToSocket = new Map<Player["id"], Socket>(
+      sockets.map((socket) => [socket.data.playerId, socket])
+    );
+    const activePlayers = game.players.filter((player) =>
+      playerIdToSocket.has(player.id)
+    );
+
+    if (activePlayers.length > 1) {
+      const leavingHostIndex = activePlayers.findIndex(
+        (player) => player.id === playerId
+      );
+      let nextHostIndex = leavingHostIndex + 1;
+      if (nextHostIndex === activePlayers.length) nextHostIndex = 0;
+
+      const newHost = activePlayers[nextHostIndex];
+      const newHostSocket = playerIdToSocket.get(newHost.id);
+
+      if (newHostSocket !== undefined) setHost(io, newHostSocket);
+      return newHost.id;
+    }
+  }
+};

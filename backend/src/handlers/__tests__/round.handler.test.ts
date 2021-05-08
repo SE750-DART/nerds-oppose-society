@@ -28,12 +28,13 @@ describe("Round handler", () => {
       winningPunchlines: string[],
       callback: (data: string) => void
     ) => Promise<void>;
+    hostNextRound: (callback: (data: string) => void) => void;
   };
 
   it("registers each round handler", async () => {
     handlers = registerRoundHandler(io, socket);
 
-    expect(socket.on).toHaveBeenCalledTimes(4);
+    expect(socket.on).toHaveBeenCalledTimes(5);
     expect(socket.on).toHaveBeenCalledWith(
       "round:host-begin",
       handlers.hostStartRound
@@ -49,6 +50,10 @@ describe("Round handler", () => {
     expect(socket.on).toHaveBeenCalledWith(
       "round:host-choose",
       handlers.hostChooseWinner
+    );
+    expect(socket.on).toHaveBeenCalledWith(
+      "round:host-next",
+      handlers.hostNextRound
     );
   });
 
