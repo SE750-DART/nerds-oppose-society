@@ -6,7 +6,7 @@ import {
   Redirect,
   useParams,
 } from "react-router-dom";
-import { BasicPage, NicknamePage, LobbyPage } from "./pages";
+import { BasicPage, NicknamePage, LobbyPage, StartRoundPage } from "./pages";
 
 type PathParams = {
   gameCode: string;
@@ -27,7 +27,7 @@ const GameRouter = () => {
         </Route>
 
         <Route path="/preRound">
-          <BasicPage gameCode={gameCode} path="preRound" />
+          <StartRoundPage />
         </Route>
 
         <Route path="/submitPunchline">
