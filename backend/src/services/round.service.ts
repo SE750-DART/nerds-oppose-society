@@ -32,7 +32,7 @@ export const playerChoosePunchlines = async (
   gameCode: Game["gameCode"],
   playerId: Player["id"],
   chosenPunchlines: string[]
-): Promise<void> => {
+): Promise<Set<string>> => {
   const game = await getGame(gameCode);
   const round = game.rounds.slice(-1)[0];
   const player = game.players.id(playerId);
@@ -64,7 +64,7 @@ export const playerChoosePunchlines = async (
     round.punchlinesByPlayer.set(playerId, chosenPunchlines);
 
     await game.save();
-    return;
+    return new Set(round.punchlinesByPlayer.keys());
   }
   throw new ServiceError(ErrorType.invalidAction, "Cannot choose punchlines");
 };
@@ -79,7 +79,7 @@ export const enterHostChoosesState = async (
     round.state = RoundState.hostChooses;
 
     await game.save();
-    return Array.from(round.punchlinesByPlayer.values()).map((entry) => entry);
+    return Array.from(round.punchlinesByPlayer.values());
   }
   throw new ServiceError(
     ErrorType.invalidAction,
