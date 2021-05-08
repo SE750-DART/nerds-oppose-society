@@ -28,7 +28,7 @@ export const createPlayer = async (
     if (e.type === ErrorType.gameCode) {
       res.status(400).send("Could not get game");
       return;
-    } else if (e.type === ErrorType.playerName) {
+    } else if (e.type === ErrorType.playerId) {
       res.status(400).send("Nickname taken");
       return;
     } else {

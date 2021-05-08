@@ -19,7 +19,7 @@ export const createPlayer = async (
   try {
     await game.save();
   } catch (e) {
-    throw new ServiceError(ErrorType.playerName, "Duplicate player nickname");
+    throw new ServiceError(ErrorType.playerId, "Duplicate player nickname");
   }
 
   return {
@@ -34,7 +34,7 @@ export const removePlayer = async (
 ): Promise<Player> => {
   const player = game.players.id(playerId);
   if (player === null)
-    throw new ServiceError(ErrorType.playerName, "Player does not exist");
+    throw new ServiceError(ErrorType.playerId, "Player does not exist");
 
   if (player.score === 0) {
     await player.remove();
@@ -54,7 +54,7 @@ export const getPlayer = async (
   const player = game.players.id(playerId);
 
   if (player) return player;
-  throw new ServiceError(ErrorType.playerName, "Player does not exist");
+  throw new ServiceError(ErrorType.playerId, "Player does not exist");
 };
 
 export const authenticatePlayer = async (

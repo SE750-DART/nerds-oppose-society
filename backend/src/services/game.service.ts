@@ -1,4 +1,4 @@
-import { Game, GameModel, Settings, Setup } from "../models";
+import { Game, GameModel, Player, Settings, Setup } from "../models";
 import { digitShortCode, ErrorType, ServiceError, shuffle } from "../util";
 import { PUNCHLINES, SETUPS } from "../resources";
 
@@ -46,4 +46,53 @@ export const setRoundLimit = async (
 ): Promise<void> => {
   game.settings.roundLimit = roundLimit;
   await game.save();
+};
+
+export const initialiseNextRound = async (
+  gameCode: string,
+  host: Player["id"]
+): Promise<{ roundNumber: number; setup: Setup }> => {
+  const game = await getGame(gameCode);
+
+  const setup = game.setups.pop();
+  if (setup !== undefined) {
+    game.rounds.push({
+      setup: setup,
+      host: host,
+    });
+
+    await game.save();
+    return {
+      roundNumber: game.rounds.length,
+      setup: setup,
+    };
+  }
+  throw new ServiceError(ErrorType.invalidAction, "Could not start round");
+};
+
+export const allocatePlayerPunchlines = async (
+  game: Game,
+  playerId: Player["id"],
+  punchlineLimit = 10
+): Promise<string[]> => {
+  const player = game.players.id(playerId);
+
+  const punchlinesAdded: string[] = [];
+
+  if (player !== null) {
+    while (player.punchlines.length < punchlineLimit) {
+      const punchlineFromDeck = game.punchlines.pop();
+      if (punchlineFromDeck === undefined) {
+        // Potentially reshuffle deck if it is undefined
+        throw new ServiceError(ErrorType.gameError, "No punchlines in deck");
+      }
+
+      punchlinesAdded.push(punchlineFromDeck);
+      player.punchlines.push(punchlineFromDeck);
+    }
+
+    return punchlinesAdded;
+  }
+
+  throw new ServiceError(ErrorType.playerId, "Player does not exist");
 };
