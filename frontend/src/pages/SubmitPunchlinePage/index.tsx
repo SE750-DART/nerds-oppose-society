@@ -7,7 +7,7 @@ import ProgressBar from "../../components/ProgressBar";
 import PunchlineCard from "../../components/PunchlineCard";
 import Button from "../../components/Button";
 
-const ChoosePunchlinePage = () => {
+const SubmitPunchlinePage = () => {
   const memoryHistory = useHistory();
 
   const dummyPunchlines: {
@@ -151,4 +151,4 @@ const ChoosePunchlinePage = () => {
   );
 };
 
-export default ChoosePunchlinePage;
+export default SubmitPunchlinePage;
