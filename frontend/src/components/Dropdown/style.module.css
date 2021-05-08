@@ -25,6 +25,7 @@
 .dropHide {
   top: 0;
   transition: 0.3s;
+  visibility: hidden;
   z-index: 0;
 }
 
@@ -32,5 +33,6 @@
   box-shadow: 0px 10px 20px -18px rgba(0, 0, 0, 0.75);
   top: 162px;
   transition: 0.3s;
+  visibility: visible;
   z-index: 10;
 }
