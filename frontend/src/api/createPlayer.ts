@@ -9,6 +9,11 @@ type Props = {
   nickname: string;
 };
 
+export type Response = {
+  playerId: string;
+  token: string;
+};
+
 /**
  * Expected status codes:
  * 201 - Player Created Successfully,
@@ -17,13 +22,22 @@ type Props = {
  * @param gameCode - code of the game the player will be added to
  * @param nickname - nickname of the new player
  */
-const createPlayer: (player: Props) => Promise<ApiResponse<string>> = async ({
+const createPlayer: (player: Props) => Promise<ApiResponse<Response>> = async ({
   gameCode,
   nickname,
 }: Props) => {
+  // Check that game code is a number
+  if (!gameCode.match(/^\d+$/)) {
+    return {
+      success: false,
+      status: 400,
+      error: "Game code must be a number",
+    };
+  }
+
   const url = `${BASE_URL}/player/create`;
   const axiosMethod = async () =>
-    axios.post<any, AxiosResponse<string>>(url, undefined, {
+    axios.post<any, AxiosResponse<Response>>(url, undefined, {
       params: {
         gameCode,
         nickname,
@@ -31,7 +45,7 @@ const createPlayer: (player: Props) => Promise<ApiResponse<string>> = async ({
     });
   const acceptedCodes = [CREATED_201];
 
-  return axiosCall<string>({ axiosMethod, acceptedCodes });
+  return axiosCall<Response>({ axiosMethod, acceptedCodes });
 };
 
 export default createPlayer;

@@ -1,8 +1,19 @@
-import { createGame, getGame, validateGameCode } from "../game.service";
-import { Game, GameModel, Setup } from "../../models";
+import {
+  allocatePlayerPunchlines,
+  createGame,
+  getGame,
+  initialiseNextRound,
+  setMaxPlayers,
+  setRoundLimit,
+  validateGameCode,
+} from "../game.service";
+import { Game, GameModel, GameState, Player, Setup } from "../../models";
 import mongoose from "mongoose";
 import { PUNCHLINES, SETUPS } from "../../resources";
 import * as Util from "../../util";
+import { ErrorType, ServiceError } from "../../util";
+import { createPlayer, getPlayer } from "../player.service";
+import { RoundState } from "../../models/round.model";
 
 beforeAll(async () => {
   await mongoose.connect(global.__MONGO_URI__, {
@@ -66,7 +77,7 @@ describe("createGame Service", () => {
 
 describe("getGame Service", () => {
   it("throws an error when provided an invalid gameCode", async () => {
-    await expect(getGame("123456")).rejects.toThrow("Could not get game");
+    await expect(getGame("123456")).rejects.toThrow("Game does not exist");
   });
 
   it("returns a game object", async () => {
@@ -82,7 +93,7 @@ describe("validateGameCode Service", () => {
   it("returns false for an invalid gameCode", async () => {
     const result = await validateGameCode("69420");
 
-    expect(result).toBe(false);
+    expect(result).toBeFalsy();
   });
 
   it("returns true for a valid gameCode", async () => {
@@ -90,6 +101,169 @@ describe("validateGameCode Service", () => {
 
     const result = await validateGameCode(gameCode);
 
-    expect(result).toBe(true);
+    expect(result).toBeTruthy();
+  });
+});
+
+describe("setRoundLimit Service", () => {
+  it("sets roundLimit to 100", async () => {
+    const gameCode = await createGame();
+    let game = await getGame(gameCode);
+    expect(game.settings.roundLimit).not.toBe(100);
+
+    await setRoundLimit(game, 100);
+
+    game = await getGame(gameCode);
+    expect(game.settings.roundLimit).toBe(100);
+  });
+});
+
+describe("setMaxPlayers Service", () => {
+  it("sets maxPlayers to 50", async () => {
+    const gameCode = await createGame();
+    let game = await getGame(gameCode);
+    expect(game.settings.maxPlayers).not.toBe(50);
+
+    await setMaxPlayers(game, 50);
+
+    game = await getGame(gameCode);
+    expect(game.settings.maxPlayers).toBe(50);
+  });
+});
+
+describe("nextRound Service", () => {
+  let gameCode: string;
+
+  let playerId: string;
+
+  beforeEach(async () => {
+    gameCode = await createGame();
+
+    playerId = (await createPlayer(gameCode, "Bob")).playerId;
+  });
+
+  it("initialises the next round", async () => {
+    let game = await getGame(gameCode);
+    const setup = game.setups.pop();
+    if (setup === undefined) return fail();
+
+    await expect(
+      initialiseNextRound(gameCode, playerId)
+    ).resolves.toMatchObject({
+      roundNumber: 1,
+      setup: {
+        setup: setup.setup,
+        type: setup.type,
+      },
+    });
+
+    game = await getGame(gameCode);
+    expect(game.rounds[0].setup).toMatchObject({
+      setup: setup.setup,
+      type: setup.type,
+    });
+    expect(game.rounds[0].host.toString()).toBe(playerId);
+    expect(game.rounds[0].state).toBe(RoundState.before);
+    expect(game.state).toBe(GameState.active);
+  });
+
+  it("throws error if game does not exist", async () => {
+    await expect(initialiseNextRound("987654321", playerId)).rejects.toThrow(
+      new ServiceError(ErrorType.gameCode, "Game does not exist")
+    );
+  });
+
+  it("throws error if game has no setups", async () => {
+    const game = await getGame(gameCode);
+
+    while (game.setups.length > 0) {
+      game.setups.pop();
+    }
+    await game.save();
+
+    await expect(initialiseNextRound(gameCode, playerId)).rejects.toThrow(
+      new ServiceError(ErrorType.invalidAction, "Could not start round")
+    );
+  });
+});
+
+describe("allocateCards Service", () => {
+  let gameCode: string;
+  let playerId: Player["id"];
+  let punchlineLimit: number;
+
+  beforeEach(async () => {
+    gameCode = await createGame();
+    playerId = (await createPlayer(gameCode, "bob")).playerId;
+    punchlineLimit = 10;
+  });
+
+  it("should successfully allocate new cards at the start of the game", async () => {
+    const game: Game = await getGame(gameCode);
+    const newCards = await allocatePlayerPunchlines(
+      game,
+      playerId,
+      punchlineLimit
+    );
+    expect(newCards.length).toBe(10);
+  });
+
+  it("should successfully only allocate 1 punchline on a normal setup if a player has 9 punchlines", async () => {
+    const game: Game = await getGame(gameCode);
+    const player: Player = await getPlayer(gameCode, playerId, game);
+    const punchlines = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
+    player.punchlines.push(...punchlines);
+    await game.save();
+    const newCards = await allocatePlayerPunchlines(
+      game,
+      playerId,
+      punchlineLimit
+    );
+    expect(newCards.length).toBe(1);
+  });
+
+  it("should successfully only allocate 2 punchlines on a play 2 setup if a player has 8 punchlines", async () => {
+    const game: Game = await getGame(gameCode);
+    const player: Player = await getPlayer(gameCode, playerId, game);
+    const punchlines = ["1", "2", "3", "4", "5", "6", "7", "8"];
+    player.punchlines.push(...punchlines);
+    await game.save();
+    const newCards = await allocatePlayerPunchlines(
+      game,
+      playerId,
+      punchlineLimit
+    );
+    expect(newCards.length).toBe(2);
+  });
+
+  it("should successfully only allocate 3 punchlines on a draw 2 pick 3 setup with a normal hand", async () => {
+    const game: Game = await getGame(gameCode);
+    const player: Player = await getPlayer(gameCode, playerId, game);
+    const punchlines = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
+    player.punchlines.push(...punchlines);
+    await game.save();
+    const newCards = await allocatePlayerPunchlines(game, playerId, 12);
+    expect(newCards.length).toBe(3);
+  });
+
+  it("should throw ServiceError if there are no punchlines left in the deck", async () => {
+    let game: Game = await getGame(gameCode);
+    while (game.punchlines.length > 0) {
+      game.punchlines.pop();
+    }
+    await game.save();
+    game = await getGame(gameCode);
+    await expect(allocatePlayerPunchlines(game, playerId)).rejects.toThrow(
+      new ServiceError(ErrorType.gameError, "No punchlines in deck")
+    );
+  });
+
+  it("should throw ServiceError if player id is incorrect", async () => {
+    const game: Game = await getGame(gameCode);
+    await expect(
+      allocatePlayerPunchlines(game, "12345", punchlineLimit)
+    ).rejects.toThrow(
+      new ServiceError(ErrorType.playerId, "Player does not exist")
+    );
   });
 });

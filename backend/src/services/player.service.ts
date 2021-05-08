@@ -1,11 +1,14 @@
 import { getGame } from "./game.service";
-import { Player } from "../models";
+import { Game, GameModel, Player } from "../models";
 import { ErrorType, ServiceError } from "../util";
 
 export const createPlayer = async (
-  gameCode: string,
+  gameCode: Game["gameCode"],
   nickname: string
-): Promise<string> => {
+): Promise<{
+  playerId: Player["id"];
+  token: Player["token"];
+}> => {
   const game = await getGame(gameCode);
 
   const length = game.players.push({
@@ -19,17 +22,68 @@ export const createPlayer = async (
     throw new ServiceError(ErrorType.playerName, "Duplicate player nickname");
   }
 
-  return player._id;
+  return {
+    playerId: player.id,
+    token: player.token,
+  };
+};
+
+export const removePlayer = async (
+  game: Game,
+  playerId: Player["id"]
+): Promise<Player> => {
+  const player = game.players.id(playerId);
+  if (player === null)
+    throw new ServiceError(ErrorType.playerId, "Player does not exist");
+
+  if (player.score === 0) {
+    await player.remove();
+    await game.save();
+  }
+
+  return player;
 };
 
 export const getPlayer = async (
-  gameCode: string,
-  playerId: string
+  gameCode: Game["gameCode"],
+  playerId: Player["id"],
+  game?: Game
 ): Promise<Player> => {
-  const game = await getGame(gameCode);
+  if (!game) game = await getGame(gameCode);
 
   const player = game.players.id(playerId);
 
   if (player) return player;
-  throw new ServiceError(ErrorType.playerName, "Could not get player");
+  throw new ServiceError(ErrorType.playerId, "Player does not exist");
+};
+
+export const authenticatePlayer = async (
+  gameCode: Game["gameCode"],
+  playerId: Player["id"],
+  token: Player["token"]
+): Promise<boolean> => {
+  return await GameModel.exists({
+    gameCode: gameCode,
+    players: { $elemMatch: { _id: playerId, token: token } },
+  });
+};
+
+export const initialisePlayer = async (
+  game: Game,
+  playerId: Player["id"]
+): Promise<void> => {
+  const player = game.players.id(playerId);
+  if (player === null) throw Error("Player does not exist");
+  player.new = false;
+  await game.save();
+};
+
+export const incrementScore = async (
+  game: Game,
+  playerId: Player["id"]
+): Promise<void> => {
+  const player = game.players.id(playerId);
+  if (player === null) throw Error("Player does not exist");
+  player.score++;
+  await game.save();
 };

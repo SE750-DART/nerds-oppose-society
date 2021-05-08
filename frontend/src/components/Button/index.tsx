@@ -40,6 +40,7 @@ const Button = ({
       className={`${styles.button} ${buttonTypeStyle} ${buttonSizeStyle} ${buttonDisabledStyle}`}
       type="button"
       onClick={handleOnClick}
+      disabled={disabled}
     >
       {text}
     </button>

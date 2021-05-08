@@ -2,8 +2,9 @@ import express, { NextFunction, Request, Response } from "express";
 import cors from "cors";
 import helmet from "helmet";
 import http from "http";
-import { Server as IOServer, Socket } from "socket.io";
+import { Server as IOServer } from "socket.io";
 import config from "./config";
+import { Connection, Auth } from "./handlers";
 import routes from "./routes";
 import mongoose from "mongoose";
 
@@ -53,7 +54,8 @@ const io = new IOServer(server, {
   },
 });
 
-io.on("connection", async (socket: Socket) => {
-  console.log("client connected!");
-  socket.emit("hello", "world!");
+io.use(Auth);
+
+io.on("connection", async (socket) => {
+  await Connection(io, socket);
 });
