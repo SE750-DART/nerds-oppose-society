@@ -1,6 +1,7 @@
 import { Document, Schema } from "mongoose";
 
 export const MaxPlayers = 40;
+export const MinPlayers = 3;
 
 export interface Settings extends Document {
   roundLimit?: number;
@@ -9,5 +10,5 @@ export interface Settings extends Document {
 
 export const SettingsSchema: Schema = new Schema({
   roundLimit: { type: Number, default: 69, min: 1 },
-  maxPlayers: { type: Number, default: 25, min: 3, max: MaxPlayers },
+  maxPlayers: { type: Number, default: 25, min: MinPlayers, max: MaxPlayers },
 });
