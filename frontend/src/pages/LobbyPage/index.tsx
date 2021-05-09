@@ -43,10 +43,7 @@ const LobbyPage = ({ gameCode, settings }: Props) => {
   const updateSettings = useCallback(
     debounce((setting: string, value: string) => {
       if (value.match(/^\d+$/)) {
-        socket.emit("settings:update", {
-          setting,
-          value: parseInt(value, 10),
-        });
+        socket.emit("settings:update", setting, parseInt(value, 10));
       }
     }, msDebounceDelay),
     []

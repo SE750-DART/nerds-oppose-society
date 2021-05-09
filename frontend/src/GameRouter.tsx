@@ -46,7 +46,7 @@ const GameRouter = () => {
   const handlePlayersRemove = useCallback(removePlayer, [removePlayer]);
   const handleSettingsInitial = useCallback(setSettings, [setSettings]);
   const handleSettingsUpdate = useCallback(
-    ({ setting, value }: { setting: string; value: number }) => {
+    (setting, value) => {
       let key;
       switch (setting) {
         case "MAX_PLAYERS":
