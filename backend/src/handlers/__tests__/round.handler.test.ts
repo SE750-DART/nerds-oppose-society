@@ -298,9 +298,22 @@ describe("Round handler", () => {
 
       playersChooseSpy.mockReturnValue(new Set(["abc123"]));
       fetchMock.mockReturnValue([
-        { data: { playerId: "abc123" } },
-        { data: { playerId: "def456" } },
-        { data: { playerId: "ghi789" } },
+        {
+          data: { playerId: "abc123" },
+          rooms: new Set(["<socket 4qtwf98y9s>", "42069"]),
+        },
+        {
+          data: { playerId: "def456" },
+          rooms: new Set(["<socket wrtehfgdhhf>", "42069"]),
+        },
+        {
+          data: { playerId: "ghi789" },
+          rooms: new Set(["<socket ertgdfsbg>", "42069"]),
+        },
+        {
+          data: { playerId: "jkl012" },
+          rooms: new Set(["<socket ertgdfsbg>", "42069", "42069:host"]),
+        },
       ]);
 
       callback = jest.fn();
