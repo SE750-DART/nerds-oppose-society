@@ -164,6 +164,7 @@ export default (
     try {
       if (isHost(socket, gameCode)) {
         const newHostId = await assignNextHost(io, socket);
+        socket.leave(gameCode);
         if (await checkGameEnded(gameCode)) {
           return io.to(gameCode).emit("navigate", GameState.finished);
         }
