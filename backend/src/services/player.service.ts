@@ -1,5 +1,5 @@
 import { getGame } from "./game.service";
-import { Game, GameModel, Player } from "../models";
+import { Game, GameModel, GameState, Player } from "../models";
 import { ErrorType, ServiceError } from "../util";
 
 export const createPlayer = async (
@@ -10,6 +10,16 @@ export const createPlayer = async (
   token: Player["token"];
 }> => {
   const game = await getGame(gameCode);
+  // TODO - add the const for MaxPlayers defined when the discard shuffle PR is merged
+  const gameMax =
+    game.settings !== undefined && game.settings.maxPlayers !== undefined
+      ? game.settings.maxPlayers
+      : 40;
+  if (game.state === GameState.finished) {
+    throw new ServiceError(ErrorType.gameError, "Game is finished");
+  } else if (game.players.length >= gameMax) {
+    throw new ServiceError(ErrorType.gameError, "Too many players in the game");
+  }
 
   const length = game.players.push({
     nickname: nickname,
