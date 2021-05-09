@@ -5,7 +5,7 @@ import * as GameService from "../../services/game.service";
 import * as RoundService from "../../services/round.service";
 import { RoundState } from "../../models/round.model";
 import { ErrorType, ServiceError } from "../../util";
-import { Game, Player, SetupType } from "../../models";
+import { Game, GameState, Player, SetupType } from "../../models";
 
 describe("Round handler", () => {
   const io = ("io" as unknown) as Server;
@@ -595,6 +595,7 @@ describe("Round handler", () => {
     let gameEndedSpy: jest.SpyInstance;
 
     let callback: jest.Mock;
+    let emitMock: jest.Mock;
 
     let io: Server;
     let socket: Socket;
@@ -605,7 +606,12 @@ describe("Round handler", () => {
       gameEndedSpy = jest.spyOn(GameService, "checkGameEnded");
       initialiseSpy = jest.spyOn(GameHandler, "initialiseNextRound");
 
-      io = ("io" as unknown) as Server;
+      emitMock = jest.fn();
+      io = ({
+        to: jest.fn(() => {
+          return { emit: emitMock };
+        }),
+      } as unknown) as Server;
 
       socket = ({
         data: {
@@ -644,10 +650,14 @@ describe("Round handler", () => {
 
       await handlers.hostNextRound(callback);
 
-      expect(gameEndedSpy).toHaveBeenCalledTimes(1);
       expect(callback).toHaveBeenCalledTimes(0);
 
       expect(hostSpy).toHaveBeenCalledTimes(1);
+
+      expect(gameEndedSpy).toHaveBeenCalledTimes(1);
+      expect(io.to).toHaveBeenCalledTimes(0);
+      expect(emitMock).toHaveBeenCalledTimes(0);
+
       expect(initialiseSpy).toHaveBeenCalledTimes(1);
     });
 
@@ -656,11 +666,15 @@ describe("Round handler", () => {
       gameEndedSpy.mockReturnValue(true);
 
       await handlers.hostNextRound(callback);
-
-      expect(gameEndedSpy).toHaveBeenCalledTimes(1);
-      expect(callback).toHaveBeenCalledTimes(1);
+      expect(callback).toHaveBeenCalledTimes(0);
 
       expect(hostSpy).toHaveBeenCalledTimes(1);
+
+      expect(gameEndedSpy).toHaveBeenCalledTimes(1);
+      expect(io.to).toHaveBeenCalledTimes(1);
+      expect(emitMock).toHaveBeenCalledTimes(1);
+      expect(emitMock).toHaveBeenCalledWith("navigate", GameState.finished);
+
       expect(initialiseSpy).toHaveBeenCalledTimes(0);
     });
 
