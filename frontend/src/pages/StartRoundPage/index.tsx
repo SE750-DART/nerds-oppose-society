@@ -1,16 +1,18 @@
 import React, { useState } from "react";
-import { useHistory } from "react-router-dom";
 import Button from "../../components/Button";
 import styles from "./style.module.css";
+import socket from "../../socket";
 
-const StartRoundPage = () => {
-  const memoryHistory = useHistory();
+type Props = {
+  roundLimit: number;
+};
 
+const StartRoundPage = ({ roundLimit }: Props) => {
   const [isTheMan] = useState(true);
 
   return (
     <div className={styles.container}>
-      <h4 className={styles.round}>Round X of X</h4>
+      <h4 className={styles.round}>Round X of {roundLimit}</h4>
       <div className={styles.theMan}>
         <p className={styles.theManText}>
           {isTheMan ? "You are The Man™." : "USERNAME is The Man™."}
@@ -20,7 +22,7 @@ const StartRoundPage = () => {
       {isTheMan ? (
         <Button
           text="Leshgo!"
-          handleOnClick={() => memoryHistory.push("/submitPunchline")}
+          handleOnClick={() => socket.emit("round:host-begin")}
         />
       ) : (
         <p className={styles.waitingMsg}>Waiting on X to start the round...</p>

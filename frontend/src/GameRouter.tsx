@@ -17,8 +17,8 @@ import {
 } from "./pages";
 
 export type Settings = {
-  roundLimit?: number;
-  maxPlayers?: number;
+  roundLimit: number;
+  maxPlayers: number;
 };
 
 type PathParams = {
@@ -29,12 +29,15 @@ const memoryHistory = createMemoryHistory();
 const usePlayerIdState = createPersistedState("playerId");
 const useTokenState = createPersistedState("token");
 
+const INITIAL_ROUND_LIMIT = 69;
+const INITIAL_MAX_PLAYERS = 40;
+
 const setupSockets = ({
   settings,
   setSettings,
 }: {
-  settings?: Settings;
-  setSettings: React.Dispatch<React.SetStateAction<Settings | undefined>>;
+  settings: Settings;
+  setSettings: React.Dispatch<React.SetStateAction<Settings>>;
 }) => {
   const [, setPlayerId] = usePlayerIdState("");
   const [, setToken] = useTokenState("");
@@ -123,7 +126,10 @@ const setupSockets = ({
 
 const GameRouter = () => {
   const { gameCode } = useParams<PathParams>();
-  const [settings, setSettings] = useState<Settings>();
+  const [settings, setSettings] = useState<Settings>({
+    roundLimit: INITIAL_ROUND_LIMIT,
+    maxPlayers: INITIAL_MAX_PLAYERS,
+  });
 
   setupSockets({
     settings,
@@ -142,7 +148,7 @@ const GameRouter = () => {
         </Route>
 
         <Route path="/preRound">
-          <StartRoundPage />
+          <StartRoundPage roundLimit={settings.roundLimit} />
         </Route>
 
         <Route path="/submitPunchline">
