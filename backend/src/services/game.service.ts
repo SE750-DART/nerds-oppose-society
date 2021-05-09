@@ -9,7 +9,7 @@ import {
 } from "../models";
 import { digitShortCode, ErrorType, ServiceError, shuffle } from "../util";
 import { PUNCHLINES, SETUPS } from "../resources";
-import { MaxPlayers } from "../models/game.model";
+import { MaxPlayers } from "../models/settings.model";
 
 export const createGame = async (): Promise<Game["gameCode"]> => {
   const gameCode: number = digitShortCode(6);
