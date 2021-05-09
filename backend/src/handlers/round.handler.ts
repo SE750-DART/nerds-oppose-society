@@ -99,7 +99,6 @@ export default (
         io.to(gameCode).emit("navigate", RoundState.hostChooses);
       }
     } catch (e) {
-      console.log(e);
       if (e instanceof ServiceError) {
         callback(e.message);
       } else {
