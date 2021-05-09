@@ -7,13 +7,16 @@ const equals = (punchline1: Punchline, punchline2: Punchline) =>
 
 type Context = {
   punchlines: Punchline[];
-  initialisePunchlines?: (arg0: Punchline[]) => void;
-  addPunchline?: (arg0: string) => void;
-  removePunchline?: (arg0: string) => void;
+  initialisePunchlines: (arg0: Punchline[]) => void;
+  addPunchlines: (arg0: string[]) => void;
+  removePunchline: (arg0: string) => void;
 };
 
 const PunchlinesContext = React.createContext<Context>({
   punchlines: [],
+  initialisePunchlines: () => null,
+  addPunchlines: () => null,
+  removePunchline: () => null,
 });
 
 const PunchlinesContextProvider = ({
@@ -24,7 +27,7 @@ const PunchlinesContextProvider = ({
   const {
     items: punchlines,
     initialiseItems: initialisePunchlines,
-    addItem: addPunchline,
+    addItems: addPunchlines,
     removeItem,
   } = useCrud<Punchline>(equals);
 
@@ -42,7 +45,7 @@ const PunchlinesContextProvider = ({
   const context = {
     punchlines,
     initialisePunchlines,
-    addPunchline,
+    addPunchlines,
     removePunchline,
   };
 

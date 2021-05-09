@@ -4,6 +4,7 @@ import { createMemoryHistory } from "history";
 import createPersistedState from "use-persisted-state";
 import socket from "./socket";
 import { PlayersContext } from "./providers/ContextProviders/PlayersContextProvider";
+import { PunchlinesContext } from "./providers/ContextProviders/PunchlinesContextProvider";
 import {
   BasicPage,
   EndGamePage,
@@ -40,15 +41,23 @@ const setupSockets = ({
   const { setHost, initialisePlayers, addPlayer, removePlayer } = useContext(
     PlayersContext
   );
+  const { addPunchlines } = useContext(PunchlinesContext);
 
+  // Connection
   const handleNavigate = useCallback(memoryHistory.push, [memoryHistory.push]);
   const handleHost = useCallback(setHost, [setHost]);
   const handlePlayersInitial = useCallback(initialisePlayers, [
     initialisePlayers,
   ]);
+  const handleSettingsInitial = useCallback(setSettings, [setSettings]);
+  const handleConnectError = useCallback(() => {
+    setPlayerId("");
+    setToken("");
+  }, [setPlayerId, setToken]);
+
+  // Lobby
   const handlePlayersAdd = useCallback(addPlayer, [addPlayer]);
   const handlePlayersRemove = useCallback(removePlayer, [removePlayer]);
-  const handleSettingsInitial = useCallback(setSettings, [setSettings]);
   const handleSettingsUpdate = useCallback(
     ({ setting, value }: { setting: string; value: number }) => {
       let key;
@@ -72,31 +81,42 @@ const setupSockets = ({
     },
     [setSettings]
   );
-  const handleConnectError = useCallback(() => {
-    setPlayerId("");
-    setToken("");
-  }, [setPlayerId, setToken]);
+
+  // Round
+  const handlePunchlinesAdd = useCallback(addPunchlines, [addPunchlines]);
 
   useEffect(() => {
+    // Connection
     socket.on("navigate", handleNavigate);
     socket.on("host", handleHost);
     socket.on("players:initial", handlePlayersInitial);
+    socket.on("settings:initial", handleSettingsInitial);
+    socket.on("connect_error", handleConnectError);
+
+    // Lobby
     socket.on("players:add", handlePlayersAdd);
     socket.on("players:remove", handlePlayersRemove);
-    socket.on("settings:initial", handleSettingsInitial);
     socket.on("settings:update", handleSettingsUpdate);
-    socket.on("connect_error", handleConnectError);
+
+    // Round
+    socket.on("punchlines:add", handlePunchlinesAdd);
 
     return () => {
       // Remove event handlers when component is unmounted to prevent buildup of identical handlers
+      // Connection
       socket.off("navigate", handleNavigate);
       socket.off("host", handleHost);
       socket.off("players:initial", handlePlayersInitial);
+      socket.off("settings:initial", handleSettingsInitial);
+      socket.off("connect_error", handleConnectError);
+
+      // Lobby
       socket.off("players:add", handlePlayersAdd);
       socket.off("players:remove", handlePlayersRemove);
-      socket.off("settings:initial", handleSettingsInitial);
       socket.off("settings:update", handleSettingsUpdate);
-      socket.off("connect_error", handleConnectError);
+
+      // Round
+      socket.off("punchlines:add", handlePunchlinesAdd);
     };
   });
 };

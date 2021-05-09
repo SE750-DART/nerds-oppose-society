@@ -4,6 +4,7 @@ export type CrudHookType<Type> = {
   items: Type[];
   initialiseItems: (initialItems: Type[]) => void;
   addItem: (item: Type) => void;
+  addItems: (items: Type[]) => void;
   removeItem: (itemToRemove: Type) => void;
   updateItem: (updatedItem: Type) => void;
 };
@@ -22,6 +23,8 @@ const useCrud = <Type>(
 
   const addItem = (item: Type) => setItems([...items, item]);
 
+  const addItems = (itemsToAdd: Type[]) => setItems([...items, ...itemsToAdd]);
+
   const removeItem = (itemToRemove: Type) =>
     setItems(items.filter((item) => !equals(item, itemToRemove)));
 
@@ -39,6 +42,7 @@ const useCrud = <Type>(
 
   return {
     items,
+    addItems,
     initialiseItems,
     addItem,
     removeItem,
