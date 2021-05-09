@@ -12,6 +12,8 @@ import { RoundContext } from "../../providers/ContextProviders/RoundContextProvi
 import socket from "../../socket";
 
 const SubmitPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
+  const [, setResponse] = useState("");
+
   const { players } = useContext(PlayersContext);
   const { punchlines } = useContext(PunchlinesContext);
   const {
@@ -97,7 +99,9 @@ const SubmitPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
                 socket.emit(
                   "round:player-choose",
                   [punchlineSelected],
-                  (res: any) => console.log(res)
+                  (response: string) => {
+                    setResponse(response);
+                  }
                 );
               }}
             />
