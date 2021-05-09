@@ -1,4 +1,4 @@
-import React, { CSSProperties, useState } from "react";
+import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
 import styles from "./style.module.css";
 import Dropdown from "../../components/Dropdown";
@@ -6,6 +6,7 @@ import PlayerList from "../../components/PlayerList";
 import ProgressBar from "../../components/ProgressBar";
 import PunchlineCard from "../../components/PunchlineCard";
 import Button from "../../components/Button";
+import Setup from "../../components/Setup";
 
 const SubmitPunchlinePage = () => {
   const memoryHistory = useHistory();
@@ -70,6 +71,7 @@ const SubmitPunchlinePage = () => {
       status: "available",
     },
   ];
+  const setup: string = "Daddy, why is mommy crying?";
 
   const [punchlineSelected, setPunchlineSelected] = useState("");
   const [punchlineSubmitted, setPunchlineSubmitted] = useState("");
@@ -86,15 +88,6 @@ const SubmitPunchlinePage = () => {
     }
   };
 
-  const setup: string = "Daddy, why is mommy crying?";
-
-  let setupSize: CSSProperties = {};
-  if (setup.length > 75) {
-    setupSize = { fontSize: "24px" };
-  } else if (setup.length > 45) {
-    setupSize = { fontSize: "32px" };
-  }
-
   return (
     <>
       <Dropdown
@@ -103,18 +96,11 @@ const SubmitPunchlinePage = () => {
         header="Scoreboard"
       />
       <div className={styles.container}>
-        <div className={`${styles.setup}`}>
-          <h5>The Setup:</h5>
-          <h2 className={styles.punchlineText} style={setupSize}>
-            {setup}
-          </h2>
-        </div>
+        <Setup setupText={setup} />
 
-        <div className={styles.spacer}>
-          <ProgressBar playersChosen={0} playersTotal={0} />
-        </div>
+        <ProgressBar playersChosen={0} playersTotal={0} />
 
-        <h5 style={{ marginBottom: `18px` }}>
+        <h5 style={{ margin: `18px 0` }}>
           {punchlineSubmitted ? `Punchline sent!` : `Choose a Punchline:`}
         </h5>
         {punchlines.map((punchline) => {

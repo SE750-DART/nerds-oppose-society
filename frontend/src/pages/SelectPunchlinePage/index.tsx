@@ -1,4 +1,4 @@
-import React, { CSSProperties, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import styles from "./style.module.css";
 import Dropdown from "../../components/Dropdown";
@@ -6,6 +6,7 @@ import PlayerList from "../../components/PlayerList";
 import ProgressBar from "../../components/ProgressBar";
 import PunchlineCard from "../../components/PunchlineCard";
 import Button from "../../components/Button";
+import Setup from "../../components/Setup";
 
 interface Punchline {
   id: string;
@@ -70,6 +71,7 @@ const SelectPunchlinePage = () => {
       blurred: true,
     },
   ];
+  const setup: string = "Daddy, why is mommy crying?";
 
   const [punchlineSelected, setPunchlineSelected] = useState("");
   const [punchlines, setPunchlines] = useState<Punchline[]>([]);
@@ -125,15 +127,6 @@ const SelectPunchlinePage = () => {
     }
   };
 
-  const setup: string = "Daddy, why is mommy crying?";
-
-  let setupSize: CSSProperties = {};
-  if (setup.length > 75) {
-    setupSize = { fontSize: "24px" };
-  } else if (setup.length > 45) {
-    setupSize = { fontSize: "32px" };
-  }
-
   return (
     <>
       <Dropdown
@@ -146,16 +139,7 @@ const SelectPunchlinePage = () => {
         <p className={styles.theManText}>You are The Man™.</p>
         <p style={{ fontStyle: `italic` }}>{promptMessage}</p>
 
-        <div
-          className={`${styles.setup} ${
-            waiting ? styles.setupNoGradient : undefined
-          }`}
-        >
-          <h5>The Setup:</h5>
-          <h2 className={styles.punchlineText} style={setupSize}>
-            {setup}
-          </h2>
-        </div>
+        <Setup setupText={setup} />
 
         {waiting && <ProgressBar playersChosen={0} playersTotal={0} />}
 
