@@ -116,6 +116,7 @@ describe("Round handler", () => {
             },
           },
         ],
+        save: jest.fn(),
       } as unknown) as Game;
       socketsByPlayerId = (new Map([
         ["1", { emit: socketMock }],
@@ -145,7 +146,7 @@ describe("Round handler", () => {
 
       expect(activeSpy).toHaveBeenCalledTimes(1);
       expect(allocateSpy).toHaveBeenCalledTimes(1);
-      expect(allocateSpy).toHaveBeenCalledWith(game, "1", 10);
+      expect(allocateSpy).toHaveBeenCalledWith(game, "1", 10, false);
 
       expect(socketMock).toHaveBeenCalledTimes(2);
       expect(socketMock).toHaveBeenCalledWith("punchlines:add", [
@@ -153,6 +154,8 @@ describe("Round handler", () => {
         "To go to KFC",
       ]);
       expect(socketMock).toHaveBeenCalledWith("punchlines:remove", []);
+
+      expect(game.save).toHaveBeenCalledTimes(1);
 
       expect(io.to).toHaveBeenCalledTimes(1);
       expect(io.to).toHaveBeenCalledWith("42069");
@@ -173,7 +176,7 @@ describe("Round handler", () => {
 
       expect(activeSpy).toHaveBeenCalledTimes(1);
       expect(allocateSpy).toHaveBeenCalledTimes(1);
-      expect(allocateSpy).toHaveBeenCalledWith(game, "1", 12);
+      expect(allocateSpy).toHaveBeenCalledWith(game, "1", 12, false);
 
       expect(socketMock).toHaveBeenCalledTimes(2);
       expect(socketMock).toHaveBeenCalledWith("punchlines:add", [
@@ -181,6 +184,8 @@ describe("Round handler", () => {
         "To go to KFC",
       ]);
       expect(socketMock).toHaveBeenCalledWith("punchlines:remove", []);
+
+      expect(game.save).toHaveBeenCalledTimes(1);
 
       expect(io.to).toHaveBeenCalledTimes(1);
       expect(io.to).toHaveBeenCalledWith("42069");
