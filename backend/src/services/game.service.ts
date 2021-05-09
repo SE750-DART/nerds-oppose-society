@@ -134,7 +134,6 @@ export const shuffleDiscardedPunchlines = async (
     requiredDeckSize = handSize === 8 ? 2 * maxPlayers : maxPlayers;
   }
 
-  console.log(`req deck: ${requiredDeckSize}`);
   if (game.punchlines.length <= requiredDeckSize) {
     const discardedPunchlines: string[] = game.discardedPunchlines;
     const shuffledDiscard: string[] = shuffle(discardedPunchlines);

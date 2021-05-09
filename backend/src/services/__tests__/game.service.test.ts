@@ -407,7 +407,6 @@ describe("reshuffle setups/punchlines service", () => {
       const game: Game = await getGame(gameCode);
       const punchlines = game.punchlines;
       const discards = punchlines.splice(4 * MaxPlayers + 1, punchlines.length);
-      console.log(`discards: ${discards.length}, setups:${punchlines.length}`);
       game.punchlines = punchlines;
       game.discardedPunchlines.push(...discards);
       await game.save();
