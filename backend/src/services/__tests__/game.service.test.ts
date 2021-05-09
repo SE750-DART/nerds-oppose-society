@@ -279,6 +279,147 @@ describe("allocateCards Service", () => {
   });
 });
 
+describe("reshuffle setups/punchlines service", () => {
+  let gameCode: string;
+  let setupNum: number;
+  let punchlineNum: number;
+  let playerId: Player["id"];
+
+  beforeEach(async () => {
+    gameCode = await createGame();
+    const game: Game = await getGame(gameCode);
+    setupNum = game.setups.length;
+    punchlineNum = game.punchlines.length;
+    playerId = (await createPlayer(gameCode, "Bob")).playerId;
+  });
+
+  describe("setups shuffling", () => {
+    it("should shuffle the deck when there are only 5 setups left", async () => {
+      const game: Game = await getGame(gameCode);
+      const setups = game.setups;
+      const discards = setups.splice(5, setups.length);
+      game.setups = setups;
+      game.discardedSetups.push(...discards);
+      await game.save();
+      await shuffleDiscardedSetups(game);
+      expect(game.setups.length).toBe(setupNum);
+      expect(game.discardedSetups.length).toBe(0);
+    });
+
+    it("should not shuffle the deck when there are more than 5 setups left", async () => {
+      const game: Game = await getGame(gameCode);
+      const setups = game.setups;
+      const discards = setups.splice(6, setups.length);
+      game.setups = setups;
+      game.discardedSetups.push(...discards);
+      await game.save();
+      await shuffleDiscardedSetups(game);
+      expect(game.setups.length).toBe(6);
+      expect(game.discardedSetups.length).toBe(setupNum - 6);
+    });
+  });
+
+  describe("punchlines shuffling", () => {
+    it(`should shuffle the punchlines when: hand size 8, draw 4, 4 * ${MaxPlayers} punchlines left`, async () => {
+      const game: Game = await getGame(gameCode);
+      await allocatePlayerPunchlines(game, playerId, 8);
+
+      game.setups.push({
+        setup: "why did the chicken cross the road?",
+        type: SetupType.drawTwoPickThree,
+      });
+
+      const punchlines = game.punchlines;
+      const discards = punchlines.splice(4 * MaxPlayers, punchlines.length);
+
+      game.punchlines = punchlines;
+      game.discardedPunchlines.push(...discards);
+      await game.save();
+
+      await shuffleDiscardedPunchlines(game);
+      expect(game.punchlines.length).toBe(punchlineNum - 8);
+      expect(game.discardedPunchlines.length).toBe(0);
+    });
+
+    it(`should shuffle the punchlines when: hand size 9, draw 3, 3 * ${MaxPlayers} punchlines left`, async () => {
+      const game: Game = await getGame(gameCode);
+      await allocatePlayerPunchlines(game, playerId, 9);
+
+      game.setups.push({
+        setup: "why did the chicken cross the road?",
+        type: SetupType.drawTwoPickThree,
+      });
+
+      const punchlines = game.punchlines;
+      const discards = punchlines.splice(3 * MaxPlayers, punchlines.length);
+
+      game.punchlines = punchlines;
+      game.discardedPunchlines.push(...discards);
+      await game.save();
+
+      await shuffleDiscardedPunchlines(game);
+      expect(game.punchlines.length).toBe(punchlineNum - 9);
+      expect(game.discardedPunchlines.length).toBe(0);
+    });
+
+    it(`should shuffle the punchlines when: hand size 8, draw 2, 2 * ${MaxPlayers} punchlines left`, async () => {
+      const game: Game = await getGame(gameCode);
+      await allocatePlayerPunchlines(game, playerId, 8);
+
+      game.setups.push({
+        setup: "why did the chicken cross the road?",
+        type: SetupType.pickOne,
+      });
+
+      const punchlines = game.punchlines;
+      const discards = punchlines.splice(2 * MaxPlayers, punchlines.length);
+
+      game.punchlines = punchlines;
+      game.discardedPunchlines.push(...discards);
+      await game.save();
+
+      await shuffleDiscardedPunchlines(game);
+      expect(game.punchlines.length).toBe(punchlineNum - 8);
+      expect(game.discardedPunchlines.length).toBe(0);
+    });
+
+    it(`should shuffle the punchlines when: hand size 9, draw 1, 1 * ${MaxPlayers} punchlines left`, async () => {
+      const game: Game = await getGame(gameCode);
+      await allocatePlayerPunchlines(game, playerId, 9);
+
+      game.setups.push({
+        setup: "why did the chicken cross the road?",
+        type: SetupType.pickTwo,
+      });
+
+      const punchlines = game.punchlines;
+      const discards = punchlines.splice(MaxPlayers, punchlines.length);
+
+      game.punchlines = punchlines;
+      game.discardedPunchlines.push(...discards);
+      await game.save();
+
+      await shuffleDiscardedPunchlines(game);
+      expect(game.punchlines.length).toBe(punchlineNum - 9);
+      expect(game.discardedPunchlines.length).toBe(0);
+    });
+
+    it(`should not shuffle punchlines when there are more than 4 * ${MaxPlayers} punchlines`, async () => {
+      const game: Game = await getGame(gameCode);
+      const punchlines = game.punchlines;
+      const discards = punchlines.splice(4 * MaxPlayers + 1, punchlines.length);
+      game.punchlines = punchlines;
+      game.discardedPunchlines.push(...discards);
+      await game.save();
+      await shuffleDiscardedPunchlines(game);
+      expect(game.punchlines.length).toBe(4 * MaxPlayers + 1);
+      expect(game.discardedPunchlines.length).toBe(
+        punchlineNum - 4 * MaxPlayers - 1
+      );
+    });
+  });
+});
+
 describe("checkGameEnded service", () => {
   let gameCode: string;
   const randomHostId = "6094a2e1d7909d84ae35819c";
@@ -333,148 +474,5 @@ describe("checkGameEnded service", () => {
     expect(await checkGameEnded(gameCode)).toBe(true);
     game = await getGame(gameCode);
     expect(game.state).toBe(GameState.finished);
-  });
-  describe("reshuffle setups/punchlines service", () => {
-    let gameCode: string;
-    let setupNum: number;
-    let punchlineNum: number;
-    let playerId: Player["id"];
-
-    beforeEach(async () => {
-      gameCode = await createGame();
-      const game: Game = await getGame(gameCode);
-      setupNum = game.setups.length;
-      punchlineNum = game.punchlines.length;
-      playerId = (await createPlayer(gameCode, "Bob")).playerId;
-    });
-
-    describe("setups shuffling", () => {
-      it("should shuffle the deck when there are only 5 setups left", async () => {
-        const game: Game = await getGame(gameCode);
-        const setups = game.setups;
-        const discards = setups.splice(5, setups.length);
-        game.setups = setups;
-        game.discardedSetups.push(...discards);
-        await game.save();
-        await shuffleDiscardedSetups(game);
-        expect(game.setups.length).toBe(setupNum);
-        expect(game.discardedSetups.length).toBe(0);
-      });
-
-      it("should not shuffle the deck when there are more than 5 setups left", async () => {
-        const game: Game = await getGame(gameCode);
-        const setups = game.setups;
-        const discards = setups.splice(6, setups.length);
-        game.setups = setups;
-        game.discardedSetups.push(...discards);
-        await game.save();
-        await shuffleDiscardedSetups(game);
-        expect(game.setups.length).toBe(6);
-        expect(game.discardedSetups.length).toBe(setupNum - 6);
-      });
-    });
-
-    describe("punchlines shuffling", () => {
-      it(`should shuffle the punchlines when: hand size 8, draw 4, 4 * ${MaxPlayers} punchlines left`, async () => {
-        const game: Game = await getGame(gameCode);
-        await allocatePlayerPunchlines(game, playerId, 8);
-
-        game.setups.push({
-          setup: "why did the chicken cross the road?",
-          type: SetupType.drawTwoPickThree,
-        });
-
-        const punchlines = game.punchlines;
-        const discards = punchlines.splice(4 * MaxPlayers, punchlines.length);
-
-        game.punchlines = punchlines;
-        game.discardedPunchlines.push(...discards);
-        await game.save();
-
-        await shuffleDiscardedPunchlines(game);
-        expect(game.punchlines.length).toBe(punchlineNum - 8);
-        expect(game.discardedPunchlines.length).toBe(0);
-      });
-
-      it(`should shuffle the punchlines when: hand size 9, draw 3, 3 * ${MaxPlayers} punchlines left`, async () => {
-        const game: Game = await getGame(gameCode);
-        await allocatePlayerPunchlines(game, playerId, 9);
-
-        game.setups.push({
-          setup: "why did the chicken cross the road?",
-          type: SetupType.drawTwoPickThree,
-        });
-
-        const punchlines = game.punchlines;
-        const discards = punchlines.splice(3 * MaxPlayers, punchlines.length);
-
-        game.punchlines = punchlines;
-        game.discardedPunchlines.push(...discards);
-        await game.save();
-
-        await shuffleDiscardedPunchlines(game);
-        expect(game.punchlines.length).toBe(punchlineNum - 9);
-        expect(game.discardedPunchlines.length).toBe(0);
-      });
-
-      it(`should shuffle the punchlines when: hand size 8, draw 2, 2 * ${MaxPlayers} punchlines left`, async () => {
-        const game: Game = await getGame(gameCode);
-        await allocatePlayerPunchlines(game, playerId, 8);
-
-        game.setups.push({
-          setup: "why did the chicken cross the road?",
-          type: SetupType.pickOne,
-        });
-
-        const punchlines = game.punchlines;
-        const discards = punchlines.splice(2 * MaxPlayers, punchlines.length);
-
-        game.punchlines = punchlines;
-        game.discardedPunchlines.push(...discards);
-        await game.save();
-
-        await shuffleDiscardedPunchlines(game);
-        expect(game.punchlines.length).toBe(punchlineNum - 8);
-        expect(game.discardedPunchlines.length).toBe(0);
-      });
-
-      it(`should shuffle the punchlines when: hand size 9, draw 1, 1 * ${MaxPlayers} punchlines left`, async () => {
-        const game: Game = await getGame(gameCode);
-        await allocatePlayerPunchlines(game, playerId, 9);
-
-        game.setups.push({
-          setup: "why did the chicken cross the road?",
-          type: SetupType.pickTwo,
-        });
-
-        const punchlines = game.punchlines;
-        const discards = punchlines.splice(MaxPlayers, punchlines.length);
-
-        game.punchlines = punchlines;
-        game.discardedPunchlines.push(...discards);
-        await game.save();
-
-        await shuffleDiscardedPunchlines(game);
-        expect(game.punchlines.length).toBe(punchlineNum - 9);
-        expect(game.discardedPunchlines.length).toBe(0);
-      });
-
-      it(`should not shuffle punchlines when there are more than 4 * ${MaxPlayers} punchlines`, async () => {
-        const game: Game = await getGame(gameCode);
-        const punchlines = game.punchlines;
-        const discards = punchlines.splice(
-          4 * MaxPlayers + 1,
-          punchlines.length
-        );
-        game.punchlines = punchlines;
-        game.discardedPunchlines.push(...discards);
-        await game.save();
-        await shuffleDiscardedPunchlines(game);
-        expect(game.punchlines.length).toBe(4 * MaxPlayers + 1);
-        expect(game.discardedPunchlines.length).toBe(
-          punchlineNum - 4 * MaxPlayers - 1
-        );
-      });
-    });
   });
 });
