@@ -1,7 +1,12 @@
-"3.9"
-"nos-redis"
-    "redis:latest"
-    - "6969:6969"
-  "nos-db"
-    "mongo:latest"
-    - "27017:27017"
+version: "3.9"
+services:
+  redis:
+    container_name: "nos-redis"
+    image: "redis:latest"
+    ports:
+      - "6969:6969"
+  mongo:
+    container_name: "nos-db"
+    image: "mongo:latest"
+    ports:
+      - "27017:27017"
