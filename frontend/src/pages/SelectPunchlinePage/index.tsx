@@ -8,6 +8,7 @@ import PunchlineCard from "../../components/PunchlineCard";
 import Button from "../../components/Button";
 import Setup from "../../components/Setup";
 import { PlayersContext } from "../../providers/ContextProviders/PlayersContextProvider";
+import { PunchlinesContext } from "../../providers/ContextProviders/PunchlinesContextProvider";
 import { RoundContext } from "../../providers/ContextProviders/RoundContextProvider";
 import socket from "../../socket";
 
@@ -16,11 +17,11 @@ const usePlayerIdState = createPersistedState("playerId");
 const SelectPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
   const [, setResponse] = useState("");
 
-  const { host } = useContext(PlayersContext);
+  const { host, players } = useContext(PlayersContext);
   const [playerId] = usePlayerIdState("");
   const playerIsHost = playerId === host;
 
-  const { players } = useContext(PlayersContext);
+  const { removePunchline } = useContext(PunchlinesContext);
   const {
     roundNumber,
     setup,
@@ -138,6 +139,7 @@ const SelectPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
             <Button
               text="Send it"
               handleOnClick={() => {
+                removePunchline(punchlineSelected);
                 socket.emit(
                   "round:host-choose",
                   [punchlineSelected],
