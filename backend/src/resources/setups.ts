@@ -24,19 +24,19 @@ export default <Setup[]>[
       "Next from J.K. Rowling: Harry Potter and the Chamber of __________.",
     type: SetupType.pickOne,
   },
-  {
-    setup: "That's right, I killed __________. How, you ask? __________.",
-    type: SetupType.pickTwo,
-  },
+  // {
+  //   setup: "That's right, I killed __________. How, you ask? __________.",
+  //   type: SetupType.pickTwo,
+  // },
   {
     setup:
       "I'm sorry, Professor, but I couldn't complete my homework because of __________.",
     type: SetupType.pickOne,
   },
-  {
-    setup: "And the Academy Award for __________ goes to __________.",
-    type: SetupType.pickTwo,
-  },
+  // {
+  //   setup: "And the Academy Award for __________ goes to __________.",
+  //   type: SetupType.pickTwo,
+  // },
   {
     setup: "Dude, do not go in that bathroom. There's __________ in there.",
     type: SetupType.pickOne,
@@ -47,10 +47,10 @@ export default <Setup[]>[
       "It's a pity that kids these days are all getting involved with __________.",
     type: SetupType.pickOne,
   },
-  {
-    setup: "Step 1: __________. Step 2: __________. Step 3: Profit.",
-    type: SetupType.pickTwo,
-  },
+  // {
+  //   setup: "Step 1: __________. Step 2: __________. Step 3: Profit.",
+  //   type: SetupType.pickTwo,
+  // },
   {
     setup: "__________. Betcha can't have just one!",
     type: SetupType.pickOne,
@@ -59,10 +59,10 @@ export default <Setup[]>[
     setup: "Kids, I don't need drugs to get high. I'm high on __________.",
     type: SetupType.pickOne,
   },
-  {
-    setup: "For my next trick, I will pull __________ out of __________.",
-    type: SetupType.pickTwo,
-  },
+  // {
+  //   setup: "For my next trick, I will pull __________ out of __________.",
+  //   type: SetupType.pickTwo,
+  // },
   {
     setup:
       "While the United States raced the Soviet Union to the moon, the Mexican government funneled millions of pesos into research on __________.",
@@ -79,10 +79,10 @@ export default <Setup[]>[
       "I'm going on a cleanse this week. Nothing but kale juice and __________.",
     type: SetupType.pickOne,
   },
-  {
-    setup: "________ + ________ = __________.",
-    type: SetupType.drawTwoPickThree,
-  },
+  // {
+  //   setup: "________ + ________ = __________.",
+  //   type: SetupType.drawTwoPickThree,
+  // },
   {
     setup:
       "When Pharaoh remained unmoved, Moses called down a Plague of __________.",
@@ -94,10 +94,10 @@ export default <Setup[]>[
     type: SetupType.pickOne,
   },
   { setup: "Daddy, why is mommy crying?", type: SetupType.pickOne },
-  {
-    setup: "When I was tripping on acid, __________ turned into __________.",
-    type: SetupType.pickTwo,
-  },
+  // {
+  //   setup: "When I was tripping on acid, __________ turned into __________.",
+  //   type: SetupType.pickTwo,
+  // },
   {
     setup: "50% of all marriages end in __________.",
     type: SetupType.pickOne,
@@ -135,10 +135,10 @@ export default <Setup[]>[
     type: SetupType.pickOne,
   },
   { setup: "White people like __________.", type: SetupType.pickOne },
-  {
-    setup: "__________ is a slippery slope that leads to __________.",
-    type: SetupType.pickTwo,
-  },
+  // {
+  //   setup: "__________ is a slippery slope that leads to __________.",
+  //   type: SetupType.pickTwo,
+  // },
   { setup: "Why do I hurt all over?", type: SetupType.pickOne },
   {
     setup:
@@ -164,11 +164,11 @@ export default <Setup[]>[
       "Dear Abby, I'm having some trouble with __________ and would like your advice.",
     type: SetupType.pickOne,
   },
-  {
-    setup:
-      "In M. Night Shyamalan's new movie, Bruce Willis discovers that __________ had really been __________ all along.",
-    type: SetupType.pickTwo,
-  },
+  // {
+  //   setup:
+  //     "In M. Night Shyamalan's new movie, Bruce Willis discovers that __________ had really been __________ all along.",
+  //   type: SetupType.pickTwo,
+  // },
   {
     setup: "When I am President, I will create the Department of __________.",
     type: SetupType.pickOne,
@@ -179,7 +179,7 @@ export default <Setup[]>[
     setup: "IF you like __________, YOU MIGHT BE A REDNECK.",
     type: SetupType.pickOne,
   },
-  { setup: "Make a haiku.", type: SetupType.drawTwoPickThree },
+  // { setup: "Make a haiku.", type: SetupType.drawTwoPickThree },
   { setup: "What made my first kiss so awkward?", type: SetupType.pickOne },
   {
     setup:
@@ -201,11 +201,11 @@ export default <Setup[]>[
     type: SetupType.pickOne,
   },
   { setup: "__________. That was so metal.", type: SetupType.pickOne },
-  {
-    setup:
-      "I never truly understood __________ until I encountered __________.",
-    type: SetupType.pickTwo,
-  },
+  // {
+  //   setup:
+  //     "I never truly understood __________ until I encountered __________.",
+  //   type: SetupType.pickTwo,
+  // },
   {
     setup: "During sex, I like to think about __________.",
     type: SetupType.pickOne,
@@ -230,15 +230,15 @@ export default <Setup[]>[
     type: SetupType.pickOne,
   },
   { setup: "What will always get you laid?", type: SetupType.pickOne },
-  {
-    setup:
-      "They said we were crazy. They said we couldn't put __________ inside of _________. They were wrong.",
-    type: SetupType.pickTwo,
-  },
-  {
-    setup: 'Lifetime® presents "__________: the Story of __________."',
-    type: SetupType.pickTwo,
-  },
+  // {
+  //   setup:
+  //     "They said we were crazy. They said we couldn't put __________ inside of _________. They were wrong.",
+  //   type: SetupType.pickTwo,
+  // },
+  // {
+  //   setup: 'Lifetime® presents "__________: the Story of __________."',
+  //   type: SetupType.pickTwo,
+  // },
   {
     setup: "__________: kid-tested, mother-approved.",
     type: SetupType.pickOne,
@@ -273,11 +273,11 @@ export default <Setup[]>[
       "A recent laboratory study shows that undergraduates have 50% less sex after being exposed to __________.",
     type: SetupType.pickOne,
   },
-  {
-    setup:
-      "Introducing the amazing superhero/sidekick duo! It's __________ and __________!",
-    type: SetupType.pickTwo,
-  },
+  // {
+  //   setup:
+  //     "Introducing the amazing superhero/sidekick duo! It's __________ and __________!",
+  //   type: SetupType.pickTwo,
+  // },
   {
     setup: "Next on ESPN2: The World Series of __________.",
     type: SetupType.pickOne,
