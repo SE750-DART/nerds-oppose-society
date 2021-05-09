@@ -17,7 +17,7 @@ interface Punchline {
 const SelectPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
   const memoryHistory = useHistory();
 
-  const { roundNumber } = useContext(RoundContext);
+  const { roundNumber, setup } = useContext(RoundContext);
 
   const dummyPunchlines: Punchline[] = [
     {
@@ -150,7 +150,7 @@ const SelectPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
           }`}
         >
           <h5>The Setup:</h5>
-          <h2>Daddy, why is mommy crying?</h2>
+          <h2>{setup.setup}</h2>
         </div>
 
         {waiting && <ProgressBar playersChosen={0} playersTotal={0} />}

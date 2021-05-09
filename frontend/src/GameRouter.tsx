@@ -46,7 +46,7 @@ const setupSockets = ({
     PlayersContext
   );
   const { addPunchlines } = useContext(PunchlinesContext);
-  const { setRoundNumber } = useContext(RoundContext);
+  const { setRoundNumber, setSetup } = useContext(RoundContext);
 
   // Connection
   const handleNavigate = useCallback(
@@ -93,6 +93,7 @@ const setupSockets = ({
   // Round
   const handlePunchlinesAdd = useCallback(addPunchlines, [addPunchlines]);
   const handleRoundNumber = useCallback(setRoundNumber, [setRoundNumber]);
+  const handleRoundSetup = useCallback(setSetup, [setSetup]);
 
   useEffect(() => {
     // Connection
@@ -110,6 +111,7 @@ const setupSockets = ({
     // Round
     socket.on("punchlines:add", handlePunchlinesAdd);
     socket.on("round:number", handleRoundNumber);
+    socket.on("round:setup", handleRoundSetup);
 
     return () => {
       // Remove event handlers when component is unmounted to prevent buildup of identical handlers
@@ -128,6 +130,7 @@ const setupSockets = ({
       // Round
       socket.off("punchlines:add", handlePunchlinesAdd);
       socket.off("round:number", handleRoundNumber);
+      socket.off("round:setup", handleRoundSetup);
     };
   });
 };

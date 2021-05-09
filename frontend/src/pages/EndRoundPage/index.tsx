@@ -8,9 +8,8 @@ import { RoundContext } from "../../providers/ContextProviders/RoundContextProvi
 const EndRoundPage = ({ roundLimit }: { roundLimit: number }) => {
   const memoryHistory = useHistory();
 
-  const { roundNumber } = useContext(RoundContext);
+  const { roundNumber, setup } = useContext(RoundContext);
 
-  const [setup] = useState("Daddy, why is Mommy crying?");
   const [winningPunchline] = useState(
     "Looking in the mirror, applying lipstick, and whispering “tonight, you will have sex with Tom Cruise.”"
   );
@@ -41,7 +40,7 @@ const EndRoundPage = ({ roundLimit }: { roundLimit: number }) => {
       <div className={styles.endOfRound}>
         <div style={{ margin: `24px 0` }}>
           <h5>The Setup:</h5>
-          <h2>{setup}</h2>
+          <h2>{setup.setup}</h2>
         </div>
 
         <h5 style={{ marginBottom: `12px` }}>Winning Punchline:</h5>

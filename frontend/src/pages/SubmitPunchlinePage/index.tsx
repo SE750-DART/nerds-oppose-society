@@ -11,7 +11,7 @@ import { RoundContext } from "../../providers/ContextProviders/RoundContextProvi
 const SubmitPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
   const memoryHistory = useHistory();
 
-  const { roundNumber } = useContext(RoundContext);
+  const { roundNumber, setup } = useContext(RoundContext);
 
   const dummyPunchlines: {
     id: string;
@@ -103,7 +103,7 @@ const SubmitPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
       <div className={styles.container}>
         <div className={styles.spacer}>
           <h5>The Setup:</h5>
-          <h2>Daddy, why is mommy crying?</h2>
+          <h2>{setup.setup}</h2>
         </div>
         <div className={styles.spacer}>
           <ProgressBar playersChosen={0} playersTotal={0} />
