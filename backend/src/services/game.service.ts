@@ -105,23 +105,21 @@ export const allocatePlayerPunchlines = async (
   const punchlinesRemoved: string[] = [];
 
   if (player !== null) {
-    if (player.punchlines.length > punchlineLimit) {
-      while (player.punchlines.length > punchlineLimit) {
-        const punchline = player.punchlines.pop() as string;
-        punchlinesRemoved.push(punchline);
-        game.discardedPunchlines.push(punchline);
-      }
-    } else {
-      while (player.punchlines.length < punchlineLimit) {
-        const punchlineFromDeck = game.punchlines.pop();
-        if (punchlineFromDeck === undefined) {
-          // Potentially reshuffle deck if it is undefined
-          throw new ServiceError(ErrorType.gameError, "No punchlines in deck");
-        }
+    while (player.punchlines.length > punchlineLimit) {
+      const punchline = player.punchlines.pop() as string;
+      punchlinesRemoved.push(punchline);
+      game.discardedPunchlines.push(punchline);
+    }
 
-        punchlinesAdded.push(punchlineFromDeck);
-        player.punchlines.push(punchlineFromDeck);
+    while (player.punchlines.length < punchlineLimit) {
+      const punchlineFromDeck = game.punchlines.pop();
+      if (punchlineFromDeck === undefined) {
+        // Potentially reshuffle deck if it is undefined
+        throw new ServiceError(ErrorType.gameError, "No punchlines in deck");
       }
+
+      punchlinesAdded.push(punchlineFromDeck);
+      player.punchlines.push(punchlineFromDeck);
     }
     await game.save();
 
