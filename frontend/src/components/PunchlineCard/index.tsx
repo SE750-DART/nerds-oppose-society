@@ -5,7 +5,7 @@ import styles from "./style.module.css";
 
 interface PunchlineCardProps {
   text: string;
-  handleOnClick: () => void;
+  handleOnClick?: () => void;
   status?: "available" | "selected" | "submitted";
   newCard?: boolean;
   selectedNum?: 1 | 2 | 3;
@@ -55,7 +55,7 @@ const PunchlineCard = ({
       )}
       <p
         className={`${textStyle} ${blurred ? styles.textBlurred : undefined}`}
-        style={{ transition: `0.3s` }}
+        style={{ transition: "0.3s" }}
       >
         {text}
       </p>

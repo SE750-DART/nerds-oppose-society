@@ -72,7 +72,7 @@ const SelectPunchlinePage = () => {
   ];
 
   const [punchlineSelected, setPunchlineSelected] = useState("");
-  const [punchlines, setPunchlines] = useState([] as Punchline[]);
+  const [punchlines, setPunchlines] = useState<Punchline[]>([]);
   const [waiting, setWaiting] = useState(true);
   const [finishedReading, setFinishedReading] = useState(false);
 

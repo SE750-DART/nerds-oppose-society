@@ -40,7 +40,7 @@ const EndRoundPage = () => {
         </div>
 
         <h5 style={{ marginBottom: `12px` }}>Winning Punchline:</h5>
-        <PunchlineCard text={winningPunchline} handleOnClick={() => {}} />
+        <PunchlineCard text={winningPunchline} />
 
         <h2>Scoreboard</h2>
         <PlayerList gameState="endround" />
