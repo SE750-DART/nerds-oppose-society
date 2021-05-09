@@ -32,7 +32,7 @@ const EndRoundPage = ({ roundLimit }: { roundLimit: number }) => {
 
         <h5 style={{ marginBottom: `12px` }}>Winning Punchline:</h5>
         {winner.winningPunchlines.map((punchline) => (
-          <PunchlineCard text={punchline} />
+          <PunchlineCard key={punchline} text={punchline} />
         ))}
 
         <h2>Scoreboard</h2>

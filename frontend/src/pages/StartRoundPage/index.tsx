@@ -5,6 +5,7 @@ import socket from "../../socket";
 import { RoundContext } from "../../providers/ContextProviders/RoundContextProvider";
 
 const StartRoundPage = ({ roundLimit }: { roundLimit: number }) => {
+  const [, setResponse] = useState("");
   const [isTheMan] = useState(true);
 
   const { roundNumber } = useContext(RoundContext);
@@ -23,7 +24,11 @@ const StartRoundPage = ({ roundLimit }: { roundLimit: number }) => {
       {isTheMan ? (
         <Button
           text="Leshgo!"
-          handleOnClick={() => socket.emit("round:host-begin")}
+          handleOnClick={() =>
+            socket.emit("round:host-begin", (response: string) =>
+              setResponse(response)
+            )
+          }
         />
       ) : (
         <p className={styles.waitingMsg}>Waiting on X to start the round...</p>
