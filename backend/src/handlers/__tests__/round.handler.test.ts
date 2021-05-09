@@ -637,6 +637,7 @@ describe("Round handler", () => {
         },
         rooms: new Set(["<socket cqwdqcd>", "42069", "42069:host"]),
         on: jest.fn(),
+        leave: jest.fn(),
       } as unknown) as Socket;
 
       callback = jest.fn();
@@ -671,6 +672,9 @@ describe("Round handler", () => {
 
       expect(hostSpy).toHaveBeenCalledTimes(1);
 
+      expect(socket.leave).toHaveBeenCalledTimes(1);
+      expect(socket.leave).toHaveBeenCalledWith("42069:host");
+
       expect(gameEndedSpy).toHaveBeenCalledTimes(1);
       expect(io.to).toHaveBeenCalledTimes(0);
       expect(emitMock).toHaveBeenCalledTimes(0);
@@ -686,6 +690,9 @@ describe("Round handler", () => {
       expect(callback).toHaveBeenCalledTimes(0);
 
       expect(hostSpy).toHaveBeenCalledTimes(1);
+
+      expect(socket.leave).toHaveBeenCalledTimes(1);
+      expect(socket.leave).toHaveBeenCalledWith("42069:host");
 
       expect(gameEndedSpy).toHaveBeenCalledTimes(1);
       expect(io.to).toHaveBeenCalledTimes(1);
