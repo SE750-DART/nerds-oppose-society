@@ -1,6 +1,7 @@
 import { getGame } from "./game.service";
 import { Game, GameModel, GameState, Player } from "../models";
 import { ErrorType, ServiceError } from "../util";
+import { MaxPlayers } from "../models/game.model";
 
 export const createPlayer = async (
   gameCode: Game["gameCode"],
@@ -10,8 +11,7 @@ export const createPlayer = async (
   token: Player["token"];
 }> => {
   const game = await getGame(gameCode);
-  // TODO - add the const for MaxPlayers defined when the discard shuffle PR is merged
-  const gameMax = game?.settings?.maxPlayers || 40;
+  const gameMax = game?.settings?.maxPlayers || MaxPlayers;
   if (game.state === GameState.finished) {
     throw new ServiceError(ErrorType.gameError, "Game is finished");
   } else if (game.players.length >= gameMax) {
