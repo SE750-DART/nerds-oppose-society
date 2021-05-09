@@ -1,7 +1,7 @@
 import { getGame } from "./game.service";
 import { Game, GameModel, GameState, Player } from "../models";
 import { ErrorType, ServiceError } from "../util";
-import { MaxPlayers } from "../models/game.model";
+import { MaxPlayers } from "../models/settings.model";
 
 export const createPlayer = async (
   gameCode: Game["gameCode"],

@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import { GameModel, GameState, SetupType } from "../../models";
 import { RoundState } from "../round.model";
 import { validate as validateUUID } from "uuid";
-import { MaxPlayers } from "../game.model";
+import { MaxPlayers } from "../settings.model";
 
 describe("Game Model", () => {
   let gameCode = 420691;
