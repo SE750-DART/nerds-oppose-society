@@ -13,6 +13,7 @@ import {
   setHost,
 } from "./game.handler";
 import { getGame } from "../services/game.service";
+import { MinPlayers } from "../models/settings.model";
 
 export default (
   io: Server,
@@ -45,8 +46,7 @@ export default (
       if (game.state === GameState.active) {
         const sockets = await getSockets(io, gameCode);
 
-        // Todo add min players constant from #93
-        if (sockets.length < 3) {
+        if (sockets.length < MinPlayers) {
           game.state = GameState.lobby;
           await game.save();
 

@@ -10,6 +10,7 @@ import {
 } from "../services/game.service";
 import { ServiceError } from "../util";
 import { RoundState } from "../models/round.model";
+import { MinPlayers } from "../models/settings.model";
 
 export default (
   io: Server,
@@ -29,9 +30,10 @@ export default (
       if (isHost(socket, gameCode)) {
         const sockets = await getSockets(io, gameCode);
 
-        // Todo add min players constant from #93
-        if (sockets.length < 3) {
-          return callback(`Need a minimum of ${3} players to start a game`);
+        if (sockets.length < MinPlayers) {
+          return callback(
+            `Need a minimum of ${MinPlayers} players to start a game`
+          );
         }
 
         await initialiseNextRound(io, gameCode, playerId);

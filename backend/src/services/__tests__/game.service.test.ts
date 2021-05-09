@@ -24,7 +24,7 @@ import * as Util from "../../util";
 import { ErrorType, ServiceError } from "../../util";
 import { createPlayer, getPlayer } from "../player.service";
 import { RoundState } from "../../models/round.model";
-import { MaxPlayers } from "../../models/game.model";
+import { MaxPlayers } from "../../models/settings.model";
 
 beforeAll(async () => {
   await mongoose.connect(global.__MONGO_URI__, {
@@ -130,15 +130,15 @@ describe("setRoundLimit Service", () => {
 });
 
 describe("setMaxPlayers Service", () => {
-  it("sets maxPlayers to 50", async () => {
+  it("sets maxPlayers to 40", async () => {
     const gameCode = await createGame();
     let game = await getGame(gameCode);
-    expect(game.settings.maxPlayers).not.toBe(50);
+    expect(game.settings.maxPlayers).not.toBe(40);
 
-    await setMaxPlayers(game, 50);
+    await setMaxPlayers(game, 40);
 
     game = await getGame(gameCode);
-    expect(game.settings.maxPlayers).toBe(50);
+    expect(game.settings.maxPlayers).toBe(40);
   });
 });
 

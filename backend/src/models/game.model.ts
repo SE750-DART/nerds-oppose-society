@@ -1,10 +1,8 @@
 import mongoose, { Document, Schema, Types } from "mongoose";
 import { SetupSchema, Setup } from "./setup.model";
-import { SettingsSchema, Settings } from "./settings.model";
+import { SettingsSchema, Settings, MaxPlayers } from "./settings.model";
 import { PlayerSchema, Player } from "./player.model";
 import { RoundSchema, Round } from "./round.model";
-
-export const MaxPlayers = 40;
 
 export enum GameState {
   lobby = "LOBBY",
