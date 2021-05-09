@@ -45,10 +45,8 @@ export const removePlayer = async (
 
   if (player.score === 0 && game.state === GameState.lobby) {
     while (player.punchlines.length > 0) {
-      const punchline = player.punchlines.pop();
-      if (punchline !== undefined) {
-        game.discardedPunchlines.push(punchline);
-      }
+      const punchline = player.punchlines.pop() as string;
+      game.discardedPunchlines.push(punchline);
     }
     await game.save();
     await player.remove();

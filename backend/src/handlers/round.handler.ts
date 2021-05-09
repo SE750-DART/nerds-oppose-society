@@ -96,7 +96,11 @@ export default (
         .in(gameCode)
         .fetchSockets()) as unknown) as Socket[];
 
-      if (sockets.every((socket) => chosenPlayers.has(socket.data.playerId))) {
+      if (
+        sockets
+          .filter((socket) => !socket.rooms.has(`${gameCode}:host`))
+          .every((socket) => chosenPlayers.has(socket.data.playerId))
+      ) {
         const chosenPunchlines = await enterHostChoosesState(gameCode);
 
         io.to(gameCode).emit("round:chosen-punchlines", chosenPunchlines);
