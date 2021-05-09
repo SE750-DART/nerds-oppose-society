@@ -9,7 +9,7 @@ import TextField from "../../components/TextField";
 import Dropdown from "../../components/Dropdown";
 import { Settings } from "../../GameRouter";
 import socket from "../../socket";
-import { PlayersContext } from "../../ContextProviders/PlayersContextProvider";
+import { PlayersContext } from "../../providers/ContextProviders/PlayersContextProvider";
 
 const usePlayerIdState = createPersistedState("playerId");
 

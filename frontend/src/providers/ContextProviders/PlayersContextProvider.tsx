@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import useCrud from "../hooks/useCrud";
+import useCrud from "../../hooks/useCrud";
 
 export type Player = {
   nickname: string;

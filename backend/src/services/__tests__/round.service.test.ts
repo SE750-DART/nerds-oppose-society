@@ -4,7 +4,7 @@ import {
   enterPlayersChooseState,
   enterHostChoosesState,
   playerChoosePunchlines,
-  hostChoosesWinner,
+  hostChooseWinner,
 } from "../round.service";
 import mongoose from "mongoose";
 import { RoundState } from "../../models/round.model";
@@ -313,9 +313,11 @@ describe("enterHostChoosesState Service", () => {
 
 describe("hostChoosesWinner Service", () => {
   let game: Game;
+  let playerId: string;
 
   beforeEach(async () => {
     const gameCode = await createGame();
+    playerId = (await createPlayer(gameCode, "Bob")).playerId;
     game = await getGame(gameCode);
 
     game.rounds.push({
@@ -327,15 +329,15 @@ describe("hostChoosesWinner Service", () => {
       state: RoundState.hostChooses,
       punchlinesByPlayer: new Map([
         ["def456", ["To get to the other side"]],
-        ["ghi789", ["It was feeling cocky"]],
+        [playerId, ["It was feeling cocky"]],
       ]),
     });
   });
 
-  it("returns winner", async () => {
+  it("returns winner playerId and increments their score", async () => {
     await game.save();
 
-    const winningEntry = await hostChoosesWinner(
+    const winningPlayerId = await hostChooseWinner(
       game.gameCode,
       "6094a2e1d7909d84ae35819c",
       ["It was feeling cocky"]
@@ -343,10 +345,11 @@ describe("hostChoosesWinner Service", () => {
 
     game = await getGame(game.gameCode);
     expect(game.rounds[0].state).toBe(RoundState.after);
-    expect(winningEntry.playerId).toBe("ghi789");
-    expect(winningEntry.punchlines).toEqual(
-      expect.arrayContaining(["It was feeling cocky"])
-    );
+    expect(winningPlayerId).toBe(playerId);
+
+    const player = game.players.id(winningPlayerId);
+    if (player === null) fail();
+    expect(player.score).toBe(1);
   });
 
   it("throws error if game contains no rounds", async () => {
@@ -354,7 +357,7 @@ describe("hostChoosesWinner Service", () => {
     await game.save();
 
     await expect(
-      hostChoosesWinner(game.gameCode, "6094a2e1d7909d84ae35819c", [
+      hostChooseWinner(game.gameCode, "6094a2e1d7909d84ae35819c", [
         "It was feeling cocky",
       ])
     ).rejects.toThrow("Cannot choose winner");
@@ -365,7 +368,7 @@ describe("hostChoosesWinner Service", () => {
     await game.save();
 
     await expect(
-      hostChoosesWinner(game.gameCode, "6094a2e1d7909d84ae35819c", [
+      hostChooseWinner(game.gameCode, "6094a2e1d7909d84ae35819c", [
         "It was feeling cocky",
       ])
     ).rejects.toThrow("Cannot choose winner");
@@ -376,7 +379,7 @@ describe("hostChoosesWinner Service", () => {
     await game.save();
 
     await expect(
-      hostChoosesWinner(game.gameCode, "6094a2e1d7909d84ae35819c", [
+      hostChooseWinner(game.gameCode, "6094a2e1d7909d84ae35819c", [
         "It was feeling cocky",
       ])
     ).rejects.toThrow("Cannot choose winner");
@@ -386,7 +389,7 @@ describe("hostChoosesWinner Service", () => {
     await game.save();
 
     await expect(
-      hostChoosesWinner(game.gameCode, "6094a2e1d7909d84ae35819c", [
+      hostChooseWinner(game.gameCode, "6094a2e1d7909d84ae35819c", [
         "It was feeling bold",
       ])
     ).rejects.toThrow("Cannot choose winner");

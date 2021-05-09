@@ -4,6 +4,8 @@ import { SettingsSchema, Settings } from "./settings.model";
 import { PlayerSchema, Player } from "./player.model";
 import { RoundSchema, Round } from "./round.model";
 
+export const MaxPlayers = 40;
+
 export enum GameState {
   lobby = "LOBBY",
   active = "ACTIVE",
@@ -45,7 +47,8 @@ const GameSchema: Schema = new Schema({
       players.filter(
         (p, i, a) =>
           a.findIndex((player) => player.nickname === p.nickname) === i
-      ).length === players.length,
+      ).length === players.length &&
+      players.length <= MaxPlayers,
   },
   host: Schema.Types.ObjectId,
   state: {

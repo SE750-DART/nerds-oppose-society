@@ -64,3 +64,9 @@
 .textSmall {
   font-size: 20px;
 }
+
+.textBlurred {
+  color: transparent;
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  transition: 0.6s;
+}

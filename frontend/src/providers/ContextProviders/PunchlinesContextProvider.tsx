@@ -1,5 +1,5 @@
 import React from "react";
-import useCrud from "../hooks/useCrud";
+import useCrud from "../../hooks/useCrud";
 
 export type Punchline = string;
 const equals = (punchline1: Punchline, punchline2: Punchline) =>
