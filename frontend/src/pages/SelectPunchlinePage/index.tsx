@@ -6,6 +6,7 @@ import PlayerList from "../../components/PlayerList";
 import ProgressBar from "../../components/ProgressBar";
 import PunchlineCard from "../../components/PunchlineCard";
 import Button from "../../components/Button";
+import { PlayersContext } from "../../providers/ContextProviders/PlayersContextProvider";
 import { RoundContext } from "../../providers/ContextProviders/RoundContextProvider";
 
 interface Punchline {
@@ -17,7 +18,8 @@ interface Punchline {
 const SelectPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
   const memoryHistory = useHistory();
 
-  const { roundNumber, setup } = useContext(RoundContext);
+  const { players } = useContext(PlayersContext);
+  const { roundNumber, setup, numPlayersChosen } = useContext(RoundContext);
 
   const dummyPunchlines: Punchline[] = [
     {
@@ -153,7 +155,12 @@ const SelectPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
           <h2>{setup.setup}</h2>
         </div>
 
-        {waiting && <ProgressBar playersChosen={0} playersTotal={0} />}
+        {waiting && (
+          <ProgressBar
+            playersChosen={numPlayersChosen}
+            playersTotal={players.length}
+          />
+        )}
 
         {punchlines &&
           punchlines.map((punchline, index) => (

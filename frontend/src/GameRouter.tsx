@@ -46,7 +46,9 @@ const setupSockets = ({
     PlayersContext
   );
   const { addPunchlines } = useContext(PunchlinesContext);
-  const { setRoundNumber, setSetup } = useContext(RoundContext);
+  const { setRoundNumber, setSetup, incrementPlayersChosen } = useContext(
+    RoundContext
+  );
 
   // Connection
   const handleNavigate = useCallback(
@@ -94,6 +96,10 @@ const setupSockets = ({
   const handlePunchlinesAdd = useCallback(addPunchlines, [addPunchlines]);
   const handleRoundNumber = useCallback(setRoundNumber, [setRoundNumber]);
   const handleRoundSetup = useCallback(setSetup, [setSetup]);
+  const handleRoundIncrementPlayersChosen = useCallback(
+    incrementPlayersChosen,
+    [incrementPlayersChosen]
+  );
 
   useEffect(() => {
     // Connection
@@ -112,6 +118,10 @@ const setupSockets = ({
     socket.on("punchlines:add", handlePunchlinesAdd);
     socket.on("round:number", handleRoundNumber);
     socket.on("round:setup", handleRoundSetup);
+    socket.on(
+      "round:increment-players-chosen",
+      handleRoundIncrementPlayersChosen
+    );
 
     return () => {
       // Remove event handlers when component is unmounted to prevent buildup of identical handlers
@@ -131,6 +141,10 @@ const setupSockets = ({
       socket.off("punchlines:add", handlePunchlinesAdd);
       socket.off("round:number", handleRoundNumber);
       socket.off("round:setup", handleRoundSetup);
+      socket.off(
+        "round:increment-players-chosen",
+        handleRoundIncrementPlayersChosen
+      );
     };
   });
 };

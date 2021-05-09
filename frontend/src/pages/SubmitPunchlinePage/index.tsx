@@ -6,12 +6,14 @@ import PlayerList from "../../components/PlayerList";
 import ProgressBar from "../../components/ProgressBar";
 import PunchlineCard from "../../components/PunchlineCard";
 import Button from "../../components/Button";
+import { PlayersContext } from "../../providers/ContextProviders/PlayersContextProvider";
 import { RoundContext } from "../../providers/ContextProviders/RoundContextProvider";
 
 const SubmitPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
   const memoryHistory = useHistory();
 
-  const { roundNumber, setup } = useContext(RoundContext);
+  const { players } = useContext(PlayersContext);
+  const { roundNumber, setup, numPlayersChosen } = useContext(RoundContext);
 
   const dummyPunchlines: {
     id: string;
@@ -106,7 +108,10 @@ const SubmitPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
           <h2>{setup.setup}</h2>
         </div>
         <div className={styles.spacer}>
-          <ProgressBar playersChosen={0} playersTotal={0} />
+          <ProgressBar
+            playersChosen={numPlayersChosen}
+            playersTotal={players.length}
+          />
         </div>
 
         <h5 style={{ marginBottom: `18px` }}>
