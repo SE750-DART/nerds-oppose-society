@@ -114,6 +114,7 @@ export const allocatePlayerPunchlines = async (
       punchlinesAdded.push(punchlineFromDeck);
       player.punchlines.push(punchlineFromDeck);
     }
+    await game.save();
 
     return punchlinesAdded;
   }
