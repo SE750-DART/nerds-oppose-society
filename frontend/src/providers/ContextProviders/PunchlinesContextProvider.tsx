@@ -70,6 +70,8 @@ const PunchlinesContextProvider = ({
     const punchlineToRemove = punchlines.find(
       (p: Punchline) => p.text === punchline
     );
+    console.log(punchline);
+    console.log(punchlineToRemove);
     if (!punchlineToRemove) {
       return;
     }

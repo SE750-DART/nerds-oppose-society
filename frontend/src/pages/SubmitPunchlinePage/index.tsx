@@ -18,7 +18,7 @@ const SubmitPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
   const [, setResponse] = useState("");
 
   const { host, players } = useContext(PlayersContext);
-  const { punchlines } = useContext(PunchlinesContext);
+  const { punchlines, removePunchline } = useContext(PunchlinesContext);
   const {
     roundNumber,
     setup,
@@ -100,6 +100,7 @@ const SubmitPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
               text="Send it"
               handleOnClick={() => {
                 setPunchlineSubmitted(punchlineSelected);
+                removePunchline(punchlineSelected);
                 setPunchlineSelected("");
 
                 incrementPlayersChosen();

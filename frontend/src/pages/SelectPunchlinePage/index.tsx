@@ -16,11 +16,10 @@ const usePlayerIdState = createPersistedState("playerId");
 const SelectPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
   const [, setResponse] = useState("");
 
-  const { host } = useContext(PlayersContext);
+  const { host, players } = useContext(PlayersContext);
   const [playerId] = usePlayerIdState("");
   const playerIsHost = playerId === host;
 
-  const { players } = useContext(PlayersContext);
   const {
     roundNumber,
     setup,
