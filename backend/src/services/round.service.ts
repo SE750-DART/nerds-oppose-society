@@ -18,8 +18,6 @@ export const enterPlayersChooseState = async (
   ) {
     round.state = RoundState.playersChoose;
 
-    // TODO: Allocate player cards here?
-
     await game.save();
     return;
   }
