@@ -592,6 +592,7 @@ describe("Round handler", () => {
   describe("hostNextRound handler", () => {
     let hostSpy: jest.SpyInstance;
     let initialiseSpy: jest.SpyInstance;
+    let gameEndedSpy: jest.SpyInstance;
 
     let callback: jest.Mock;
 
@@ -601,6 +602,7 @@ describe("Round handler", () => {
     beforeEach(() => {
       hostSpy = jest.spyOn(GameHandler, "assignNextHost");
       hostSpy.mockReturnValue("def456");
+      gameEndedSpy = jest.spyOn(GameService, "checkGameEnded");
       initialiseSpy = jest.spyOn(GameHandler, "initialiseNextRound");
 
       io = ("io" as unknown) as Server;
@@ -622,6 +624,7 @@ describe("Round handler", () => {
     afterEach(() => {
       hostSpy.mockRestore();
       initialiseSpy.mockRestore();
+      gameEndedSpy.mockRestore();
     });
 
     it("non-host calls handler and nothing happens", async () => {
@@ -637,19 +640,35 @@ describe("Round handler", () => {
 
     it("assigns new host and initialises next round", async () => {
       initialiseSpy.mockImplementation();
+      gameEndedSpy.mockReturnValue(false);
 
       await handlers.hostNextRound(callback);
 
+      expect(gameEndedSpy).toHaveBeenCalledTimes(1);
       expect(callback).toHaveBeenCalledTimes(0);
 
       expect(hostSpy).toHaveBeenCalledTimes(1);
       expect(initialiseSpy).toHaveBeenCalledTimes(1);
     });
 
+    it("assigns new host and initialises next round but the game is over", async () => {
+      initialiseSpy.mockImplementation();
+      gameEndedSpy.mockReturnValue(true);
+
+      await handlers.hostNextRound(callback);
+
+      expect(gameEndedSpy).toHaveBeenCalledTimes(1);
+      expect(callback).toHaveBeenCalledTimes(1);
+
+      expect(hostSpy).toHaveBeenCalledTimes(1);
+      expect(initialiseSpy).toHaveBeenCalledTimes(0);
+    });
+
     it("catches ServiceError thrown by initialiseNextRound handler", async () => {
       initialiseSpy.mockRejectedValue(
         new ServiceError(ErrorType.gameCode, "Game does not exist")
       );
+      gameEndedSpy.mockReturnValue(false);
 
       await handlers.hostNextRound(callback);
 
@@ -659,6 +678,7 @@ describe("Round handler", () => {
 
     it("catches Error thrown by initialiseNextRound handler", async () => {
       initialiseSpy.mockRejectedValue(Error());
+      gameEndedSpy.mockReturnValue(false);
 
       await handlers.hostNextRound(callback);
 

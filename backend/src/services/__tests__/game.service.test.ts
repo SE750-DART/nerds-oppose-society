@@ -1,5 +1,6 @@
 import {
   allocatePlayerPunchlines,
+  checkGameEnded,
   createGame,
   getGame,
   initialiseNextRound,
@@ -265,5 +266,62 @@ describe("allocateCards Service", () => {
     ).rejects.toThrow(
       new ServiceError(ErrorType.playerId, "Player does not exist")
     );
+  });
+});
+
+describe("checkGameEnded service", () => {
+  let gameCode: string;
+  const randomHostId = "6094a2e1d7909d84ae35819c";
+
+  beforeEach(async () => {
+    gameCode = await createGame();
+  });
+
+  it("should return false if the rounds are less than the limit", async () => {
+    const game: Game = await getGame(gameCode);
+    game.settings.roundLimit = 5;
+    game.rounds.push(
+      ...[
+        { setup: { setup: "1" }, host: randomHostId },
+        {
+          setup: { setup: "2" },
+          host: randomHostId,
+        },
+        { setup: { setup: "3" }, host: randomHostId },
+        {
+          setup: { setup: "4" },
+          host: randomHostId,
+        },
+      ]
+    );
+    await game.save();
+    expect(await checkGameEnded(gameCode)).toBe(false);
+  });
+
+  it("should return true if the rounds are at the limit", async () => {
+    let game: Game = await getGame(gameCode);
+    game.settings.roundLimit = 5;
+    game.rounds.push(
+      ...[
+        { setup: { setup: "1" }, host: randomHostId },
+        {
+          setup: { setup: "2" },
+          host: randomHostId,
+        },
+        { setup: { setup: "3" }, host: randomHostId },
+        {
+          setup: { setup: "4" },
+          host: randomHostId,
+        },
+        {
+          setup: { setup: "5" },
+          host: randomHostId,
+        },
+      ]
+    );
+    await game.save();
+    expect(await checkGameEnded(gameCode)).toBe(true);
+    game = await getGame(gameCode);
+    expect(game.state).toBe(GameState.finished);
   });
 });
