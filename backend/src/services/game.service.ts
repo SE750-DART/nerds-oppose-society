@@ -71,6 +71,15 @@ export const initialiseNextRound = async (
   throw new ServiceError(ErrorType.invalidAction, "Could not start round");
 };
 
+export const checkGameEnded = async (game: Game): Promise<boolean> => {
+  if (game?.settings?.roundLimit === game?.rounds.length) {
+    game.state = GameState.finished;
+    await game.save();
+    return true;
+  }
+  return false;
+};
+
 export const allocatePlayerPunchlines = async (
   game: Game,
   playerId: Player["id"],
