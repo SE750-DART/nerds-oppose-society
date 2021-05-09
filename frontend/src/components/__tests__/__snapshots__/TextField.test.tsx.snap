@@ -1,0 +1,23 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Text field snapshot testing 1`] = `
+<input
+  className="textfield textfield__big"
+  disabled={false}
+  onChange={[Function]}
+  placeholder="Game code"
+  type="text"
+  value=""
+/>
+`;
+
+exports[`Text field snapshot testing 2`] = `
+<input
+  className="textfield textfield__small"
+  disabled={false}
+  onChange={[Function]}
+  placeholder=""
+  type="text"
+  value=""
+/>
+`;
