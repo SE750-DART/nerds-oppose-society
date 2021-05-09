@@ -68,7 +68,6 @@ describe("Round handler", () => {
     let callback: jest.Mock;
     let emitMock: jest.Mock;
     let socketMock: jest.Mock;
-    let saveMock: jest.Mock;
 
     let io: Server;
     let socket: Socket;
@@ -95,7 +94,6 @@ describe("Round handler", () => {
       } as unknown) as Server;
 
       socketMock = jest.fn();
-      saveMock = jest.fn();
 
       socket = ({
         data: {
@@ -111,7 +109,6 @@ describe("Round handler", () => {
       activePlayers = ([{ id: "1" }] as unknown) as Player[];
       game = ({
         gameId: "42069",
-        save: saveMock,
         rounds: [
           {
             setup: {
@@ -152,7 +149,6 @@ describe("Round handler", () => {
         "To get to the other side",
         "To go to KFC",
       ]);
-      expect(saveMock).toHaveBeenCalledTimes(1);
 
       expect(io.to).toHaveBeenCalledTimes(1);
       expect(io.to).toHaveBeenCalledWith("42069");
@@ -180,7 +176,6 @@ describe("Round handler", () => {
         "To get to the other side",
         "To go to KFC",
       ]);
-      expect(saveMock).toHaveBeenCalledTimes(1);
 
       expect(io.to).toHaveBeenCalledTimes(1);
       expect(io.to).toHaveBeenCalledWith("42069");
@@ -211,7 +206,6 @@ describe("Round handler", () => {
 
       expect(allocateSpy).toHaveBeenCalledTimes(0);
       expect(socketMock).toHaveBeenCalledTimes(0);
-      expect(saveMock).toHaveBeenCalledTimes(0);
 
       expect(io.to).toHaveBeenCalledTimes(0);
       expect(emitMock).toHaveBeenCalledTimes(0);

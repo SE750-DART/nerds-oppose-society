@@ -217,6 +217,7 @@ describe("allocateCards Service", () => {
       punchlineLimit
     );
     expect(newCards.length).toBe(10);
+    expect((await getPlayer(gameCode, playerId)).punchlines.length).toBe(10);
   });
 
   it("should successfully only allocate 1 punchline on a normal setup if a player has 9 punchlines", async () => {
@@ -231,6 +232,7 @@ describe("allocateCards Service", () => {
       punchlineLimit
     );
     expect(newCards.length).toBe(1);
+    expect((await getPlayer(gameCode, playerId)).punchlines.length).toBe(10);
   });
 
   it("should successfully only allocate 2 punchlines on a play 2 setup if a player has 8 punchlines", async () => {
@@ -245,6 +247,7 @@ describe("allocateCards Service", () => {
       punchlineLimit
     );
     expect(newCards.length).toBe(2);
+    expect((await getPlayer(gameCode, playerId)).punchlines.length).toBe(10);
   });
 
   it("should successfully only allocate 3 punchlines on a draw 2 pick 3 setup with a normal hand", async () => {
@@ -255,6 +258,7 @@ describe("allocateCards Service", () => {
     await game.save();
     const newCards = await allocatePlayerPunchlines(game, playerId, 12);
     expect(newCards.length).toBe(3);
+    expect((await getPlayer(gameCode, playerId)).punchlines.length).toBe(12);
   });
 
   it("should throw ServiceError if there are no punchlines left in the deck", async () => {
