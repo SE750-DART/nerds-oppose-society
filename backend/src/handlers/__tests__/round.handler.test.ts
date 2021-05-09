@@ -126,7 +126,10 @@ describe("Round handler", () => {
         game: game,
         socketsByPlayerId: socketsByPlayerId,
       });
-      allocateSpy.mockReturnValue(["To get to the other side", "To go to KFC"]);
+      allocateSpy.mockReturnValue({
+        addedPunchlines: ["To get to the other side", "To go to KFC"],
+        removedPunchlines: [],
+      });
     });
 
     afterEach(() => {
@@ -144,11 +147,12 @@ describe("Round handler", () => {
       expect(allocateSpy).toHaveBeenCalledTimes(1);
       expect(allocateSpy).toHaveBeenCalledWith(game, "1", 10);
 
-      expect(socketMock).toHaveBeenCalledTimes(1);
+      expect(socketMock).toHaveBeenCalledTimes(2);
       expect(socketMock).toHaveBeenCalledWith("punchlines:add", [
         "To get to the other side",
         "To go to KFC",
       ]);
+      expect(socketMock).toHaveBeenCalledWith("punchlines:remove", []);
 
       expect(io.to).toHaveBeenCalledTimes(1);
       expect(io.to).toHaveBeenCalledWith("42069");
@@ -171,11 +175,12 @@ describe("Round handler", () => {
       expect(allocateSpy).toHaveBeenCalledTimes(1);
       expect(allocateSpy).toHaveBeenCalledWith(game, "1", 12);
 
-      expect(socketMock).toHaveBeenCalledTimes(1);
+      expect(socketMock).toHaveBeenCalledTimes(2);
       expect(socketMock).toHaveBeenCalledWith("punchlines:add", [
         "To get to the other side",
         "To go to KFC",
       ]);
+      expect(socketMock).toHaveBeenCalledWith("punchlines:remove", []);
 
       expect(io.to).toHaveBeenCalledTimes(1);
       expect(io.to).toHaveBeenCalledWith("42069");
@@ -298,9 +303,22 @@ describe("Round handler", () => {
 
       playersChooseSpy.mockReturnValue(new Set(["abc123"]));
       fetchMock.mockReturnValue([
-        { data: { playerId: "abc123" } },
-        { data: { playerId: "def456" } },
-        { data: { playerId: "ghi789" } },
+        {
+          data: { playerId: "abc123" },
+          rooms: new Set(["<socket 4qtwf98y9s>", "42069"]),
+        },
+        {
+          data: { playerId: "def456" },
+          rooms: new Set(["<socket wrtehfgdhhf>", "42069"]),
+        },
+        {
+          data: { playerId: "ghi789" },
+          rooms: new Set(["<socket ertgdfsbg>", "42069"]),
+        },
+        {
+          data: { playerId: "jkl012" },
+          rooms: new Set(["<socket ertgdfsbg>", "42069", "42069:host"]),
+        },
       ]);
 
       callback = jest.fn();

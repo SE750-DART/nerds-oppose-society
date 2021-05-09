@@ -52,12 +52,20 @@ export default (
         if (round === undefined) throw Error();
 
         activePlayers.map(async (player) => {
-          const punchlines = await allocatePlayerPunchlines(
+          const {
+            addedPunchlines,
+            removedPunchlines,
+          } = await allocatePlayerPunchlines(
             game,
             player.id,
             round.setup.type === SetupType.drawTwoPickThree ? 12 : 10
           );
-          socketsByPlayerId.get(player.id)?.emit("punchlines:add", punchlines);
+          socketsByPlayerId
+            .get(player.id)
+            ?.emit("punchlines:add", addedPunchlines);
+          socketsByPlayerId
+            .get(player.id)
+            ?.emit("punchlines:remove", removedPunchlines);
         });
 
         io.to(gameCode).emit("navigate", RoundState.playersChoose);
@@ -88,7 +96,11 @@ export default (
         .in(gameCode)
         .fetchSockets()) as unknown) as Socket[];
 
-      if (sockets.every((socket) => chosenPlayers.has(socket.data.playerId))) {
+      if (
+        sockets
+          .filter((socket) => !socket.rooms.has(`${gameCode}:host`))
+          .every((socket) => chosenPlayers.has(socket.data.playerId))
+      ) {
         const chosenPunchlines = await enterHostChoosesState(gameCode);
 
         io.to(gameCode).emit("round:chosen-punchlines", chosenPunchlines);
