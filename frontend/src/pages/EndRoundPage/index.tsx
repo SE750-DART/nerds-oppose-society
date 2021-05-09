@@ -21,6 +21,9 @@ const EndRoundPage = () => {
     return () => clearTimeout(nextRoundTimer);
   });
 
+  // For the purposes of dummy testing, this goes to the EndGamePage
+  // But it should really go back to StartRoundPage until the game actually ends
+  // TODO: Redirect to StartRoundPage once backend is connected
   useEffect(() => {
     if (nextRoundIn === 0) {
       memoryHistory.push("/scoreboard");

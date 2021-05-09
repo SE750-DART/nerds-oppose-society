@@ -78,7 +78,8 @@ const SelectPunchlinePage = () => {
 
   // This is only to demonstrate the full user flow without the backend connected.
   // This can be a little buggy sometimes (usually when you edit something and hot reload),
-  // but I figure it won't matter because it's about to be deleted.
+  // and it always seems to run one more time than it needs to.
+  // But I figure it won't matter because it's about to be deleted.
   // TODO: Load in the real punchlines via setPunchlines from the backend and delete this hook
   useEffect(() => {
     const loadPunchlines = setTimeout(
