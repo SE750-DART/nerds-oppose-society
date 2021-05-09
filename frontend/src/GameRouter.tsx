@@ -3,13 +3,16 @@ import { Router, Switch, Route, Redirect, useParams } from "react-router-dom";
 import { createMemoryHistory } from "history";
 import createPersistedState from "use-persisted-state";
 import socket from "./socket";
-import { PlayersContext } from "./ContextProviders/PlayersContextProvider";
+import { PlayersContext } from "./providers/ContextProviders/PlayersContextProvider";
 import {
   BasicPage,
-  SubmitPunchlinePage,
+  EndGamePage,
+  EndRoundPage,
   NicknamePage,
   LobbyPage,
+  SelectPunchlinePage,
   StartRoundPage,
+  SubmitPunchlinePage,
 } from "./pages";
 
 export type Settings = {
@@ -113,15 +116,19 @@ const GameRouter = () => {
         </Route>
 
         <Route path="/selectPunchline">
-          <BasicPage gameCode={gameCode} path="selectPunchline" />
+          <SelectPunchlinePage />
         </Route>
 
         <Route path="/postRound">
-          <BasicPage gameCode={gameCode} path="postRound" />
+          <EndRoundPage />
         </Route>
 
         <Route path="/scoreboard">
-          <BasicPage gameCode={gameCode} path="scoreboard" />
+          <EndGamePage />
+        </Route>
+
+        <Route path="/switchboard">
+          <BasicPage gameCode={gameCode} path="switchboard" />
         </Route>
 
         <Route path="*">

@@ -3,7 +3,7 @@ import { useHistory } from "react-router-dom";
 import Button from "../../components/Button";
 import styles from "./style.module.css";
 
-const LobbyPage = () => {
+const StartRoundPage = () => {
   const memoryHistory = useHistory();
 
   const [isTheMan] = useState(true);
@@ -29,4 +29,4 @@ const LobbyPage = () => {
   );
 };
 
-export default LobbyPage;
+export default StartRoundPage;

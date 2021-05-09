@@ -1,0 +1,20 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  padding: 24px;
+}
+
+.round {
+  text-align: center;
+}
+
+.endOfRound {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.waitingMsg {
+  font-style: italic;
+}

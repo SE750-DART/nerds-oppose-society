@@ -5,7 +5,7 @@ import styles from "./style.module.css";
 import {
   Player as PlayerType,
   PlayersContext,
-} from "../../ContextProviders/PlayersContextProvider";
+} from "../../providers/ContextProviders/PlayersContextProvider";
 
 const usePlayerIdState = createPersistedState("playerId");
 
@@ -21,9 +21,11 @@ const PlayerList = ({ gameState }: PlayerListProps) => {
   const isMe = (player: PlayerType) => player.id === playerId;
 
   let showScores: boolean = true;
+  let showHost: boolean = false;
 
   if (gameState === "lobby") {
     showScores = false;
+    showHost = true;
   }
 
   return (
@@ -39,7 +41,7 @@ const PlayerList = ({ gameState }: PlayerListProps) => {
             !isMe(player) && // player not me
             !isMe(players[index + 1]) // next player not me
           }
-          isHost={isHost(player)}
+          isHost={showHost ? isHost(player) : undefined}
         />
       ))}
     </div>
