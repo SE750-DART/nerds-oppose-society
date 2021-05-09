@@ -13,8 +13,11 @@ import {
   initialiseNextRound,
   isHost,
 } from "./game.handler";
-import { allocatePlayerPunchlines } from "../services/game.service";
-import { SetupType } from "../models";
+import {
+  allocatePlayerPunchlines,
+  checkGameEnded,
+} from "../services/game.service";
+import { GameState, SetupType } from "../models";
 
 export default (
   io: Server,
@@ -131,6 +134,7 @@ export default (
           winningPlayerId,
           winningPunchlines
         );
+
         io.to(gameCode).emit("navigate", RoundState.after);
       }
     } catch (e) {
@@ -146,7 +150,9 @@ export default (
     try {
       if (isHost(socket, gameCode)) {
         const newHostId = await assignNextHost(io, socket);
-
+        if (await checkGameEnded(gameCode)) {
+          return io.to(gameCode).emit("navigate", GameState.finished);
+        }
         await initialiseNextRound(io, gameCode, newHostId);
       }
     } catch (e) {
