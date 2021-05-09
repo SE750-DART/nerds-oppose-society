@@ -126,7 +126,10 @@ describe("Round handler", () => {
         game: game,
         socketsByPlayerId: socketsByPlayerId,
       });
-      allocateSpy.mockReturnValue(["To get to the other side", "To go to KFC"]);
+      allocateSpy.mockReturnValue({
+        addedPunchlines: ["To get to the other side", "To go to KFC"],
+        removedPunchlines: [],
+      });
     });
 
     afterEach(() => {
@@ -144,11 +147,12 @@ describe("Round handler", () => {
       expect(allocateSpy).toHaveBeenCalledTimes(1);
       expect(allocateSpy).toHaveBeenCalledWith(game, "1", 10);
 
-      expect(socketMock).toHaveBeenCalledTimes(1);
+      expect(socketMock).toHaveBeenCalledTimes(2);
       expect(socketMock).toHaveBeenCalledWith("punchlines:add", [
         "To get to the other side",
         "To go to KFC",
       ]);
+      expect(socketMock).toHaveBeenCalledWith("punchlines:remove", []);
 
       expect(io.to).toHaveBeenCalledTimes(1);
       expect(io.to).toHaveBeenCalledWith("42069");
@@ -171,11 +175,12 @@ describe("Round handler", () => {
       expect(allocateSpy).toHaveBeenCalledTimes(1);
       expect(allocateSpy).toHaveBeenCalledWith(game, "1", 12);
 
-      expect(socketMock).toHaveBeenCalledTimes(1);
+      expect(socketMock).toHaveBeenCalledTimes(2);
       expect(socketMock).toHaveBeenCalledWith("punchlines:add", [
         "To get to the other side",
         "To go to KFC",
       ]);
+      expect(socketMock).toHaveBeenCalledWith("punchlines:remove", []);
 
       expect(io.to).toHaveBeenCalledTimes(1);
       expect(io.to).toHaveBeenCalledWith("42069");

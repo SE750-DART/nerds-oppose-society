@@ -98,12 +98,19 @@ export const allocatePlayerPunchlines = async (
   game: Game,
   playerId: Player["id"],
   punchlineLimit = 10
-): Promise<string[]> => {
+): Promise<{ addedPunchlines: string[]; removedPunchlines: string[] }> => {
   const player = game.players.id(playerId);
 
   const punchlinesAdded: string[] = [];
+  const punchlinesRemoved: string[] = [];
 
   if (player !== null) {
+    while (player.punchlines.length > punchlineLimit) {
+      const punchline = player.punchlines.pop() as string;
+      punchlinesRemoved.push(punchline);
+      game.discardedPunchlines.push(punchline);
+    }
+
     while (player.punchlines.length < punchlineLimit) {
       const punchlineFromDeck = game.punchlines.pop();
       if (punchlineFromDeck === undefined) {
@@ -116,7 +123,10 @@ export const allocatePlayerPunchlines = async (
     }
     await game.save();
 
-    return punchlinesAdded;
+    return {
+      addedPunchlines: punchlinesAdded,
+      removedPunchlines: punchlinesRemoved,
+    };
   }
 
   throw new ServiceError(ErrorType.playerId, "Player does not exist");

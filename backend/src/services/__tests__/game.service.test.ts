@@ -211,52 +211,80 @@ describe("allocateCards Service", () => {
 
   it("should successfully allocate new cards at the start of the game", async () => {
     const game: Game = await getGame(gameCode);
-    const newCards = await allocatePlayerPunchlines(
-      game,
-      playerId,
-      punchlineLimit
-    );
+    const newCards = (
+      await allocatePlayerPunchlines(game, playerId, punchlineLimit)
+    ).addedPunchlines;
     expect(newCards.length).toBe(10);
+    expect((await getPlayer(gameCode, playerId)).punchlines.length).toBe(10);
+  });
+
+  it("should remove a players punchlines if they are over the limit", async () => {
+    let game: Game = await getGame(gameCode);
+    const player = game.players.id(playerId);
+    const punchlines = [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "10",
+      "11",
+      "12",
+    ];
+    player?.punchlines.push(...punchlines);
+    await game.save();
+    game = await getGame(gameCode);
+    const removedCards = (
+      await allocatePlayerPunchlines(game, playerId, punchlineLimit)
+    ).removedPunchlines;
+    game = await getGame(gameCode);
+    expect(removedCards.length).toBe(2);
+    expect(game.discardedPunchlines.length).toBe(2);
     expect((await getPlayer(gameCode, playerId)).punchlines.length).toBe(10);
   });
 
   it("should successfully only allocate 1 punchline on a normal setup if a player has 9 punchlines", async () => {
     const game: Game = await getGame(gameCode);
-    const player: Player = await getPlayer(gameCode, playerId, game);
+    const player = game.players.id(playerId);
+
     const punchlines = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
-    player.punchlines.push(...punchlines);
+
+    player?.punchlines.push(...punchlines);
+
     await game.save();
-    const newCards = await allocatePlayerPunchlines(
-      game,
-      playerId,
-      punchlineLimit
-    );
+
+    const newCards = (
+      await allocatePlayerPunchlines(game, playerId, punchlineLimit)
+    ).addedPunchlines;
     expect(newCards.length).toBe(1);
     expect((await getPlayer(gameCode, playerId)).punchlines.length).toBe(10);
   });
 
   it("should successfully only allocate 2 punchlines on a play 2 setup if a player has 8 punchlines", async () => {
     const game: Game = await getGame(gameCode);
-    const player: Player = await getPlayer(gameCode, playerId, game);
+    const player = game.players.id(playerId);
     const punchlines = ["1", "2", "3", "4", "5", "6", "7", "8"];
-    player.punchlines.push(...punchlines);
+    player?.punchlines.push(...punchlines);
     await game.save();
-    const newCards = await allocatePlayerPunchlines(
-      game,
-      playerId,
-      punchlineLimit
-    );
+    const newCards = (
+      await allocatePlayerPunchlines(game, playerId, punchlineLimit)
+    ).addedPunchlines;
     expect(newCards.length).toBe(2);
     expect((await getPlayer(gameCode, playerId)).punchlines.length).toBe(10);
   });
 
   it("should successfully only allocate 3 punchlines on a draw 2 pick 3 setup with a normal hand", async () => {
     const game: Game = await getGame(gameCode);
-    const player: Player = await getPlayer(gameCode, playerId, game);
+    const player = game.players.id(playerId);
     const punchlines = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
-    player.punchlines.push(...punchlines);
+    player?.punchlines.push(...punchlines);
     await game.save();
-    const newCards = await allocatePlayerPunchlines(game, playerId, 12);
+    const newCards = (await allocatePlayerPunchlines(game, playerId, 12))
+      .addedPunchlines;
     expect(newCards.length).toBe(3);
     expect((await getPlayer(gameCode, playerId)).punchlines.length).toBe(12);
   });
