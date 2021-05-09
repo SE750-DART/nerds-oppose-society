@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { CSSProperties, useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import styles from "./style.module.css";
 import Dropdown from "../../components/Dropdown";
@@ -125,6 +125,15 @@ const SelectPunchlinePage = () => {
     }
   };
 
+  const setup: string = "Daddy, why is mommy crying?";
+
+  let setupSize: CSSProperties = {};
+  if (setup.length > 75) {
+    setupSize = { fontSize: "24px" };
+  } else if (setup.length > 45) {
+    setupSize = { fontSize: "32px" };
+  }
+
   return (
     <>
       <Dropdown
@@ -143,7 +152,9 @@ const SelectPunchlinePage = () => {
           }`}
         >
           <h5>The Setup:</h5>
-          <h2>Daddy, why is mommy crying?</h2>
+          <h2 className={styles.punchlineText} style={setupSize}>
+            {setup}
+          </h2>
         </div>
 
         {waiting && <ProgressBar playersChosen={0} playersTotal={0} />}
