@@ -5,7 +5,7 @@ import styles from "./style.module.css";
 import {
   Player as PlayerType,
   PlayersContext,
-} from "../../ContextProviders/PlayersContextProvider";
+} from "../../providers/ContextProviders/PlayersContextProvider";
 
 const usePlayerIdState = createPersistedState("playerId");
 

@@ -3,7 +3,7 @@ import { Router, Switch, Route, Redirect, useParams } from "react-router-dom";
 import { createMemoryHistory } from "history";
 import createPersistedState from "use-persisted-state";
 import socket from "./socket";
-import { PlayersContext } from "./ContextProviders/PlayersContextProvider";
+import { PlayersContext } from "./providers/ContextProviders/PlayersContextProvider";
 import {
   BasicPage,
   EndGamePage,
