@@ -24,9 +24,8 @@ const SubmitPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
   const [punchlineSubmitted, setPunchlineSubmitted] = useState("");
 
   const selectPunchline = (text: string) => {
-    if (punchlineSubmitted) {
-      return;
-    }
+    if (punchlineSubmitted) return;
+
     if (text === punchlineSelected) {
       setPunchlineSelected("");
     } else {
