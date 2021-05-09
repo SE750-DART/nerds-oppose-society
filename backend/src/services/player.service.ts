@@ -43,7 +43,14 @@ export const removePlayer = async (
   if (player === null)
     throw new ServiceError(ErrorType.playerId, "Player does not exist");
 
-  if (player.score === 0) {
+  if (player.score === 0 && game.state === GameState.lobby) {
+    while (player.punchlines.length > 0) {
+      const punchline = player.punchlines.pop();
+      if (punchline !== undefined) {
+        game.discardedPunchlines.push(punchline);
+      }
+    }
+    await game.save();
     await player.remove();
     await game.save();
   }

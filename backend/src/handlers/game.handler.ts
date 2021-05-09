@@ -10,6 +10,7 @@ import {
 } from "../services/game.service";
 import { ServiceError } from "../util";
 import { RoundState } from "../models/round.model";
+import { MinPlayers } from "../models/settings.model";
 
 export default (
   io: Server,
@@ -27,10 +28,17 @@ export default (
   const startGame = async (callback: (data: string) => void): Promise<void> => {
     try {
       if (isHost(socket, gameCode)) {
+        const sockets = await getSockets(io, gameCode);
+
+        if (sockets.length < MinPlayers) {
+          return callback(
+            `Need a minimum of ${MinPlayers} players to start a game`
+          );
+        }
+
         await initialiseNextRound(io, gameCode, playerId);
       }
     } catch (e) {
-      console.log(e);
       if (e instanceof ServiceError) {
         callback(e.message);
       } else {
@@ -156,9 +164,7 @@ export const getActivePlayers = async (
   game: Game;
   socketsByPlayerId: Map<Player["id"], Socket>;
 }> => {
-  const sockets = ((await io
-    .in(gameCode)
-    .fetchSockets()) as unknown) as Socket[];
+  const sockets = await getSockets(io, gameCode);
 
   const game = await getGame(gameCode);
 
@@ -172,4 +178,11 @@ export const getActivePlayers = async (
     game: game,
     socketsByPlayerId: socketByPlayerId,
   };
+};
+
+export const getSockets = async (
+  io: Server,
+  gameCode: Game["gameCode"]
+): Promise<Socket[]> => {
+  return ((await io.in(gameCode).fetchSockets()) as unknown) as Socket[];
 };

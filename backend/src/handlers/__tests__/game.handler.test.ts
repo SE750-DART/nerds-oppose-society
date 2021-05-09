@@ -7,6 +7,7 @@ import registerGameHandler, {
   emitNavigate,
   getActivePlayers,
   getHost,
+  getSockets,
   initialiseNextRound,
   isHost,
   setHost,
@@ -48,8 +49,9 @@ describe("Game handler", () => {
     let initialiseSpy: jest.SpyInstance;
 
     let callback: jest.Mock;
-
+    let fetchMock: jest.Mock;
     let emitMock: jest.Mock;
+
     let io: Server;
     let socket: Socket;
 
@@ -65,8 +67,14 @@ describe("Game handler", () => {
 
       callback = jest.fn();
 
+      fetchMock = jest.fn();
       emitMock = jest.fn();
       io = ({
+        in: jest.fn(() => {
+          return {
+            fetchSockets: fetchMock,
+          };
+        }),
         to: jest.fn(() => {
           return {
             emit: emitMock,
@@ -98,14 +106,23 @@ describe("Game handler", () => {
       expect(callback).toHaveBeenCalledTimes(0);
       expect(initialiseSpy).toHaveBeenCalledTimes(0);
 
+      expect(io.in).toHaveBeenCalledTimes(0);
+      expect(fetchMock).toHaveBeenCalledTimes(0);
+
       expect(io.to).toHaveBeenCalledTimes(0);
       expect(emitMock).toHaveBeenCalledTimes(0);
     });
 
     it("assigns new host and initialises next round", async () => {
+      fetchMock.mockReturnValue(["1", "2", "3", "4"]);
+
       await handlers.startGame(callback);
 
       expect(callback).toHaveBeenCalledTimes(0);
+
+      expect(io.in).toHaveBeenCalledTimes(1);
+      expect(io.in).toHaveBeenCalledWith("42069");
+      expect(fetchMock).toHaveBeenCalledTimes(1);
 
       expect(initialiseSpy).toHaveBeenCalledTimes(1);
 
@@ -127,7 +144,29 @@ describe("Game handler", () => {
       );
     });
 
+    it("does not start round if not min active players", async () => {
+      fetchMock.mockReturnValue(["1", "2"]);
+
+      await handlers.startGame(callback);
+
+      expect(callback).toHaveBeenCalledTimes(1);
+      expect(callback).toHaveBeenCalledWith(
+        `Need a minimum of 3 players to start a game`
+      );
+
+      expect(io.in).toHaveBeenCalledTimes(1);
+      expect(io.in).toHaveBeenCalledWith("42069");
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+
+      expect(initialiseSpy).toHaveBeenCalledTimes(0);
+
+      expect(io.to).toHaveBeenCalledTimes(0);
+      expect(emitMock).toHaveBeenCalledTimes(0);
+    });
+
     it("catches ServiceError thrown by initialiseNextRound", async () => {
+      fetchMock.mockReturnValue(["1", "2", "3"]);
+
       initialiseSpy.mockRejectedValue(
         new ServiceError(ErrorType.gameCode, "Game does not exist")
       );
@@ -142,6 +181,8 @@ describe("Game handler", () => {
     });
 
     it("catches Error thrown by initialiseNextRound", async () => {
+      fetchMock.mockReturnValue(["1", "2", "3", "4"]);
+
       initialiseSpy.mockRejectedValue(Error());
 
       await handlers.startGame(callback);
@@ -784,6 +825,45 @@ describe("getActivePlayers handler", () => {
         ["1", { data: { playerId: "1" } }],
         ["2", { data: { playerId: "2" } }],
         ["4", { data: { playerId: "4" } }],
+      ])
+    );
+  });
+});
+
+describe("getSockets handler", () => {
+  let io: Server;
+
+  let fetchMock: jest.Mock;
+
+  beforeEach(() => {
+    fetchMock = jest.fn();
+    io = ({
+      in: jest.fn(() => {
+        return {
+          fetchSockets: fetchMock,
+        };
+      }),
+    } as unknown) as Server;
+  });
+
+  it("returns sockets", async () => {
+    fetchMock.mockReturnValue([
+      { data: { playerId: "1" } },
+      { data: { playerId: "2" } },
+      { data: { playerId: "4" } },
+    ]);
+
+    const sockets = await getSockets(io, "42069");
+
+    expect(io.in).toHaveBeenCalledTimes(1);
+    expect(io.in).toHaveBeenCalledWith("42069");
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    expect(sockets).toEqual(
+      expect.arrayContaining([
+        { data: { playerId: "1" } },
+        { data: { playerId: "2" } },
+        { data: { playerId: "4" } },
       ])
     );
   });

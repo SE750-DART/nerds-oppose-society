@@ -59,7 +59,6 @@ export default (
           );
           socketsByPlayerId.get(player.id)?.emit("punchlines:add", punchlines);
         });
-        await game.save();
 
         io.to(gameCode).emit("navigate", RoundState.playersChoose);
       }
