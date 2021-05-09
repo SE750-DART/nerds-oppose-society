@@ -2,9 +2,15 @@ import React, { useCallback, useContext, useEffect, useState } from "react";
 import { Router, Switch, Route, Redirect, useParams } from "react-router-dom";
 import { createMemoryHistory } from "history";
 import createPersistedState from "use-persisted-state";
-import { BasicPage, NicknamePage, LobbyPage } from "./pages";
 import socket from "./socket";
 import { PlayersContext } from "./ContextProviders/PlayersContextProvider";
+import {
+  BasicPage,
+  SubmitPunchlinePage,
+  NicknamePage,
+  LobbyPage,
+  StartRoundPage,
+} from "./pages";
 
 export type Settings = {
   roundLimit?: number;
@@ -99,11 +105,11 @@ const GameRouter = () => {
         </Route>
 
         <Route path="/preRound">
-          <BasicPage gameCode={gameCode} path="preRound" />
+          <StartRoundPage />
         </Route>
 
         <Route path="/submitPunchline">
-          <BasicPage gameCode={gameCode} path="submitPunchline" />
+          <SubmitPunchlinePage />
         </Route>
 
         <Route path="/selectPunchline">

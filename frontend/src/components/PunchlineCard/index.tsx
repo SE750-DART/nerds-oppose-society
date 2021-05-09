@@ -26,7 +26,7 @@ const PunchlineCard = ({
     textStyle = styles.textSmall;
   }
 
-  let cardStyle: string = "";
+  let cardStyle: string = styles.punchlineAvailable;
   if (status === "selected") {
     cardStyle = styles.punchlineSelected;
   } else if (status === "submitted") {
