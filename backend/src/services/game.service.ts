@@ -80,6 +80,18 @@ export const initialiseNextRound = async (
   throw new ServiceError(ErrorType.invalidAction, "Could not start round");
 };
 
+export const checkGameEnded = async (
+  gameCode: Game["gameCode"]
+): Promise<boolean> => {
+  const game = await getGame(gameCode);
+  if (game?.settings?.roundLimit === game?.rounds.length) {
+    game.state = GameState.finished;
+    await game.save();
+    return true;
+  }
+  return false;
+};
+
 /* TODO - rewrite this to pop from the punchlines and pushes onto player if less than max but if greater than max, then remove the excess
  */
 export const allocatePlayerPunchlines = async (
