@@ -69,7 +69,7 @@ const LobbyPage = ({ gameCode, settings }: Props) => {
           size="small"
           text="Copy"
           handleOnClick={() => {
-            navigator.clipboard.writeText(gameCode);
+            navigator.clipboard.writeText(gameCode).catch();
           }}
         />
       </div>
