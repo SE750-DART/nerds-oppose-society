@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import { GameModel, GameState, SetupType } from "../../models";
 import { RoundState } from "../round.model";
 import { validate as validateUUID } from "uuid";
+import { MaxPlayers } from "../game.model";
 
 describe("Game Model", () => {
   let gameCode = 420691;
@@ -247,6 +248,24 @@ describe("Game Model", () => {
     } catch (e) {
       expect(e).toBeInstanceOf(mongoose.Error.ValidationError);
       expect(e.errors["rounds.0.host"]).toBeDefined();
+    }
+  });
+
+  it("should throw a validation error if the game is at max capacity and another player tries to join", async () => {
+    gameData.players = [];
+    for (let i = 0; i < MaxPlayers; i++) {
+      gameData.players.push({ nickname: `Bob${i}` });
+    }
+
+    const game = new GameModel(gameData);
+
+    try {
+      game.players.push({ nickname: `Bob${MaxPlayers}` });
+      await game.save();
+      fail(`should not allow a ${MaxPlayers + 1}th player`);
+    } catch (e) {
+      expect(e).toBeInstanceOf(mongoose.Error.ValidationError);
+      expect(e.errors.players).toBeDefined();
     }
   });
 });
