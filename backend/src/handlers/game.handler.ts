@@ -27,10 +27,16 @@ export default (
   const startGame = async (callback: (data: string) => void): Promise<void> => {
     try {
       if (isHost(socket, gameCode)) {
+        const sockets = await getSockets(io, gameCode);
+
+        // Todo add min players constant from #93
+        if (sockets.length <= 3) {
+          return callback(`Need a minimum of ${3} players to start a game`);
+        }
+
         await initialiseNextRound(io, gameCode, playerId);
       }
     } catch (e) {
-      console.log(e);
       if (e instanceof ServiceError) {
         callback(e.message);
       } else {
