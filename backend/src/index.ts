@@ -61,8 +61,9 @@ io.on("connection", async (socket) => {
   await Connection(io, socket);
 });
 
-app.use(express.static(path.resolve(__dirname, "../build/src/build/")));
+// if (process.env.NODE_ENV == 'production') {
+app.use(express.static(path.resolve(__dirname, "../src/build/")));
 
 app.get("/*", (req, res) => {
-  res.sendFile(path.resolve(__dirname, "../build/src/build/", "index.html"));
+  res.sendFile(path.resolve(__dirname, "../src/build/", "index.html"));
 });
