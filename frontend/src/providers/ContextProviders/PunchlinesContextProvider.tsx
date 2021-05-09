@@ -1,19 +1,27 @@
 import React from "react";
 import useCrud from "../../hooks/useCrud";
 
-export type Punchline = string;
+export type Punchline = {
+  text: string;
+  new?: boolean;
+  viewed?: boolean;
+};
+
 const equals = (punchline1: Punchline, punchline2: Punchline) =>
-  punchline1 === punchline2;
+  punchline1.text === punchline2.text;
 
 type Context = {
   punchlines: Punchline[];
-  initialisePunchlines?: (arg0: Punchline[]) => void;
-  addPunchline?: (arg0: string) => void;
-  removePunchline?: (arg0: string) => void;
+  initialisePunchlines: (arg0: Punchline[]) => void;
+  addPunchlines: (arg0: string[]) => void;
+  removePunchline: (arg0: string) => void;
 };
 
 const PunchlinesContext = React.createContext<Context>({
   punchlines: [],
+  initialisePunchlines: () => null,
+  addPunchlines: () => null,
+  removePunchline: () => null,
 });
 
 const PunchlinesContextProvider = ({
@@ -24,13 +32,43 @@ const PunchlinesContextProvider = ({
   const {
     items: punchlines,
     initialiseItems: initialisePunchlines,
-    addItem: addPunchline,
+    addItems,
     removeItem,
+    updateItem,
   } = useCrud<Punchline>(equals);
+
+  const addPunchlines = (newPunchlines: string[]) => {
+    if (punchlines.length === 0) {
+      addItems(
+        newPunchlines.map((punchline) => ({
+          text: punchline,
+          new: false,
+          viewed: false,
+        }))
+      );
+      return;
+    }
+
+    punchlines.forEach((punchline) => {
+      updateItem({
+        ...punchline,
+        new: false,
+        viewed: false,
+      });
+    });
+
+    addItems(
+      newPunchlines.map((punchline) => ({
+        text: punchline,
+        new: true,
+        viewed: false,
+      }))
+    );
+  };
 
   const removePunchline = (punchline: string) => {
     const punchlineToRemove = punchlines.find(
-      (p: Punchline) => p === punchline
+      (p: Punchline) => p.text === punchline
     );
     if (!punchlineToRemove) {
       return;
@@ -42,7 +80,7 @@ const PunchlinesContextProvider = ({
   const context = {
     punchlines,
     initialisePunchlines,
-    addPunchline,
+    addPunchlines,
     removePunchline,
   };
 

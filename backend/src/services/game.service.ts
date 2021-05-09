@@ -97,7 +97,8 @@ export const checkGameEnded = async (
 export const allocatePlayerPunchlines = async (
   game: Game,
   playerId: Player["id"],
-  punchlineLimit = 10
+  punchlineLimit = 10,
+  save = true
 ): Promise<{ addedPunchlines: string[]; removedPunchlines: string[] }> => {
   const player = game.players.id(playerId);
 
@@ -121,7 +122,7 @@ export const allocatePlayerPunchlines = async (
       punchlinesAdded.push(punchlineFromDeck);
       player.punchlines.push(punchlineFromDeck);
     }
-    await game.save();
+    if (save) await game.save();
 
     return {
       addedPunchlines: punchlinesAdded,

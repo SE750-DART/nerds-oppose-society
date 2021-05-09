@@ -58,7 +58,8 @@ export default (
           } = await allocatePlayerPunchlines(
             game,
             player.id,
-            round.setup.type === SetupType.drawTwoPickThree ? 12 : 10
+            round.setup.type === SetupType.drawTwoPickThree ? 12 : 10,
+            false
           );
           socketsByPlayerId
             .get(player.id)
@@ -67,10 +68,12 @@ export default (
             .get(player.id)
             ?.emit("punchlines:remove", removedPunchlines);
         });
+        await game.save();
 
         io.to(gameCode).emit("navigate", RoundState.playersChoose);
       }
     } catch (e) {
+      console.log(e);
       if (e instanceof ServiceError) {
         callback(e.message);
       } else {

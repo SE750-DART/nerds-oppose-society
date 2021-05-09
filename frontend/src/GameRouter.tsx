@@ -4,6 +4,7 @@ import { createMemoryHistory } from "history";
 import createPersistedState from "use-persisted-state";
 import socket from "./socket";
 import { PlayersContext } from "./providers/ContextProviders/PlayersContextProvider";
+import { PunchlinesContext } from "./providers/ContextProviders/PunchlinesContextProvider";
 import {
   BasicPage,
   EndGamePage,
@@ -14,10 +15,11 @@ import {
   StartRoundPage,
   SubmitPunchlinePage,
 } from "./pages";
+import { RoundContext } from "./providers/ContextProviders/RoundContextProvider";
 
 export type Settings = {
-  roundLimit?: number;
-  maxPlayers?: number;
+  roundLimit: number;
+  maxPlayers: number;
 };
 
 type PathParams = {
@@ -28,23 +30,52 @@ const memoryHistory = createMemoryHistory();
 const usePlayerIdState = createPersistedState("playerId");
 const useTokenState = createPersistedState("token");
 
-const GameRouter = () => {
-  const { gameCode } = useParams<PathParams>();
+const INITIAL_ROUND_LIMIT = 69;
+const INITIAL_MAX_PLAYERS = 40;
+
+const setupSockets = ({
+  settings,
+  setSettings,
+}: {
+  settings: Settings;
+  setSettings: React.Dispatch<React.SetStateAction<Settings>>;
+}) => {
   const [, setPlayerId] = usePlayerIdState("");
   const [, setToken] = useTokenState("");
-  const { setHost, initialisePlayers, addPlayer, removePlayer } = useContext(
-    PlayersContext
-  );
-  const [settings, setSettings] = useState<Settings>();
+  const {
+    setHost,
+    initialisePlayers,
+    addPlayer,
+    removePlayer,
+    incrementPlayerScore,
+  } = useContext(PlayersContext);
+  const { addPunchlines } = useContext(PunchlinesContext);
+  const {
+    setRoundNumber,
+    setSetup,
+    incrementPlayersChosen,
+    setPunchlinesChosen,
+    setWinner,
+  } = useContext(RoundContext);
 
-  const handleNavigate = useCallback(memoryHistory.push, [memoryHistory.push]);
+  // Connection
+  const handleNavigate = useCallback(
+    (path: string) => memoryHistory.push(path.toLowerCase()),
+    [memoryHistory.push]
+  );
   const handleHost = useCallback(setHost, [setHost]);
   const handlePlayersInitial = useCallback(initialisePlayers, [
     initialisePlayers,
   ]);
+  const handleSettingsInitial = useCallback(setSettings, [setSettings]);
+  const handleConnectError = useCallback(() => {
+    setPlayerId("");
+    setToken("");
+  }, [setPlayerId, setToken]);
+
+  // Lobby
   const handlePlayersAdd = useCallback(addPlayer, [addPlayer]);
   const handlePlayersRemove = useCallback(removePlayer, [removePlayer]);
-  const handleSettingsInitial = useCallback(setSettings, [setSettings]);
   const handleSettingsUpdate = useCallback(
     (setting, value) => {
       let key;
@@ -68,32 +99,87 @@ const GameRouter = () => {
     },
     [setSettings]
   );
-  const handleConnectError = useCallback(() => {
-    setPlayerId("");
-    setToken("");
-  }, [setPlayerId, setToken]);
+
+  // Round
+  const handlePunchlinesAdd = useCallback(addPunchlines, [addPunchlines]);
+  const handleRoundNumber = useCallback(setRoundNumber, [setRoundNumber]);
+  const handleRoundSetup = useCallback(setSetup, [setSetup]);
+  const handleRoundIncrementPlayersChosen = useCallback(
+    incrementPlayersChosen,
+    [incrementPlayersChosen]
+  );
+  const handleRoundChosenPunchlines = useCallback(setPunchlinesChosen, [
+    setPunchlinesChosen,
+  ]);
+  const handleRoundWinner = useCallback(
+    (winningPlayerId: string, winningPunchlines: string[]) => {
+      setWinner(winningPlayerId, winningPunchlines);
+      incrementPlayerScore(winningPlayerId);
+    },
+    [setWinner]
+  );
 
   useEffect(() => {
+    // Connection
     socket.on("navigate", handleNavigate);
     socket.on("host", handleHost);
     socket.on("players:initial", handlePlayersInitial);
-    socket.on("players:add", handlePlayersAdd);
-    socket.on("players:remove", handlePlayersRemove);
     socket.on("settings:initial", handleSettingsInitial);
-    socket.on("settings:update", handleSettingsUpdate);
     socket.on("connect_error", handleConnectError);
 
+    // Lobby
+    socket.on("players:add", handlePlayersAdd);
+    socket.on("players:remove", handlePlayersRemove);
+    socket.on("settings:update", handleSettingsUpdate);
+
+    // Round
+    socket.on("punchlines:add", handlePunchlinesAdd);
+    socket.on("round:number", handleRoundNumber);
+    socket.on("round:setup", handleRoundSetup);
+    socket.on(
+      "round:increment-players-chosen",
+      handleRoundIncrementPlayersChosen
+    );
+    socket.on("round:chosen-punchlines", handleRoundChosenPunchlines);
+    socket.on("round:winner", handleRoundWinner);
     return () => {
       // Remove event handlers when component is unmounted to prevent buildup of identical handlers
+      // Connection
       socket.off("navigate", handleNavigate);
       socket.off("host", handleHost);
       socket.off("players:initial", handlePlayersInitial);
+      socket.off("settings:initial", handleSettingsInitial);
+      socket.off("connect_error", handleConnectError);
+
+      // Lobby
       socket.off("players:add", handlePlayersAdd);
       socket.off("players:remove", handlePlayersRemove);
-      socket.off("settings:initial", handleSettingsInitial);
       socket.off("settings:update", handleSettingsUpdate);
-      socket.off("connect_error", handleConnectError);
+
+      // Round
+      socket.off("punchlines:add", handlePunchlinesAdd);
+      socket.off("round:number", handleRoundNumber);
+      socket.off("round:setup", handleRoundSetup);
+      socket.off(
+        "round:increment-players-chosen",
+        handleRoundIncrementPlayersChosen
+      );
+      socket.off("round:chosen-punchlines", handleRoundChosenPunchlines);
+      socket.off("round:winner", handleRoundWinner);
     };
+  });
+};
+
+const GameRouter = () => {
+  const { gameCode } = useParams<PathParams>();
+  const [settings, setSettings] = useState<Settings>({
+    roundLimit: INITIAL_ROUND_LIMIT,
+    maxPlayers: INITIAL_MAX_PLAYERS,
+  });
+
+  setupSockets({
+    settings,
+    setSettings,
   });
 
   return (
@@ -107,20 +193,20 @@ const GameRouter = () => {
           <LobbyPage gameCode={gameCode} settings={settings} />
         </Route>
 
-        <Route path="/preRound">
-          <StartRoundPage />
+        <Route path="/before">
+          <StartRoundPage roundLimit={settings.roundLimit} />
         </Route>
 
-        <Route path="/submitPunchline">
-          <SubmitPunchlinePage />
+        <Route path="/players_choose">
+          <SubmitPunchlinePage roundLimit={settings.roundLimit} />
         </Route>
 
-        <Route path="/selectPunchline">
-          <SelectPunchlinePage />
+        <Route path="/host_chooses">
+          <SelectPunchlinePage roundLimit={settings.roundLimit} />
         </Route>
 
-        <Route path="/postRound">
-          <EndRoundPage />
+        <Route path="/after">
+          <EndRoundPage roundLimit={settings.roundLimit} />
         </Route>
 
         <Route path="/scoreboard">
