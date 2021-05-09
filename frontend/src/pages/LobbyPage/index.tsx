@@ -20,6 +20,8 @@ type Props = {
 const MINIMUM_PLAYERS = 3;
 
 const LobbyPage = ({ gameCode, settings }: Props) => {
+  const [, setResponse] = useState("");
+
   const { host, players } = useContext(PlayersContext);
   const [playerId] = usePlayerIdState("");
   const playerIsHost = playerId === host;
@@ -43,7 +45,12 @@ const LobbyPage = ({ gameCode, settings }: Props) => {
   const updateSettings = useCallback(
     debounce((setting: string, value: string) => {
       if (value.match(/^\d+$/)) {
-        socket.emit("settings:update", setting, parseInt(value, 10));
+        socket.emit(
+          "settings:update",
+          setting,
+          parseInt(value, 10),
+          (response: string) => setResponse(response)
+        );
       }
     }, msDebounceDelay),
     []
@@ -115,7 +122,9 @@ const LobbyPage = ({ gameCode, settings }: Props) => {
         {playerIsHost && (
           <Button
             text="Start game"
-            handleOnClick={() => socket.emit("start")}
+            handleOnClick={() =>
+              socket.emit("start", (response: string) => setResponse(response))
+            }
             disabled={players.length < MINIMUM_PLAYERS}
           />
         )}

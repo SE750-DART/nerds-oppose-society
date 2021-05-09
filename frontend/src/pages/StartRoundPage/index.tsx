@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import createPersistedState from "use-persisted-state";
 import Button from "../../components/Button";
 import styles from "./style.module.css";
@@ -12,6 +12,7 @@ const StartRoundPage = ({ roundLimit }: { roundLimit: number }) => {
   const { host, players } = useContext(PlayersContext);
   const [playerId] = usePlayerIdState("");
   const playerIsHost = playerId === host;
+  const [, setResponse] = useState("");
   const { roundNumber } = useContext(RoundContext);
 
   return (
@@ -30,7 +31,11 @@ const StartRoundPage = ({ roundLimit }: { roundLimit: number }) => {
       {playerIsHost ? (
         <Button
           text="Leshgo!"
-          handleOnClick={() => socket.emit("round:host-begin")}
+          handleOnClick={() =>
+            socket.emit("round:host-begin", (response: string) =>
+              setResponse(response)
+            )
+          }
         />
       ) : (
         <p className={styles.waitingMsg}>Waiting on X to start the round...</p>
