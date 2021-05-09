@@ -94,7 +94,10 @@ export const initialiseNextRound = async (
   );
 
   io.to(gameCode).emit("round:number", roundNumber);
-  io.to(gameCode).emit("round:setup", setup);
+  io.to(gameCode).emit("round:setup", {
+    setup: setup.setup,
+    type: setup.type,
+  });
   io.to(gameCode).emit("navigate", RoundState.before);
 };
 
