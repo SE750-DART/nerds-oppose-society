@@ -1,7 +1,7 @@
 import React, { createContext } from "react";
 import { Router, Switch, Route, Redirect } from "react-router-dom";
 import { createBrowserHistory } from "history";
-import { HomePage, LegalPage } from "../pages";
+import { AboutPage, HomePage, LegalPage } from "../pages";
 import GameRouter from "../GameRouter";
 import "./App.css";
 
@@ -15,6 +15,10 @@ function App() {
         <Switch>
           <Route exact path="/">
             <HomePage />
+          </Route>
+
+          <Route exact path="/about">
+            <AboutPage />
           </Route>
 
           <Route exact path="/legal">
