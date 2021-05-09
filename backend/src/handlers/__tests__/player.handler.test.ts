@@ -332,31 +332,41 @@ describe("Player handlers", () => {
   });
 
   describe("playerLeave handler", () => {
-    let toMock: jest.Mock;
-    let emitMock: jest.Mock;
+    let io: Server;
+
+    let ioEmitMock: jest.Mock;
+    let socketEmitMock: jest.Mock;
 
     let gameSpy: jest.SpyInstance;
     let removeSpy: jest.SpyInstance;
+    let socketsSpy: jest.SpyInstance;
 
     beforeEach(async () => {
-      toMock = jest.fn();
-      emitMock = jest.fn();
-      toMock.mockImplementation(() => {
-        return {
-          emit: emitMock,
-        };
-      });
-
       gameSpy = jest.spyOn(GameService, "getGame");
       removeSpy = jest.spyOn(PlayerService, "removePlayer");
+      socketsSpy = jest.spyOn(GameHandler, "getSockets");
 
+      ioEmitMock = jest.fn();
+      io = ({
+        to: jest.fn(() => {
+          return {
+            emit: ioEmitMock,
+          };
+        }),
+      } as unknown) as Server;
+
+      socketEmitMock = jest.fn();
       socket = ({
         data: {
           gameCode: "42069",
           playerId: "12345",
         },
         on: jest.fn(),
-        to: toMock,
+        to: jest.fn(() => {
+          return {
+            emit: socketEmitMock,
+          };
+        }),
       } as unknown) as Socket;
 
       handlers = await registerPlayerHandler(io, socket);
@@ -365,6 +375,7 @@ describe("Player handlers", () => {
     afterEach(() => {
       gameSpy.mockRestore();
       removeSpy.mockRestore();
+      socketsSpy.mockRestore();
     });
 
     it("removes player from game if game state is lobby", async () => {
@@ -383,11 +394,10 @@ describe("Player handlers", () => {
       expect(removeSpy).toHaveBeenCalledTimes(1);
       expect(removeSpy).toHaveBeenCalledWith(game, "12345");
 
-      expect(toMock).toHaveBeenCalledTimes(1);
-      expect(toMock).toHaveBeenCalledWith("42069");
-
-      expect(emitMock).toHaveBeenCalledTimes(1);
-      expect(emitMock).toHaveBeenCalledWith("players:remove", "abc123");
+      expect(socket.to).toHaveBeenCalledTimes(1);
+      expect(socket.to).toHaveBeenCalledWith("42069");
+      expect(socketEmitMock).toHaveBeenCalledTimes(1);
+      expect(socketEmitMock).toHaveBeenCalledWith("players:remove", "abc123");
     });
 
     it("does not removes player from game if game state is not lobby", async () => {
@@ -397,17 +407,62 @@ describe("Player handlers", () => {
       } as unknown) as Game;
       gameSpy.mockReturnValue(game);
 
-      removeSpy.mockReturnValue({
-        nickname: "Bob",
-      });
+      await handlers.playerLeave();
+
+      expect(removeSpy).toHaveBeenCalledTimes(0);
+
+      expect(socket.to).toHaveBeenCalledTimes(0);
+      expect(socketEmitMock).toHaveBeenCalledTimes(0);
+    });
+
+    it("returns players to lobby if active players drops below minimum", async () => {
+      const game = ({
+        gameCode: "42069",
+        state: GameState.active,
+        save: jest.fn(),
+      } as unknown) as Game;
+      gameSpy.mockReturnValue(game);
+
+      socketsSpy.mockReturnValue(["1", "2"]);
 
       await handlers.playerLeave();
 
       expect(removeSpy).toHaveBeenCalledTimes(0);
 
-      expect(toMock).toHaveBeenCalledTimes(0);
+      expect(game.state).toBe(GameState.lobby);
+      expect(game.save).toHaveBeenCalledTimes(1);
 
-      expect(emitMock).toHaveBeenCalledTimes(0);
+      expect(io.to).toHaveBeenCalledTimes(1);
+      expect(io.to).toHaveBeenCalledWith("42069");
+      expect(ioEmitMock).toHaveBeenCalledTimes(1);
+      expect(ioEmitMock).toHaveBeenCalledWith("navigate", GameState.lobby);
+
+      expect(socket.to).toHaveBeenCalledTimes(0);
+      expect(socketEmitMock).toHaveBeenCalledTimes(0);
+    });
+
+    it("does not return players to lobby if active players is at or above minimum", async () => {
+      const game = ({
+        gameCode: "42069",
+        state: GameState.active,
+        save: jest.fn(),
+      } as unknown) as Game;
+      gameSpy.mockReturnValue(game);
+
+      socketsSpy.mockReturnValue(["1", "2", "3"]);
+
+      await handlers.playerLeave();
+
+      expect(removeSpy).toHaveBeenCalledTimes(0);
+
+      expect(game.state).toBe(GameState.active);
+      expect(game.save).toHaveBeenCalledTimes(0);
+
+      expect(io.to).toHaveBeenCalledTimes(0);
+      expect(ioEmitMock).toHaveBeenCalledTimes(0);
+
+      expect(socket.to).toHaveBeenCalledTimes(0);
+      expect(socketEmitMock).toHaveBeenCalledTimes(0);
     });
 
     it("catches error thrown by getGame", async () => {

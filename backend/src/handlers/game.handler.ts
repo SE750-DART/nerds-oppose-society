@@ -30,7 +30,7 @@ export default (
         const sockets = await getSockets(io, gameCode);
 
         // Todo add min players constant from #93
-        if (sockets.length <= 3) {
+        if (sockets.length < 3) {
           return callback(`Need a minimum of ${3} players to start a game`);
         }
 

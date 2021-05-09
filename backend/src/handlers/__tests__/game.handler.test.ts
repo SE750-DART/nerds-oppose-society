@@ -145,7 +145,7 @@ describe("Game handler", () => {
     });
 
     it("does not start round if not min active players", async () => {
-      fetchMock.mockReturnValue(["1", "2", "3"]);
+      fetchMock.mockReturnValue(["1", "2"]);
 
       await handlers.startGame(callback);
 
@@ -165,7 +165,7 @@ describe("Game handler", () => {
     });
 
     it("catches ServiceError thrown by initialiseNextRound", async () => {
-      fetchMock.mockReturnValue(["1", "2", "3", "4"]);
+      fetchMock.mockReturnValue(["1", "2", "3"]);
 
       initialiseSpy.mockRejectedValue(
         new ServiceError(ErrorType.gameCode, "Game does not exist")

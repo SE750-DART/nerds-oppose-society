@@ -9,6 +9,7 @@ import {
   assignNextHost,
   emitHost,
   emitNavigate,
+  getSockets,
   setHost,
 } from "./game.handler";
 import { getGame } from "../services/game.service";
@@ -39,6 +40,18 @@ export default (
       if (game.state === GameState.lobby) {
         const player = await removePlayer(game, playerId);
         socket.to(game.gameCode).emit("players:remove", player.id);
+      }
+
+      if (game.state === GameState.active) {
+        const sockets = await getSockets(io, gameCode);
+
+        // Todo add min players constant from #93
+        if (sockets.length < 3) {
+          game.state = GameState.lobby;
+          await game.save();
+
+          io.to(gameCode).emit("navigate", GameState.lobby);
+        }
       }
       /* Empty catch block to keep console clean during testing.
        * Could use proper logging here such as winston
