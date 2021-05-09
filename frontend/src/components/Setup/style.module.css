@@ -6,10 +6,10 @@
     #bbdefb 80%,
     rgba(255, 255, 255, 0) 100%
   );
-  margin-left: -24px;
   padding: 24px 24px 36px 24px;
   position: sticky;
   top: 115px;
+  transform: translateX(-24px);
   width: 100vw;
   z-index: 5;
 }
