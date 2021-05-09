@@ -1,12 +1,17 @@
-import React, { useContext, useState } from "react";
+import React, { useContext } from "react";
+import createPersistedState from "use-persisted-state";
 import Button from "../../components/Button";
 import styles from "./style.module.css";
 import socket from "../../socket";
 import { RoundContext } from "../../providers/ContextProviders/RoundContextProvider";
+import { PlayersContext } from "../../providers/ContextProviders/PlayersContextProvider";
+
+const usePlayerIdState = createPersistedState("playerId");
 
 const StartRoundPage = ({ roundLimit }: { roundLimit: number }) => {
-  const [isTheMan] = useState(true);
-
+  const { host, players } = useContext(PlayersContext);
+  const [playerId] = usePlayerIdState("");
+  const playerIsHost = playerId === host;
   const { roundNumber } = useContext(RoundContext);
 
   return (
@@ -16,11 +21,13 @@ const StartRoundPage = ({ roundLimit }: { roundLimit: number }) => {
       </h4>
       <div className={styles.theMan}>
         <p className={styles.theManText}>
-          {isTheMan ? "You are The Man™." : "USERNAME is The Man™."}
+          {playerIsHost
+            ? "You are The Man™."
+            : `${players.find((p) => p.id === host)?.nickname} is The Man™.`}
         </p>
       </div>
 
-      {isTheMan ? (
+      {playerIsHost ? (
         <Button
           text="Leshgo!"
           handleOnClick={() => socket.emit("round:host-begin")}
