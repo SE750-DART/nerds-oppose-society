@@ -6,6 +6,7 @@ import PlayerList from "../../components/PlayerList";
 import ProgressBar from "../../components/ProgressBar";
 import PunchlineCard from "../../components/PunchlineCard";
 import Button from "../../components/Button";
+import Setup from "../../components/Setup";
 import { PlayersContext } from "../../providers/ContextProviders/PlayersContextProvider";
 import { RoundContext } from "../../providers/ContextProviders/RoundContextProvider";
 import socket from "../../socket";
@@ -95,14 +96,7 @@ const SelectPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
         <p className={styles.theManText}>You are The Man™.</p>
         <p style={{ fontStyle: `italic` }}>{promptMessage}</p>
 
-        <div
-          className={`${styles.setup} ${
-            waiting ? styles.setupNoGradient : undefined
-          }`}
-        >
-          <h5>The Setup:</h5>
-          <h2>{setup.setup}</h2>
-        </div>
+        <Setup setupText={setup.setup} />
 
         {waiting && (
           <ProgressBar

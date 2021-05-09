@@ -1,0 +1,35 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Setup snapshot testing 1`] = `
+<div
+  className="setup"
+>
+  <h5>
+    The Setup:
+  </h5>
+  <h2
+    style={Object {}}
+  >
+    Daddy, why is mommy crying?
+  </h2>
+</div>
+`;
+
+exports[`Setup snapshot testing 2`] = `
+<div
+  className="setup"
+>
+  <h5>
+    The Setup:
+  </h5>
+  <h2
+    style={
+      Object {
+        "fontSize": "24px",
+      }
+    }
+  >
+    After four platinum albums and three Grammys, it's time to get back to my roots, to what inspired me to make music in the first place: __________.
+  </h2>
+</div>
+`;

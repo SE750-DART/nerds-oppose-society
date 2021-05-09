@@ -1,6 +1,7 @@
 import { getGame } from "./game.service";
-import { Game, GameModel, Player } from "../models";
+import { Game, GameModel, GameState, Player } from "../models";
 import { ErrorType, ServiceError } from "../util";
+import { MaxPlayers } from "../models/settings.model";
 
 export const createPlayer = async (
   gameCode: Game["gameCode"],
@@ -10,6 +11,12 @@ export const createPlayer = async (
   token: Player["token"];
 }> => {
   const game = await getGame(gameCode);
+  const gameMax = game?.settings?.maxPlayers || MaxPlayers;
+  if (game.state === GameState.finished) {
+    throw new ServiceError(ErrorType.gameError, "Game is finished");
+  } else if (game.players.length >= gameMax) {
+    throw new ServiceError(ErrorType.gameError, "Too many players in the game");
+  }
 
   const length = game.players.push({
     nickname: nickname,
@@ -36,7 +43,12 @@ export const removePlayer = async (
   if (player === null)
     throw new ServiceError(ErrorType.playerId, "Player does not exist");
 
-  if (player.score === 0) {
+  if (player.score === 0 && game.state === GameState.lobby) {
+    while (player.punchlines.length > 0) {
+      const punchline = player.punchlines.pop() as string;
+      game.discardedPunchlines.push(punchline);
+    }
+    await game.save();
     await player.remove();
     await game.save();
   }

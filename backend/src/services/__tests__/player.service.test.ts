@@ -7,9 +7,11 @@ import {
   initialisePlayer,
   removePlayer,
 } from "../player.service";
-import { createGame, getGame } from "../game.service";
 import * as GameServices from "../game.service";
-import { validate as validateUUID, v4 as uuid } from "uuid";
+import { allocatePlayerPunchlines, createGame, getGame } from "../game.service";
+import { v4 as uuid, validate as validateUUID } from "uuid";
+import { GameState } from "../../models";
+import { ErrorType, ServiceError } from "../../util";
 
 beforeAll(async () => {
   await mongoose.connect(global.__MONGO_URI__, {
@@ -64,10 +66,38 @@ describe("createPlayer Service", () => {
       "Duplicate player nickname"
     );
   });
+
+  it("should throw an error when the game is finished", async () => {
+    const gameCode = await createGame();
+
+    const game = await getGame(gameCode);
+
+    game.state = GameState.finished;
+    await game.save();
+    await expect(createPlayer(gameCode, "Fred")).rejects.toThrow(
+      new ServiceError(ErrorType.gameError, "Game is finished")
+    );
+  });
+
+  it("should throw an error when the game has the max number of players", async () => {
+    const gameCode = await createGame();
+
+    const game = await getGame(gameCode);
+
+    game.settings.maxPlayers = 5;
+
+    for (let i = 0; i < 5; i++) {
+      game.players.push({ nickname: `Bob${i}` });
+    }
+    await game.save();
+    await expect(createPlayer(gameCode, "Fred")).rejects.toThrow(
+      new ServiceError(ErrorType.gameError, "Too many players in the game")
+    );
+  });
 });
 
 describe("removePlayer Service", () => {
-  it("removes a player from a game is score is zero", async () => {
+  it("removes a player from a game if score is zero and in lobby", async () => {
     const gameCode = await createGame();
     const { playerId } = await createPlayer(gameCode, "Dave");
 
@@ -78,6 +108,21 @@ describe("removePlayer Service", () => {
 
     game = await getGame(gameCode);
     expect(game.players.id(playerId)).toBeNull();
+  });
+
+  it("does not remove a player from a game if score is zero and not in lobby", async () => {
+    const gameCode = await createGame();
+    const { playerId } = await createPlayer(gameCode, "Dave");
+    let game = await getGame(gameCode);
+    game.state = GameState.active;
+
+    await game.save();
+    expect(game.players.id(playerId)).not.toBeNull();
+
+    await removePlayer(game, playerId);
+
+    game = await getGame(gameCode);
+    expect(game.players.id(playerId)).not.toBeNull();
   });
 
   it("throws error when provided an invalid playerId", async () => {
@@ -103,6 +148,29 @@ describe("removePlayer Service", () => {
 
     game = await getGame(gameCode);
     expect(game.players.id(playerId)).not.toBeNull();
+  });
+
+  it("puts players cards into the discards", async () => {
+    const gameCode = await createGame();
+    const { playerId } = await createPlayer(gameCode, "Dave");
+
+    let game = await getGame(gameCode);
+    expect(game.players.id(playerId)).not.toBeNull();
+
+    await allocatePlayerPunchlines(game, playerId, 10);
+
+    const playerPunchlines = await getPlayer(gameCode, playerId);
+
+    expect(playerPunchlines.punchlines.length).toBe(10);
+
+    game = await getGame(gameCode);
+    const currentDiscards = game.discardedPunchlines.length;
+
+    await removePlayer(game, playerId);
+
+    game = await getGame(gameCode);
+    expect(game.players.id(playerId)).toBeNull();
+    expect(game.discardedPunchlines.length).toBe(currentDiscards + 10);
   });
 });
 

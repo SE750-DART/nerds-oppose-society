@@ -77,7 +77,7 @@ const setupSockets = ({
   const handlePlayersAdd = useCallback(addPlayer, [addPlayer]);
   const handlePlayersRemove = useCallback(removePlayer, [removePlayer]);
   const handleSettingsUpdate = useCallback(
-    ({ setting, value }: { setting: string; value: number }) => {
+    (setting, value) => {
       let key;
       switch (setting) {
         case "MAX_PLAYERS":

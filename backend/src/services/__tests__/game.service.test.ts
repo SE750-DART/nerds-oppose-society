@@ -1,19 +1,30 @@
 import {
   allocatePlayerPunchlines,
+  checkGameEnded,
   createGame,
   getGame,
   initialiseNextRound,
   setMaxPlayers,
   setRoundLimit,
+  shuffleDiscardedPunchlines,
+  shuffleDiscardedSetups,
   validateGameCode,
 } from "../game.service";
-import { Game, GameModel, GameState, Player, Setup } from "../../models";
+import {
+  Game,
+  GameModel,
+  GameState,
+  Player,
+  Setup,
+  SetupType,
+} from "../../models";
 import mongoose from "mongoose";
 import { PUNCHLINES, SETUPS } from "../../resources";
 import * as Util from "../../util";
 import { ErrorType, ServiceError } from "../../util";
 import { createPlayer, getPlayer } from "../player.service";
 import { RoundState } from "../../models/round.model";
+import { MaxPlayers } from "../../models/settings.model";
 
 beforeAll(async () => {
   await mongoose.connect(global.__MONGO_URI__, {
@@ -119,15 +130,15 @@ describe("setRoundLimit Service", () => {
 });
 
 describe("setMaxPlayers Service", () => {
-  it("sets maxPlayers to 50", async () => {
+  it("sets maxPlayers to 40", async () => {
     const gameCode = await createGame();
     let game = await getGame(gameCode);
-    expect(game.settings.maxPlayers).not.toBe(50);
+    expect(game.settings.maxPlayers).not.toBe(40);
 
-    await setMaxPlayers(game, 50);
+    await setMaxPlayers(game, 40);
 
     game = await getGame(gameCode);
-    expect(game.settings.maxPlayers).toBe(50);
+    expect(game.settings.maxPlayers).toBe(40);
   });
 });
 
@@ -200,50 +211,82 @@ describe("allocateCards Service", () => {
 
   it("should successfully allocate new cards at the start of the game", async () => {
     const game: Game = await getGame(gameCode);
-    const newCards = await allocatePlayerPunchlines(
-      game,
-      playerId,
-      punchlineLimit
-    );
+    const newCards = (
+      await allocatePlayerPunchlines(game, playerId, punchlineLimit)
+    ).addedPunchlines;
     expect(newCards.length).toBe(10);
+    expect((await getPlayer(gameCode, playerId)).punchlines.length).toBe(10);
+  });
+
+  it("should remove a players punchlines if they are over the limit", async () => {
+    let game: Game = await getGame(gameCode);
+    const player = game.players.id(playerId);
+    const punchlines = [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "10",
+      "11",
+      "12",
+    ];
+    player?.punchlines.push(...punchlines);
+    await game.save();
+    game = await getGame(gameCode);
+    const removedCards = (
+      await allocatePlayerPunchlines(game, playerId, punchlineLimit)
+    ).removedPunchlines;
+    game = await getGame(gameCode);
+    expect(removedCards.length).toBe(2);
+    expect(game.discardedPunchlines.length).toBe(2);
+    expect((await getPlayer(gameCode, playerId)).punchlines.length).toBe(10);
   });
 
   it("should successfully only allocate 1 punchline on a normal setup if a player has 9 punchlines", async () => {
     const game: Game = await getGame(gameCode);
-    const player: Player = await getPlayer(gameCode, playerId, game);
+    const player = game.players.id(playerId);
+
     const punchlines = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
-    player.punchlines.push(...punchlines);
+
+    player?.punchlines.push(...punchlines);
+
     await game.save();
-    const newCards = await allocatePlayerPunchlines(
-      game,
-      playerId,
-      punchlineLimit
-    );
+
+    const newCards = (
+      await allocatePlayerPunchlines(game, playerId, punchlineLimit)
+    ).addedPunchlines;
     expect(newCards.length).toBe(1);
+    expect((await getPlayer(gameCode, playerId)).punchlines.length).toBe(10);
   });
 
   it("should successfully only allocate 2 punchlines on a play 2 setup if a player has 8 punchlines", async () => {
     const game: Game = await getGame(gameCode);
-    const player: Player = await getPlayer(gameCode, playerId, game);
+    const player = game.players.id(playerId);
     const punchlines = ["1", "2", "3", "4", "5", "6", "7", "8"];
-    player.punchlines.push(...punchlines);
+    player?.punchlines.push(...punchlines);
     await game.save();
-    const newCards = await allocatePlayerPunchlines(
-      game,
-      playerId,
-      punchlineLimit
-    );
+    const newCards = (
+      await allocatePlayerPunchlines(game, playerId, punchlineLimit)
+    ).addedPunchlines;
     expect(newCards.length).toBe(2);
+    expect((await getPlayer(gameCode, playerId)).punchlines.length).toBe(10);
   });
 
   it("should successfully only allocate 3 punchlines on a draw 2 pick 3 setup with a normal hand", async () => {
     const game: Game = await getGame(gameCode);
-    const player: Player = await getPlayer(gameCode, playerId, game);
+    const player = game.players.id(playerId);
     const punchlines = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
-    player.punchlines.push(...punchlines);
+    player?.punchlines.push(...punchlines);
     await game.save();
-    const newCards = await allocatePlayerPunchlines(game, playerId, 12);
+    const newCards = (await allocatePlayerPunchlines(game, playerId, 12))
+      .addedPunchlines;
     expect(newCards.length).toBe(3);
+    expect((await getPlayer(gameCode, playerId)).punchlines.length).toBe(12);
   });
 
   it("should throw ServiceError if there are no punchlines left in the deck", async () => {
@@ -265,5 +308,203 @@ describe("allocateCards Service", () => {
     ).rejects.toThrow(
       new ServiceError(ErrorType.playerId, "Player does not exist")
     );
+  });
+});
+
+describe("reshuffle setups/punchlines service", () => {
+  let gameCode: string;
+  let setupNum: number;
+  let punchlineNum: number;
+  let playerId: Player["id"];
+
+  beforeEach(async () => {
+    gameCode = await createGame();
+    const game: Game = await getGame(gameCode);
+    setupNum = game.setups.length;
+    punchlineNum = game.punchlines.length;
+    playerId = (await createPlayer(gameCode, "Bob")).playerId;
+  });
+
+  describe("setups shuffling", () => {
+    it("should shuffle the deck when there are only 5 setups left", async () => {
+      const game: Game = await getGame(gameCode);
+      const setups = game.setups;
+      const discards = setups.splice(5, setups.length);
+      game.setups = setups;
+      game.discardedSetups.push(...discards);
+      await game.save();
+      await shuffleDiscardedSetups(game);
+      expect(game.setups.length).toBe(setupNum);
+      expect(game.discardedSetups.length).toBe(0);
+    });
+
+    it("should not shuffle the deck when there are more than 5 setups left", async () => {
+      const game: Game = await getGame(gameCode);
+      const setups = game.setups;
+      const discards = setups.splice(6, setups.length);
+      game.setups = setups;
+      game.discardedSetups.push(...discards);
+      await game.save();
+      await shuffleDiscardedSetups(game);
+      expect(game.setups.length).toBe(6);
+      expect(game.discardedSetups.length).toBe(setupNum - 6);
+    });
+  });
+
+  describe("punchlines shuffling", () => {
+    it(`should shuffle the punchlines when: hand size 8, draw 4, 4 * ${MaxPlayers} punchlines left`, async () => {
+      const game: Game = await getGame(gameCode);
+      await allocatePlayerPunchlines(game, playerId, 8);
+
+      game.setups.push({
+        setup: "why did the chicken cross the road?",
+        type: SetupType.drawTwoPickThree,
+      });
+
+      const punchlines = game.punchlines;
+      const discards = punchlines.splice(4 * MaxPlayers, punchlines.length);
+
+      game.punchlines = punchlines;
+      game.discardedPunchlines.push(...discards);
+      await game.save();
+
+      await shuffleDiscardedPunchlines(game);
+      expect(game.punchlines.length).toBe(punchlineNum - 8);
+      expect(game.discardedPunchlines.length).toBe(0);
+    });
+
+    it(`should shuffle the punchlines when: hand size 9, draw 3, 3 * ${MaxPlayers} punchlines left`, async () => {
+      const game: Game = await getGame(gameCode);
+      await allocatePlayerPunchlines(game, playerId, 9);
+
+      game.setups.push({
+        setup: "why did the chicken cross the road?",
+        type: SetupType.drawTwoPickThree,
+      });
+
+      const punchlines = game.punchlines;
+      const discards = punchlines.splice(3 * MaxPlayers, punchlines.length);
+
+      game.punchlines = punchlines;
+      game.discardedPunchlines.push(...discards);
+      await game.save();
+
+      await shuffleDiscardedPunchlines(game);
+      expect(game.punchlines.length).toBe(punchlineNum - 9);
+      expect(game.discardedPunchlines.length).toBe(0);
+    });
+
+    it(`should shuffle the punchlines when: hand size 8, draw 2, 2 * ${MaxPlayers} punchlines left`, async () => {
+      const game: Game = await getGame(gameCode);
+      await allocatePlayerPunchlines(game, playerId, 8);
+
+      game.setups.push({
+        setup: "why did the chicken cross the road?",
+        type: SetupType.pickOne,
+      });
+
+      const punchlines = game.punchlines;
+      const discards = punchlines.splice(2 * MaxPlayers, punchlines.length);
+
+      game.punchlines = punchlines;
+      game.discardedPunchlines.push(...discards);
+      await game.save();
+
+      await shuffleDiscardedPunchlines(game);
+      expect(game.punchlines.length).toBe(punchlineNum - 8);
+      expect(game.discardedPunchlines.length).toBe(0);
+    });
+
+    it(`should shuffle the punchlines when: hand size 9, draw 1, 1 * ${MaxPlayers} punchlines left`, async () => {
+      const game: Game = await getGame(gameCode);
+      await allocatePlayerPunchlines(game, playerId, 9);
+
+      game.setups.push({
+        setup: "why did the chicken cross the road?",
+        type: SetupType.pickTwo,
+      });
+
+      const punchlines = game.punchlines;
+      const discards = punchlines.splice(MaxPlayers, punchlines.length);
+
+      game.punchlines = punchlines;
+      game.discardedPunchlines.push(...discards);
+      await game.save();
+
+      await shuffleDiscardedPunchlines(game);
+      expect(game.punchlines.length).toBe(punchlineNum - 9);
+      expect(game.discardedPunchlines.length).toBe(0);
+    });
+
+    it(`should not shuffle punchlines when there are more than 4 * ${MaxPlayers} punchlines`, async () => {
+      const game: Game = await getGame(gameCode);
+      const punchlines = game.punchlines;
+      const discards = punchlines.splice(4 * MaxPlayers + 1, punchlines.length);
+      game.punchlines = punchlines;
+      game.discardedPunchlines.push(...discards);
+      await game.save();
+      await shuffleDiscardedPunchlines(game);
+      expect(game.punchlines.length).toBe(4 * MaxPlayers + 1);
+      expect(game.discardedPunchlines.length).toBe(
+        punchlineNum - 4 * MaxPlayers - 1
+      );
+    });
+  });
+});
+
+describe("checkGameEnded service", () => {
+  let gameCode: string;
+  const randomHostId = "6094a2e1d7909d84ae35819c";
+
+  beforeEach(async () => {
+    gameCode = await createGame();
+  });
+
+  it("should return false if the rounds are less than the limit", async () => {
+    const game: Game = await getGame(gameCode);
+    game.settings.roundLimit = 5;
+    game.rounds.push(
+      ...[
+        { setup: { setup: "1" }, host: randomHostId },
+        {
+          setup: { setup: "2" },
+          host: randomHostId,
+        },
+        { setup: { setup: "3" }, host: randomHostId },
+        {
+          setup: { setup: "4" },
+          host: randomHostId,
+        },
+      ]
+    );
+    await game.save();
+    expect(await checkGameEnded(gameCode)).toBe(false);
+  });
+
+  it("should return true if the rounds are at the limit", async () => {
+    let game: Game = await getGame(gameCode);
+    game.settings.roundLimit = 5;
+    game.rounds.push(
+      ...[
+        { setup: { setup: "1" }, host: randomHostId },
+        {
+          setup: { setup: "2" },
+          host: randomHostId,
+        },
+        { setup: { setup: "3" }, host: randomHostId },
+        {
+          setup: { setup: "4" },
+          host: randomHostId,
+        },
+        {
+          setup: { setup: "5" },
+          host: randomHostId,
+        },
+      ]
+    );
+    await game.save();
+    expect(await checkGameEnded(gameCode)).toBe(true);
+    game = await getGame(gameCode);
+    expect(game.state).toBe(GameState.finished);
   });
 });

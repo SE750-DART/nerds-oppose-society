@@ -5,7 +5,7 @@ import * as GameService from "../../services/game.service";
 import * as RoundService from "../../services/round.service";
 import { RoundState } from "../../models/round.model";
 import { ErrorType, ServiceError } from "../../util";
-import { Game, Player, SetupType } from "../../models";
+import { Game, GameState, Player, SetupType } from "../../models";
 
 describe("Round handler", () => {
   const io = ("io" as unknown) as Server;
@@ -68,7 +68,6 @@ describe("Round handler", () => {
     let callback: jest.Mock;
     let emitMock: jest.Mock;
     let socketMock: jest.Mock;
-    let saveMock: jest.Mock;
 
     let io: Server;
     let socket: Socket;
@@ -95,7 +94,6 @@ describe("Round handler", () => {
       } as unknown) as Server;
 
       socketMock = jest.fn();
-      saveMock = jest.fn();
 
       socket = ({
         data: {
@@ -111,7 +109,6 @@ describe("Round handler", () => {
       activePlayers = ([{ id: "1" }] as unknown) as Player[];
       game = ({
         gameId: "42069",
-        save: saveMock,
         rounds: [
           {
             setup: {
@@ -129,7 +126,10 @@ describe("Round handler", () => {
         game: game,
         socketsByPlayerId: socketsByPlayerId,
       });
-      allocateSpy.mockReturnValue(["To get to the other side", "To go to KFC"]);
+      allocateSpy.mockReturnValue({
+        addedPunchlines: ["To get to the other side", "To go to KFC"],
+        removedPunchlines: [],
+      });
     });
 
     afterEach(() => {
@@ -147,12 +147,12 @@ describe("Round handler", () => {
       expect(allocateSpy).toHaveBeenCalledTimes(1);
       expect(allocateSpy).toHaveBeenCalledWith(game, "1", 10);
 
-      expect(socketMock).toHaveBeenCalledTimes(1);
+      expect(socketMock).toHaveBeenCalledTimes(2);
       expect(socketMock).toHaveBeenCalledWith("punchlines:add", [
         "To get to the other side",
         "To go to KFC",
       ]);
-      expect(saveMock).toHaveBeenCalledTimes(1);
+      expect(socketMock).toHaveBeenCalledWith("punchlines:remove", []);
 
       expect(io.to).toHaveBeenCalledTimes(1);
       expect(io.to).toHaveBeenCalledWith("42069");
@@ -175,12 +175,12 @@ describe("Round handler", () => {
       expect(allocateSpy).toHaveBeenCalledTimes(1);
       expect(allocateSpy).toHaveBeenCalledWith(game, "1", 12);
 
-      expect(socketMock).toHaveBeenCalledTimes(1);
+      expect(socketMock).toHaveBeenCalledTimes(2);
       expect(socketMock).toHaveBeenCalledWith("punchlines:add", [
         "To get to the other side",
         "To go to KFC",
       ]);
-      expect(saveMock).toHaveBeenCalledTimes(1);
+      expect(socketMock).toHaveBeenCalledWith("punchlines:remove", []);
 
       expect(io.to).toHaveBeenCalledTimes(1);
       expect(io.to).toHaveBeenCalledWith("42069");
@@ -211,7 +211,6 @@ describe("Round handler", () => {
 
       expect(allocateSpy).toHaveBeenCalledTimes(0);
       expect(socketMock).toHaveBeenCalledTimes(0);
-      expect(saveMock).toHaveBeenCalledTimes(0);
 
       expect(io.to).toHaveBeenCalledTimes(0);
       expect(emitMock).toHaveBeenCalledTimes(0);
@@ -304,9 +303,22 @@ describe("Round handler", () => {
 
       playersChooseSpy.mockReturnValue(new Set(["abc123"]));
       fetchMock.mockReturnValue([
-        { data: { playerId: "abc123" } },
-        { data: { playerId: "def456" } },
-        { data: { playerId: "ghi789" } },
+        {
+          data: { playerId: "abc123" },
+          rooms: new Set(["<socket 4qtwf98y9s>", "42069"]),
+        },
+        {
+          data: { playerId: "def456" },
+          rooms: new Set(["<socket wrtehfgdhhf>", "42069"]),
+        },
+        {
+          data: { playerId: "ghi789" },
+          rooms: new Set(["<socket ertgdfsbg>", "42069"]),
+        },
+        {
+          data: { playerId: "jkl012" },
+          rooms: new Set(["<socket ertgdfsbg>", "42069", "42069:host"]),
+        },
       ]);
 
       callback = jest.fn();
@@ -592,8 +604,10 @@ describe("Round handler", () => {
   describe("hostNextRound handler", () => {
     let hostSpy: jest.SpyInstance;
     let initialiseSpy: jest.SpyInstance;
+    let gameEndedSpy: jest.SpyInstance;
 
     let callback: jest.Mock;
+    let emitMock: jest.Mock;
 
     let io: Server;
     let socket: Socket;
@@ -601,9 +615,15 @@ describe("Round handler", () => {
     beforeEach(() => {
       hostSpy = jest.spyOn(GameHandler, "assignNextHost");
       hostSpy.mockReturnValue("def456");
+      gameEndedSpy = jest.spyOn(GameService, "checkGameEnded");
       initialiseSpy = jest.spyOn(GameHandler, "initialiseNextRound");
 
-      io = ("io" as unknown) as Server;
+      emitMock = jest.fn();
+      io = ({
+        to: jest.fn(() => {
+          return { emit: emitMock };
+        }),
+      } as unknown) as Server;
 
       socket = ({
         data: {
@@ -622,6 +642,7 @@ describe("Round handler", () => {
     afterEach(() => {
       hostSpy.mockRestore();
       initialiseSpy.mockRestore();
+      gameEndedSpy.mockRestore();
     });
 
     it("non-host calls handler and nothing happens", async () => {
@@ -637,19 +658,43 @@ describe("Round handler", () => {
 
     it("assigns new host and initialises next round", async () => {
       initialiseSpy.mockImplementation();
+      gameEndedSpy.mockReturnValue(false);
 
       await handlers.hostNextRound(callback);
 
       expect(callback).toHaveBeenCalledTimes(0);
 
       expect(hostSpy).toHaveBeenCalledTimes(1);
+
+      expect(gameEndedSpy).toHaveBeenCalledTimes(1);
+      expect(io.to).toHaveBeenCalledTimes(0);
+      expect(emitMock).toHaveBeenCalledTimes(0);
+
       expect(initialiseSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it("assigns new host and initialises next round but the game is over", async () => {
+      initialiseSpy.mockImplementation();
+      gameEndedSpy.mockReturnValue(true);
+
+      await handlers.hostNextRound(callback);
+      expect(callback).toHaveBeenCalledTimes(0);
+
+      expect(hostSpy).toHaveBeenCalledTimes(1);
+
+      expect(gameEndedSpy).toHaveBeenCalledTimes(1);
+      expect(io.to).toHaveBeenCalledTimes(1);
+      expect(emitMock).toHaveBeenCalledTimes(1);
+      expect(emitMock).toHaveBeenCalledWith("navigate", GameState.finished);
+
+      expect(initialiseSpy).toHaveBeenCalledTimes(0);
     });
 
     it("catches ServiceError thrown by initialiseNextRound handler", async () => {
       initialiseSpy.mockRejectedValue(
         new ServiceError(ErrorType.gameCode, "Game does not exist")
       );
+      gameEndedSpy.mockReturnValue(false);
 
       await handlers.hostNextRound(callback);
 
@@ -659,6 +704,7 @@ describe("Round handler", () => {
 
     it("catches Error thrown by initialiseNextRound handler", async () => {
       initialiseSpy.mockRejectedValue(Error());
+      gameEndedSpy.mockReturnValue(false);
 
       await handlers.hostNextRound(callback);
 

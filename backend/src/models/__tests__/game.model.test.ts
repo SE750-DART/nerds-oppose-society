@@ -2,6 +2,8 @@ import mongoose from "mongoose";
 import { GameModel, GameState, SetupType } from "../../models";
 import { RoundState } from "../round.model";
 import { validate as validateUUID } from "uuid";
+import { MaxPlayers } from "../settings.model";
+import { fail } from "assert";
 
 describe("Game Model", () => {
   let gameCode = 420691;
@@ -247,6 +249,54 @@ describe("Game Model", () => {
     } catch (e) {
       expect(e).toBeInstanceOf(mongoose.Error.ValidationError);
       expect(e.errors["rounds.0.host"]).toBeDefined();
+    }
+  });
+
+  it("should throw a validation error if the game is at max capacity and another player tries to join", async () => {
+    gameData.players = [];
+    for (let i = 0; i < MaxPlayers; i++) {
+      gameData.players.push({ nickname: `Bob${i}` });
+    }
+
+    const game = new GameModel(gameData);
+
+    try {
+      game.players.push({ nickname: `Bob${MaxPlayers}` });
+      await game.save();
+      fail(`should not allow a ${MaxPlayers + 1}th player`);
+    } catch (e) {
+      expect(e).toBeInstanceOf(mongoose.Error.ValidationError);
+      expect(e.errors.players).toBeDefined();
+    }
+  });
+
+  it("should throw a validation error if the max players setting is above the server max", async () => {
+    const game = new GameModel(gameData);
+    try {
+      game.settings.maxPlayers = 41;
+      await game.save();
+      fail("should not allow more than max players to be set");
+    } catch (e) {
+      expect(e).toBeInstanceOf(mongoose.Error.ValidationError);
+    }
+  });
+
+  it("should allow max players to be set below the max but above the minimum", async () => {
+    const game = new GameModel(gameData);
+    game.settings.maxPlayers = 40;
+    await game.save();
+    expect(game.settings.maxPlayers).toBeDefined();
+    expect(game.settings.maxPlayers).toBe(40);
+  });
+
+  it("should throw a validation error if max players setting is below the min", async () => {
+    const game = new GameModel(gameData);
+    try {
+      game.settings.maxPlayers = 2;
+      await game.save();
+      fail("should not allow less than min players to be set");
+    } catch (e) {
+      expect(e).toBeInstanceOf(mongoose.Error.ValidationError);
     }
   });
 });

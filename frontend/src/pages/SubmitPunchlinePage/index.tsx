@@ -5,6 +5,7 @@ import PlayerList from "../../components/PlayerList";
 import ProgressBar from "../../components/ProgressBar";
 import PunchlineCard from "../../components/PunchlineCard";
 import Button from "../../components/Button";
+import Setup from "../../components/Setup";
 import { PlayersContext } from "../../providers/ContextProviders/PlayersContextProvider";
 import { PunchlinesContext } from "../../providers/ContextProviders/PunchlinesContextProvider";
 import { RoundContext } from "../../providers/ContextProviders/RoundContextProvider";
@@ -45,18 +46,14 @@ const SubmitPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
         header="Scoreboard"
       />
       <div className={styles.container}>
-        <div className={styles.spacer}>
-          <h5>The Setup:</h5>
-          <h2>{setup.setup}</h2>
-        </div>
-        <div className={styles.spacer}>
-          <ProgressBar
-            playersChosen={numPlayersChosen}
-            playersTotal={players.length}
-          />
-        </div>
+        <Setup setupText={setup.setup} />
 
-        <h5 style={{ marginBottom: `18px` }}>
+        <ProgressBar
+          playersChosen={numPlayersChosen}
+          playersTotal={players.length}
+        />
+
+        <h5 style={{ margin: `18px 0` }}>
           {punchlineSubmitted ? `Punchline sent!` : `Choose a Punchline:`}
         </h5>
         {punchlines.map((punchline) => {

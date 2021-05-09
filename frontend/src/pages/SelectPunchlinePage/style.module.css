@@ -5,30 +5,13 @@
   padding: 24px;
 }
 
-.setup {
-  background: #bbdefb;
-  background: linear-gradient(
-    180deg,
-    #bbdefb 0%,
-    #bbdefb 80%,
-    rgba(255, 255, 255, 0) 100%
-  );
-  margin-left: -24px;
-  padding: 24px 24px 36px 24px;
-  position: sticky;
-  top: 127px;
-  width: 100vw;
-  z-index: 5;
-}
-
-.setupNoGradient {
-  background: #bbdefb;
-  padding-bottom: 24px;
-}
-
 .theManText {
   font-size: 36px;
   font-style: italic;
+}
+
+.punchlineText {
+  overflow: hidden;
 }
 
 .bottomBtns {

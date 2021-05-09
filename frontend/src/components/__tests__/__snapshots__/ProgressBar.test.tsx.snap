@@ -1,0 +1,21 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Progress bar snapshot testing 1`] = `
+Array [
+  <div
+    className="barContainer"
+  >
+    <div
+      className="barComplete"
+      style={
+        Object {
+          "width": "50%",
+        }
+      }
+    />
+  </div>,
+  <h5>
+    2/4 players have chosen
+  </h5>,
+]
+`;

@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PlayerList snapshot testing 1`] = `
+<div
+  className="playerlist"
+/>
+`;
+
+exports[`PlayerList snapshot testing 2`] = `
+<div
+  className="playerlist"
+/>
+`;
