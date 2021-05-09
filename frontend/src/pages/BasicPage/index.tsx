@@ -49,23 +49,20 @@ const BasicPage = ({ path, gameCode }: Props) => {
       <button type="button" onClick={() => memoryHistory.push("/lobby")}>
         lobby
       </button>
-      <button type="button" onClick={() => memoryHistory.push("/preRound")}>
-        preRound
+      <button type="button" onClick={() => memoryHistory.push("/before")}>
+        before
       </button>
       <button
         type="button"
-        onClick={() => memoryHistory.push("/submitPunchline")}
+        onClick={() => memoryHistory.push("/players_choose")}
       >
-        submitPunchline
+        players_choose
       </button>
-      <button
-        type="button"
-        onClick={() => memoryHistory.push("/selectPunchline")}
-      >
-        selectPunchline
+      <button type="button" onClick={() => memoryHistory.push("/host_chooses")}>
+        host_chooses
       </button>
-      <button type="button" onClick={() => memoryHistory.push("/postRound")}>
-        postRound
+      <button type="button" onClick={() => memoryHistory.push("/after")}>
+        after
       </button>
       <button type="button" onClick={() => memoryHistory.push("/scoreboard")}>
         scoreboard

@@ -47,7 +47,10 @@ const setupSockets = ({
   const { addPunchlines } = useContext(PunchlinesContext);
 
   // Connection
-  const handleNavigate = useCallback(memoryHistory.push, [memoryHistory.push]);
+  const handleNavigate = useCallback(
+    (path: string) => memoryHistory.push(path.toLowerCase()),
+    [memoryHistory.push]
+  );
   const handleHost = useCallback(setHost, [setHost]);
   const handlePlayersInitial = useCallback(initialisePlayers, [
     initialisePlayers,
@@ -147,19 +150,19 @@ const GameRouter = () => {
           <LobbyPage gameCode={gameCode} settings={settings} />
         </Route>
 
-        <Route path="/preRound">
+        <Route path="/before">
           <StartRoundPage roundLimit={settings.roundLimit} />
         </Route>
 
-        <Route path="/submitPunchline">
+        <Route path="/players_choose">
           <SubmitPunchlinePage />
         </Route>
 
-        <Route path="/selectPunchline">
+        <Route path="/host_chooses">
           <SelectPunchlinePage />
         </Route>
 
-        <Route path="/postRound">
+        <Route path="/after">
           <EndRoundPage />
         </Route>
 

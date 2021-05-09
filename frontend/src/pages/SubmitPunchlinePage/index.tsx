@@ -141,7 +141,7 @@ const SubmitPunchlinePage = () => {
               handleOnClick={() => {
                 setPunchlineSubmitted(punchlineSelected);
                 setPunchlineSelected("");
-                memoryHistory.push("/selectPunchline");
+                memoryHistory.push("/host_chooses");
               }}
             />
           </div>

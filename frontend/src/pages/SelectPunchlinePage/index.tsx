@@ -178,7 +178,7 @@ const SelectPunchlinePage = () => {
               text="Send it"
               handleOnClick={() => {
                 setPunchlineSelected("");
-                memoryHistory.push("/postRound");
+                memoryHistory.push("/after");
               }}
             />
           </div>
