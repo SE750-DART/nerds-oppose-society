@@ -1,36 +1,27 @@
-import React, { useContext, useEffect, useState } from "react";
-import { useHistory } from "react-router-dom";
+import React, { useContext, useState } from "react";
+import createPersistedState from "use-persisted-state";
 import styles from "./style.module.css";
 import PlayerList from "../../components/PlayerList";
 import PunchlineCard from "../../components/PunchlineCard";
 import { RoundContext } from "../../providers/ContextProviders/RoundContextProvider";
+import { PlayersContext } from "../../providers/ContextProviders/PlayersContextProvider";
+import Button from "../../components/Button";
+import socket from "../../socket";
+
+const usePlayerIdState = createPersistedState("playerId");
 
 const EndRoundPage = ({ roundLimit }: { roundLimit: number }) => {
-  const memoryHistory = useHistory();
+  const [, setResponse] = useState("");
+
+  const { host } = useContext(PlayersContext);
+  const [playerId] = usePlayerIdState("");
+  const playerIsHost = playerId === host;
 
   const { roundNumber, setup } = useContext(RoundContext);
 
   const [winningPunchline] = useState(
     "Looking in the mirror, applying lipstick, and whispering “tonight, you will have sex with Tom Cruise.”"
   );
-  const [nextRoundIn, setNextRoundIn] = useState(5);
-
-  useEffect(() => {
-    const nextRoundTimer = setTimeout(
-      () => setNextRoundIn(nextRoundIn - 1),
-      1000
-    );
-    return () => clearTimeout(nextRoundTimer);
-  });
-
-  // For the purposes of dummy testing, this goes to the EndGamePage
-  // But it should really go back to StartRoundPage until the game actually ends
-  // TODO: Redirect to StartRoundPage once backend is connected
-  useEffect(() => {
-    if (nextRoundIn === 0) {
-      memoryHistory.push("/scoreboard");
-    }
-  }, [nextRoundIn]);
 
   return (
     <div className={styles.container}>
@@ -50,9 +41,19 @@ const EndRoundPage = ({ roundLimit }: { roundLimit: number }) => {
         <PlayerList gameState="endround" />
       </div>
 
-      <p className={styles.waitingMsg}>Next round in {nextRoundIn}...</p>
+      {playerIsHost ? (
+        <Button
+          text="Start Next Round"
+          handleOnClick={() =>
+            socket.emit("round:host-next", (response: string) =>
+              setResponse(response)
+            )
+          }
+        />
+      ) : (
+        <p className={styles.waitingMsg}>Waiting for next round...</p>
+      )}
     </div>
   );
 };
-
 export default EndRoundPage;
