@@ -673,6 +673,7 @@ describe("Round handler", () => {
       expect(hostSpy).toHaveBeenCalledTimes(1);
 
       expect(socket.leave).toHaveBeenCalledTimes(1);
+      expect(socket.leave).toHaveBeenCalledWith("42069:host");
 
       expect(gameEndedSpy).toHaveBeenCalledTimes(1);
       expect(io.to).toHaveBeenCalledTimes(0);
@@ -691,6 +692,7 @@ describe("Round handler", () => {
       expect(hostSpy).toHaveBeenCalledTimes(1);
 
       expect(socket.leave).toHaveBeenCalledTimes(1);
+      expect(socket.leave).toHaveBeenCalledWith("42069:host");
 
       expect(gameEndedSpy).toHaveBeenCalledTimes(1);
       expect(io.to).toHaveBeenCalledTimes(1);
