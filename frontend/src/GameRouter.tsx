@@ -28,14 +28,18 @@ const memoryHistory = createMemoryHistory();
 const usePlayerIdState = createPersistedState("playerId");
 const useTokenState = createPersistedState("token");
 
-const GameRouter = () => {
-  const { gameCode } = useParams<PathParams>();
+const setupSockets = ({
+  settings,
+  setSettings,
+}: {
+  settings?: Settings;
+  setSettings: React.Dispatch<React.SetStateAction<Settings | undefined>>;
+}) => {
   const [, setPlayerId] = usePlayerIdState("");
   const [, setToken] = useTokenState("");
   const { setHost, initialisePlayers, addPlayer, removePlayer } = useContext(
     PlayersContext
   );
-  const [settings, setSettings] = useState<Settings>();
 
   const handleNavigate = useCallback(memoryHistory.push, [memoryHistory.push]);
   const handleHost = useCallback(setHost, [setHost]);
@@ -94,6 +98,16 @@ const GameRouter = () => {
       socket.off("settings:update", handleSettingsUpdate);
       socket.off("connect_error", handleConnectError);
     };
+  });
+};
+
+const GameRouter = () => {
+  const { gameCode } = useParams<PathParams>();
+  const [settings, setSettings] = useState<Settings>();
+
+  setupSockets({
+    settings,
+    setSettings,
   });
 
   return (
