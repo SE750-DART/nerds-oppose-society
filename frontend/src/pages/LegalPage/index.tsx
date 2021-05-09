@@ -10,7 +10,7 @@ const LegalPage = () => {
     <div className={styles.container}>
       <h1>Legal</h1>
       <p className={styles.text}>
-        Nerds Oppose Society is a clone of{" "}
+        Nerds Oppose Society is a remix of{" "}
         <a
           href="https://cardsagainsthumanity.com/"
           rel="noreferrer"
@@ -55,7 +55,6 @@ const LegalPage = () => {
         <Button
           text="Good for you bro"
           handleOnClick={() => browserHistory.push("/")}
-          variant="secondary"
         />
       </div>
     </div>
