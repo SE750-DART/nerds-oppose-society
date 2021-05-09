@@ -108,6 +108,7 @@ export const hostChooseWinner = async (
     );
     if (winningEntry !== undefined) {
       round.state = RoundState.after;
+      round.winner = winningEntry[0];
 
       await game.save();
 
