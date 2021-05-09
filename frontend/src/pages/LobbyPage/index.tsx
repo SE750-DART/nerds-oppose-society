@@ -17,7 +17,7 @@ type Props = {
   settings?: Settings;
 };
 
-const MINIMUM_PLAYERS = 3;
+const MINIMUM_PLAYERS = 1;
 
 const LobbyPage = ({ gameCode, settings }: Props) => {
   const { host, players } = useContext(PlayersContext);
