@@ -93,8 +93,12 @@ const SelectPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
       />
 
       <div className={styles.container}>
-        <p className={styles.theManText}>You are The Man™.</p>
-        <p style={{ fontStyle: `italic` }}>{promptMessage}</p>
+        {playerIsHost && (
+          <>
+            <p className={styles.theManText}>You are The Man™.</p>
+            <p style={{ fontStyle: `italic` }}>{promptMessage}</p>
+          </>
+        )}
 
         <Setup setupText={setup.setup} />
 
