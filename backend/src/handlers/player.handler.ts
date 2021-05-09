@@ -4,8 +4,13 @@ import {
   removePlayer,
 } from "../services/player.service";
 import { Server, Socket } from "socket.io";
-import { GameState, Player } from "../models";
-import { emitHost, emitNavigate, isHost, setHost } from "./game.handler";
+import { GameState } from "../models";
+import {
+  assignNextHost,
+  emitHost,
+  emitNavigate,
+  setHost,
+} from "./game.handler";
 import { getGame } from "../services/game.service";
 
 export default (
@@ -19,33 +24,7 @@ export default (
 
   const playerLeaving = async (): Promise<void> => {
     try {
-      if (isHost(socket, gameCode)) {
-        const sockets = ((await io
-          .in(gameCode)
-          .fetchSockets()) as unknown) as Socket[];
-
-        const game = await getGame(gameCode);
-
-        const playerIdToSocket = new Map<Player["id"], Socket>(
-          sockets.map((socket) => [socket.data.playerId, socket])
-        );
-        const activePlayers = game.players.filter((player) =>
-          playerIdToSocket.has(player.id)
-        );
-
-        if (activePlayers.length > 1) {
-          const leavingHostIndex = activePlayers.findIndex(
-            (player) => player.id === playerId
-          );
-          let nextHostIndex = leavingHostIndex + 1;
-          if (nextHostIndex === activePlayers.length) nextHostIndex = 0;
-
-          const newHost = activePlayers[nextHostIndex];
-          const newHostSocket = playerIdToSocket.get(newHost.id);
-
-          if (newHostSocket !== undefined) setHost(io, newHostSocket);
-        }
-      }
+      await assignNextHost(io, socket);
       /* Empty catch block to keep console clean during testing.
        * Could use proper logging here such as winston
        * https://github.com/winstonjs/winston */
