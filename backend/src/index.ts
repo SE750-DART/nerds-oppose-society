@@ -7,6 +7,8 @@ import config from "./config";
 import { Connection, Auth } from "./handlers";
 import routes from "./routes";
 import mongoose from "mongoose";
+import { createAdapter } from "socket.io-redis";
+import { RedisClient } from "redis";
 
 // Init DB
 // Connect to local running instance of mongodb, on telosdatabase db
@@ -55,6 +57,14 @@ const io = new IOServer(server, {
 });
 
 io.use(Auth);
+
+const pubClient = new RedisClient({
+  host: config.redis_uri,
+  port: config.redis_port,
+});
+const subClient = pubClient.duplicate();
+
+io.adapter(createAdapter({ pubClient, subClient }));
 
 io.on("connection", async (socket) => {
   await Connection(io, socket);

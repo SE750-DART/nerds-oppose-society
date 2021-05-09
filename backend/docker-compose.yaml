@@ -1,0 +1,7 @@
+"3.9"
+"nos-redis"
+    "redis:latest"
+    - "6969:6969"
+  "nos-db"
+    "mongo:latest"
+    - "27017:27017"

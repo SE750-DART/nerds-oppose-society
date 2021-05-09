@@ -19,3 +19,13 @@ cd backend/
 npm ci
 npm start
 ```
+
+To start the databases:
+
+```
+cd backend/
+docker-compose pull
+docker-compose up
+```
+
+Prerequisites: Docker (docker for desktop prefereably: see the wiki)
