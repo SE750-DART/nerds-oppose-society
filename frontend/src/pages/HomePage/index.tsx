@@ -65,7 +65,7 @@ const HomePage = () => {
       />
       <h5 style={{ color: "red", textAlign: "center" }}>{newGameError}</h5>
       <div className={styles.footer}>
-        <Link to="/">About</Link> | <Link to="/">Legal</Link>
+        <Link to="/">About</Link> | <Link to="/legal">Legal</Link>
       </div>
     </div>
   );
