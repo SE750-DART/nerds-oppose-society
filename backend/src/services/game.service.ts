@@ -1,6 +1,15 @@
-import { Game, GameModel, GameState, Player, Settings, Setup } from "../models";
+import {
+  Game,
+  GameModel,
+  GameState,
+  Player,
+  Settings,
+  Setup,
+  SetupType,
+} from "../models";
 import { digitShortCode, ErrorType, ServiceError, shuffle } from "../util";
 import { PUNCHLINES, SETUPS } from "../resources";
+import { MaxPlayers } from "../models/game.model";
 
 export const createGame = async (): Promise<Game["gameCode"]> => {
   const gameCode: number = digitShortCode(6);
@@ -71,6 +80,8 @@ export const initialiseNextRound = async (
   throw new ServiceError(ErrorType.invalidAction, "Could not start round");
 };
 
+/* TODO - rewrite this to pop from the punchlines and pushes onto player if less than max but if greater than max, then remove the excess
+ */
 export const allocatePlayerPunchlines = async (
   game: Game,
   playerId: Player["id"],
@@ -96,4 +107,49 @@ export const allocatePlayerPunchlines = async (
   }
 
   throw new ServiceError(ErrorType.playerId, "Player does not exist");
+};
+export const shuffleDiscardedSetups = async (game: Game): Promise<void> => {
+  if (game.setups.length <= 5) {
+    const discardedSetups: Setup[] = game.discardedSetups;
+    const shuffledDiscard: Setup[] = shuffle(discardedSetups);
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    game.setups.push({
+      $each: shuffledDiscard,
+      $position: 0,
+    });
+    game.discardedSetups.remove(...discardedSetups);
+    await game.save();
+  }
+};
+export const shuffleDiscardedPunchlines = async (
+  game: Game,
+  maxPlayers: number = MaxPlayers
+): Promise<void> => {
+  // Get the next card in the setups pile
+  const topSetup: Setup = game.setups[game.setups.length - 1];
+
+  // Get the size of the first player in the lobby (should be representative of all players)
+  const handSize = game.players[0].punchlines.length;
+
+  let requiredDeckSize: number;
+  // In the case of draw2pick 3, players may need to draw up to 4 cards
+  if (topSetup.type === SetupType.drawTwoPickThree) {
+    requiredDeckSize = handSize === 8 ? 4 * maxPlayers : 3 * maxPlayers;
+  } else {
+    requiredDeckSize = handSize === 8 ? 2 * maxPlayers : maxPlayers;
+  }
+
+  if (game.punchlines.length <= requiredDeckSize) {
+    const discardedPunchlines: string[] = game.discardedPunchlines;
+    const shuffledDiscard: string[] = shuffle(discardedPunchlines);
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    game.punchlines.push({
+      $each: shuffledDiscard,
+      $position: 0,
+    });
+    game.discardedPunchlines = [];
+    await game.save();
+  }
 };
