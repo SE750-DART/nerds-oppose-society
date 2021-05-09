@@ -52,12 +52,20 @@ export default (
         if (round === undefined) throw Error();
 
         activePlayers.map(async (player) => {
-          const punchlines = await allocatePlayerPunchlines(
+          const {
+            addedPunchlines,
+            removedPunchlines,
+          } = await allocatePlayerPunchlines(
             game,
             player.id,
             round.setup.type === SetupType.drawTwoPickThree ? 12 : 10
           );
-          socketsByPlayerId.get(player.id)?.emit("punchlines:add", punchlines);
+          socketsByPlayerId
+            .get(player.id)
+            ?.emit("punchlines:add", addedPunchlines);
+          socketsByPlayerId
+            .get(player.id)
+            ?.emit("punchlines:remove", removedPunchlines);
         });
 
         io.to(gameCode).emit("navigate", RoundState.playersChoose);

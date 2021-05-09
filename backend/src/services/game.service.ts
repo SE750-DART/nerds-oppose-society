@@ -98,25 +98,37 @@ export const allocatePlayerPunchlines = async (
   game: Game,
   playerId: Player["id"],
   punchlineLimit = 10
-): Promise<string[]> => {
+): Promise<{ addedPunchlines: string[]; removedPunchlines: string[] }> => {
   const player = game.players.id(playerId);
 
   const punchlinesAdded: string[] = [];
+  const punchlinesRemoved: string[] = [];
 
   if (player !== null) {
-    while (player.punchlines.length < punchlineLimit) {
-      const punchlineFromDeck = game.punchlines.pop();
-      if (punchlineFromDeck === undefined) {
-        // Potentially reshuffle deck if it is undefined
-        throw new ServiceError(ErrorType.gameError, "No punchlines in deck");
+    if (player.punchlines.length > punchlineLimit) {
+      while (player.punchlines.length > punchlineLimit) {
+        const punchline = player.punchlines.pop() as string;
+        punchlinesRemoved.push(punchline);
+        game.discardedPunchlines.push(punchline);
       }
+    } else {
+      while (player.punchlines.length < punchlineLimit) {
+        const punchlineFromDeck = game.punchlines.pop();
+        if (punchlineFromDeck === undefined) {
+          // Potentially reshuffle deck if it is undefined
+          throw new ServiceError(ErrorType.gameError, "No punchlines in deck");
+        }
 
-      punchlinesAdded.push(punchlineFromDeck);
-      player.punchlines.push(punchlineFromDeck);
+        punchlinesAdded.push(punchlineFromDeck);
+        player.punchlines.push(punchlineFromDeck);
+      }
     }
     await game.save();
 
-    return punchlinesAdded;
+    return {
+      addedPunchlines: punchlinesAdded,
+      removedPunchlines: punchlinesRemoved,
+    };
   }
 
   throw new ServiceError(ErrorType.playerId, "Player does not exist");
