@@ -11,9 +11,6 @@ type Winner = {
 };
 
 type Context = {
-  // round:host-begin
-  reset: () => void;
-
   // round:number
   roundNumber: number;
   setRoundNumber: (roundNumber: number) => void;
@@ -40,9 +37,6 @@ type Context = {
 };
 
 const RoundContext = React.createContext<Context>({
-  // round:host-begin
-  reset: () => null,
-
   // round:number
   roundNumber: 0,
   setRoundNumber: () => null,
@@ -75,9 +69,6 @@ const RoundContext = React.createContext<Context>({
 });
 
 const RoundContextProvider = ({ children }: { children: React.ReactNode }) => {
-  // round:number
-  const [roundNumberState, setRoundNumber] = useState(0);
-
   // round:setup
   const [setupState, setSetup] = useState<Setup>({
     setup: "",
@@ -101,9 +92,10 @@ const RoundContextProvider = ({ children }: { children: React.ReactNode }) => {
     winningPunchlines: [],
   });
 
-  // round:host-begin
+  // round:number
+  const [roundNumberState, setRoundNumberState] = useState(0);
   const reset = () => {
-    setRoundNumber(0);
+    setRoundNumberState(0);
     setSetup({
       setup: "",
       type: "PICK_ONE",
@@ -116,15 +108,18 @@ const RoundContextProvider = ({ children }: { children: React.ReactNode }) => {
       winningPunchlines: [],
     });
   };
+  const setRoundNumber = (roundNumber: number) => {
+    if (roundNumber !== roundNumberState) {
+      reset();
+      setRoundNumberState(roundNumber);
+    }
+  };
 
   // The context value that will be supplied to any descendants of this component.
   const context = {
-    // round:host-begin
-    reset,
-
     // round:number
     roundNumber: roundNumberState,
-    setRoundNumber: (roundNumber: number) => setRoundNumber(roundNumber),
+    setRoundNumber,
 
     // round:setup
     setup: setupState,
