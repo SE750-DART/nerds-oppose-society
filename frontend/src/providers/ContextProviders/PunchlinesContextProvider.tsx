@@ -1,9 +1,13 @@
 import React from "react";
 import useCrud from "../../hooks/useCrud";
 
-export type Punchline = string;
+export type Punchline = {
+  text: string;
+  new?: boolean;
+};
+
 const equals = (punchline1: Punchline, punchline2: Punchline) =>
-  punchline1 === punchline2;
+  punchline1.text === punchline2.text;
 
 type Context = {
   punchlines: Punchline[];
@@ -27,13 +31,40 @@ const PunchlinesContextProvider = ({
   const {
     items: punchlines,
     initialiseItems: initialisePunchlines,
-    addItems: addPunchlines,
+    addItems,
     removeItem,
+    updateItem,
   } = useCrud<Punchline>(equals);
+
+  const addPunchlines = (newPunchlines: string[]) => {
+    if (punchlines.length === 0) {
+      addItems(
+        newPunchlines.map((punchline) => ({
+          text: punchline,
+          new: false,
+        }))
+      );
+      return;
+    }
+
+    punchlines.forEach((punchline) => {
+      updateItem({
+        ...punchline,
+        new: false,
+      });
+    });
+
+    addItems(
+      newPunchlines.map((punchline) => ({
+        text: punchline,
+        new: true,
+      }))
+    );
+  };
 
   const removePunchline = (punchline: string) => {
     const punchlineToRemove = punchlines.find(
-      (p: Punchline) => p === punchline
+      (p: Punchline) => p.text === punchline
     );
     if (!punchlineToRemove) {
       return;

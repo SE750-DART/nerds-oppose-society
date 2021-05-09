@@ -1,5 +1,4 @@
 import React, { useContext, useState } from "react";
-import { useHistory } from "react-router-dom";
 import styles from "./style.module.css";
 import Dropdown from "../../components/Dropdown";
 import PlayerList from "../../components/PlayerList";
@@ -7,78 +6,22 @@ import ProgressBar from "../../components/ProgressBar";
 import PunchlineCard from "../../components/PunchlineCard";
 import Button from "../../components/Button";
 import { PlayersContext } from "../../providers/ContextProviders/PlayersContextProvider";
+import { PunchlinesContext } from "../../providers/ContextProviders/PunchlinesContextProvider";
 import { RoundContext } from "../../providers/ContextProviders/RoundContextProvider";
+import socket from "../../socket";
 
 const SubmitPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
-  const memoryHistory = useHistory();
-
   const { players } = useContext(PlayersContext);
-  const { roundNumber, setup, numPlayersChosen } = useContext(RoundContext);
-
-  const dummyPunchlines: {
-    id: string;
-    text: string;
-    status: "available" | "selected" | "submitted";
-    new?: boolean;
-  }[] = [
-    {
-      id: "1",
-      text: "Me time.",
-      status: "available",
-      new: true,
-    },
-    {
-      id: "2",
-      text:
-        "Looking in the mirror, applying lipstick, and whispering “tonight, you will have sex with Tom Cruise.”",
-      status: "available",
-    },
-    {
-      id: "3",
-      text: "The violation of our most basic human rights.",
-      status: "available",
-    },
-    {
-      id: "4",
-      text:
-        "Getting married, having a few kids, buying some stuff, retiring to Florida, and dying..",
-      status: "available",
-    },
-    {
-      id: "5",
-      text: "Dark and mysterious forces beyond our control.",
-      status: "available",
-    },
-    {
-      id: "6",
-      text: "Not vaccinating my children because I am stupid.",
-      status: "available",
-    },
-    {
-      id: "7",
-      text: "Rap music.",
-      status: "available",
-    },
-    {
-      id: "8",
-      text: "Listening to her problems without trying to solve them.",
-      status: "available",
-    },
-    {
-      id: "9",
-      text: "Preteens.",
-      status: "available",
-    },
-    {
-      id: "10",
-      text: "Alcoholism.",
-      status: "available",
-    },
-  ];
+  const { punchlines } = useContext(PunchlinesContext);
+  const {
+    roundNumber,
+    setup,
+    numPlayersChosen,
+    incrementPlayersChosen,
+  } = useContext(RoundContext);
 
   const [punchlineSelected, setPunchlineSelected] = useState("");
   const [punchlineSubmitted, setPunchlineSubmitted] = useState("");
-  const [punchlines] = useState(dummyPunchlines);
 
   const selectPunchline = (text: string) => {
     if (punchlineSubmitted) {
@@ -129,7 +72,7 @@ const SubmitPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
 
           return (
             <PunchlineCard
-              key={punchline.id}
+              key={punchline.text}
               text={punchline.text}
               handleOnClick={() => selectPunchline(punchline.text)}
               status={punchlineStatus}
@@ -153,7 +96,13 @@ const SubmitPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
               handleOnClick={() => {
                 setPunchlineSubmitted(punchlineSelected);
                 setPunchlineSelected("");
-                memoryHistory.push("/host_chooses");
+
+                incrementPlayersChosen();
+                socket.emit(
+                  "round:player-choose",
+                  [punchlineSelected],
+                  (res: any) => console.log(res)
+                );
               }}
             />
           </div>
