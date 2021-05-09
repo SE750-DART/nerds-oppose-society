@@ -2,6 +2,7 @@ import { Game, Player, SetupType } from "../models";
 import { getGame } from "./game.service";
 import { RoundState } from "../models/round.model";
 import { ErrorType, ServiceError } from "../util";
+import { incrementScore } from "./player.service";
 
 export const enterPlayersChooseState = async (
   gameCode: Game["gameCode"],
@@ -32,7 +33,7 @@ export const playerChoosePunchlines = async (
   gameCode: Game["gameCode"],
   playerId: Player["id"],
   chosenPunchlines: string[]
-): Promise<void> => {
+): Promise<Set<string>> => {
   const game = await getGame(gameCode);
   const round = game.rounds.slice(-1)[0];
   const player = game.players.id(playerId);
@@ -64,7 +65,7 @@ export const playerChoosePunchlines = async (
     round.punchlinesByPlayer.set(playerId, chosenPunchlines);
 
     await game.save();
-    return;
+    return new Set(round.punchlinesByPlayer.keys());
   }
   throw new ServiceError(ErrorType.invalidAction, "Cannot choose punchlines");
 };
@@ -79,7 +80,7 @@ export const enterHostChoosesState = async (
     round.state = RoundState.hostChooses;
 
     await game.save();
-    return Array.from(round.punchlinesByPlayer.values()).map((entry) => entry);
+    return Array.from(round.punchlinesByPlayer.values());
   }
   throw new ServiceError(
     ErrorType.invalidAction,
@@ -87,11 +88,11 @@ export const enterHostChoosesState = async (
   );
 };
 
-export const hostChoosesWinner = async (
+export const hostChooseWinner = async (
   gameCode: Game["gameCode"],
   playerId: Player["id"],
   winningPunchlines: string[]
-): Promise<{ playerId: Player["id"]; punchlines: string[] }> => {
+): Promise<Player["id"]> => {
   const game = await getGame(gameCode);
   const round = game.rounds.slice(-1)[0];
 
@@ -111,10 +112,10 @@ export const hostChoosesWinner = async (
       round.state = RoundState.after;
 
       await game.save();
-      return {
-        playerId: winningEntry[0],
-        punchlines: winningEntry[1],
-      };
+
+      await incrementScore(game, winningEntry[0]);
+
+      return winningEntry[0];
     }
   }
   throw new ServiceError(ErrorType.invalidAction, "Cannot choose winner");
