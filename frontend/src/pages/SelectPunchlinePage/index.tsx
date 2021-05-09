@@ -142,7 +142,7 @@ const SelectPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
               handleOnClick={() => {
                 socket.emit(
                   "round:host-choose",
-                  punchlineSelected,
+                  [punchlineSelected],
                   (response: string) => {
                     setResponse(response);
                   }

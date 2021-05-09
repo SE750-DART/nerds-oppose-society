@@ -42,15 +42,20 @@ const setupSockets = ({
 }) => {
   const [, setPlayerId] = usePlayerIdState("");
   const [, setToken] = useTokenState("");
-  const { setHost, initialisePlayers, addPlayer, removePlayer } = useContext(
-    PlayersContext
-  );
+  const {
+    setHost,
+    initialisePlayers,
+    addPlayer,
+    removePlayer,
+    incrementPlayerScore,
+  } = useContext(PlayersContext);
   const { addPunchlines } = useContext(PunchlinesContext);
   const {
     setRoundNumber,
     setSetup,
     incrementPlayersChosen,
     setPunchlinesChosen,
+    setWinner,
   } = useContext(RoundContext);
 
   // Connection
@@ -106,6 +111,13 @@ const setupSockets = ({
   const handleRoundChosenPunchlines = useCallback(setPunchlinesChosen, [
     setPunchlinesChosen,
   ]);
+  const handleRoundWinner = useCallback(
+    (winningPlayerId: string, winningPunchlines: string[]) => {
+      setWinner(winningPlayerId, winningPunchlines);
+      incrementPlayerScore(winningPlayerId);
+    },
+    [setWinner]
+  );
 
   useEffect(() => {
     // Connection
@@ -129,6 +141,7 @@ const setupSockets = ({
       handleRoundIncrementPlayersChosen
     );
     socket.on("round:chosen-punchlines", handleRoundChosenPunchlines);
+    socket.on("round:winner", handleRoundWinner);
     return () => {
       // Remove event handlers when component is unmounted to prevent buildup of identical handlers
       // Connection
@@ -152,6 +165,7 @@ const setupSockets = ({
         handleRoundIncrementPlayersChosen
       );
       socket.off("round:chosen-punchlines", handleRoundChosenPunchlines);
+      socket.off("round:winner", handleRoundWinner);
     };
   });
 };

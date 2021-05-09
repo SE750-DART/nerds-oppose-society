@@ -17,11 +17,7 @@ const EndRoundPage = ({ roundLimit }: { roundLimit: number }) => {
   const [playerId] = usePlayerIdState("");
   const playerIsHost = playerId === host;
 
-  const { roundNumber, setup } = useContext(RoundContext);
-
-  const [winningPunchline] = useState(
-    "Looking in the mirror, applying lipstick, and whispering “tonight, you will have sex with Tom Cruise.”"
-  );
+  const { roundNumber, setup, winner } = useContext(RoundContext);
 
   return (
     <div className={styles.container}>
@@ -35,7 +31,9 @@ const EndRoundPage = ({ roundLimit }: { roundLimit: number }) => {
         </div>
 
         <h5 style={{ marginBottom: `12px` }}>Winning Punchline:</h5>
-        <PunchlineCard text={winningPunchline} />
+        {winner.winningPunchlines.map((punchline) => (
+          <PunchlineCard text={punchline} />
+        ))}
 
         <h2>Scoreboard</h2>
         <PlayerList gameState="endround" />
