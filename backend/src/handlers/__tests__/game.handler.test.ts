@@ -7,6 +7,7 @@ import registerGameHandler, {
   emitNavigate,
   getActivePlayers,
   getHost,
+  getSockets,
   initialiseNextRound,
   isHost,
   setHost,
@@ -784,6 +785,45 @@ describe("getActivePlayers handler", () => {
         ["1", { data: { playerId: "1" } }],
         ["2", { data: { playerId: "2" } }],
         ["4", { data: { playerId: "4" } }],
+      ])
+    );
+  });
+});
+
+describe("getSockets handler", () => {
+  let io: Server;
+
+  let fetchMock: jest.Mock;
+
+  beforeEach(() => {
+    fetchMock = jest.fn();
+    io = ({
+      in: jest.fn(() => {
+        return {
+          fetchSockets: fetchMock,
+        };
+      }),
+    } as unknown) as Server;
+  });
+
+  it("returns sockets", async () => {
+    fetchMock.mockReturnValue([
+      { data: { playerId: "1" } },
+      { data: { playerId: "2" } },
+      { data: { playerId: "4" } },
+    ]);
+
+    const sockets = await getSockets(io, "42069");
+
+    expect(io.in).toHaveBeenCalledTimes(1);
+    expect(io.in).toHaveBeenCalledWith("42069");
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    expect(sockets).toEqual(
+      expect.arrayContaining([
+        { data: { playerId: "1" } },
+        { data: { playerId: "2" } },
+        { data: { playerId: "4" } },
       ])
     );
   });
