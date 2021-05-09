@@ -1,11 +1,10 @@
 .punchline {
-  background-color: #eeffff;
   border-radius: 16px;
   box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.1);
   cursor: pointer;
   height: fit-content;
   margin-bottom: 24px;
-  max-height: 146px; /* This magic number is the height of the longest punchline */
+  max-height: 154px; /* This magic number is the height of the longest punchline */
   min-height: 100px;
   padding: 20px;
   position: relative;
@@ -15,6 +14,11 @@
 .punchline:hover {
   box-shadow: 0px 10px 40px rgba(0, 0, 0, 0.25);
   transition: 0.3s;
+}
+
+.punchlineAvailable {
+  background-color: #eeffff;
+  border: 4px solid #eeffff;
 }
 
 .punchlineSelected {
@@ -59,4 +63,10 @@
 
 .textSmall {
   font-size: 20px;
+}
+
+.textBlurred {
+  color: transparent;
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  transition: 0.6s;
 }

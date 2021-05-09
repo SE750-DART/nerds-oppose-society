@@ -1,23 +1,31 @@
-import React from "react";
-import useCrud from "../hooks/useCrud";
+import React, { useState } from "react";
+import useCrud from "../../hooks/useCrud";
 
 export type Player = {
   nickname: string;
+  id: string;
   score: number;
 };
-const equals = (player1: Player, player2: Player) =>
-  player1.nickname === player2.nickname;
+const equals = (player1: Player, player2: Player) => player1.id === player2.id;
 
 type Context = {
+  host: string;
+  setHost: (host: string) => void;
   players: Player[];
-  initialisePlayers?: (arg0: Player[]) => void;
-  addPlayer?: (arg0: string) => void;
-  removePlayer?: (arg0: string) => void;
-  incrementPlayerScore?: (arg0: string) => void;
+  initialisePlayers: (players: Player[]) => void;
+  addPlayer: (id: string, nickname: string) => void;
+  removePlayer: (playerId: string) => void;
+  incrementPlayerScore: (playerId: string) => void;
 };
 
 const PlayersContext = React.createContext<Context>({
+  host: "",
+  setHost: () => null,
   players: [],
+  initialisePlayers: () => null,
+  addPlayer: () => null,
+  removePlayer: () => null,
+  incrementPlayerScore: () => null,
 });
 
 const PlayersContextProvider = ({
@@ -25,6 +33,8 @@ const PlayersContextProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
+  const [host, setHost] = useState("");
+
   const {
     items: players,
     initialiseItems: initialisePlayers,
@@ -33,16 +43,15 @@ const PlayersContextProvider = ({
     updateItem,
   } = useCrud<Player>(equals);
 
-  const addPlayer = (nickname: string) =>
+  const addPlayer = (id: string, nickname: string) =>
     addItem({
       nickname,
+      id,
       score: 0,
     });
 
-  const removePlayer = (nickname: string) => {
-    const playerToRemove = players.find(
-      (player) => player.nickname === nickname
-    );
+  const removePlayer = (playerId: string) => {
+    const playerToRemove = players.find((player) => player.id === playerId);
     if (!playerToRemove) {
       return;
     }
@@ -50,10 +59,8 @@ const PlayersContextProvider = ({
     removeItem(playerToRemove);
   };
 
-  const incrementPlayerScore = (nickname: string) => {
-    const playerToUpdate = players.find(
-      (player) => player.nickname === nickname
-    );
+  const incrementPlayerScore = (playerId: string) => {
+    const playerToUpdate = players.find((player) => player.id === playerId);
     if (!playerToUpdate) {
       return;
     }
@@ -66,6 +73,8 @@ const PlayersContextProvider = ({
 
   // The context value that will be supplied to any descendants of this component.
   const context = {
+    host,
+    setHost: (newHost: string) => setHost(newHost),
     players,
     initialisePlayers,
     addPlayer,
