@@ -1,4 +1,4 @@
-import React, { ReactNode, useState } from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 import { faAngleDown } from "@fortawesome/free-solid-svg-icons";
 import styles from "./style.module.css";
 import IconButton from "../IconButton";
@@ -12,6 +12,15 @@ interface DropdownProps {
 const Dropdown = ({ aboveDrop, belowDrop, header }: DropdownProps) => {
   const [showDrop, setShowDrop] = useState(false);
   const [arrowFlipped, setArrowFlipped] = useState(false);
+  const [dropdownHeight, setDropdownHeight] = useState(0);
+
+  useEffect(() => {
+    const dropdownElement = document.getElementById("dropdown");
+    const height = dropdownElement?.clientHeight;
+    if (height) {
+      setDropdownHeight(height);
+    }
+  });
 
   const toggleDrop = () => {
     setShowDrop(!showDrop);
@@ -20,7 +29,7 @@ const Dropdown = ({ aboveDrop, belowDrop, header }: DropdownProps) => {
 
   return (
     <>
-      <div className={styles.main}>
+      <div className={styles.main} id="dropdown">
         {aboveDrop}
         <div className={styles.heading}>
           <p>{header}</p>
@@ -31,13 +40,11 @@ const Dropdown = ({ aboveDrop, belowDrop, header }: DropdownProps) => {
           />
         </div>
       </div>
-      <div
-        className={`${styles.drop} ${
-          showDrop ? styles.dropShow : styles.dropHide
-        }`}
-      >
-        <div>{belowDrop}</div>
-      </div>
+      {showDrop && (
+        <div className={styles.drop} style={{ top: `${dropdownHeight}px` }}>
+          <div>{belowDrop}</div>
+        </div>
+      )}
     </>
   );
 };

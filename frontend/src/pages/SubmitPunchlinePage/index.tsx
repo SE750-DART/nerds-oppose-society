@@ -6,6 +6,7 @@ import PlayerList from "../../components/PlayerList";
 import ProgressBar from "../../components/ProgressBar";
 import PunchlineCard from "../../components/PunchlineCard";
 import Button from "../../components/Button";
+import Setup from "../../components/Setup";
 
 const SubmitPunchlinePage = () => {
   const memoryHistory = useHistory();
@@ -70,6 +71,7 @@ const SubmitPunchlinePage = () => {
       status: "available",
     },
   ];
+  const setup: string = "Daddy, why is mommy crying?";
 
   const [punchlineSelected, setPunchlineSelected] = useState("");
   const [punchlineSubmitted, setPunchlineSubmitted] = useState("");
@@ -94,15 +96,11 @@ const SubmitPunchlinePage = () => {
         header="Scoreboard"
       />
       <div className={styles.container}>
-        <div className={styles.spacer}>
-          <h5>The Setup:</h5>
-          <h2>Daddy, why is mommy crying?</h2>
-        </div>
-        <div className={styles.spacer}>
-          <ProgressBar playersChosen={0} playersTotal={0} />
-        </div>
+        <Setup setupText={setup} />
 
-        <h5 style={{ marginBottom: `18px` }}>
+        <ProgressBar playersChosen={0} playersTotal={0} />
+
+        <h5 style={{ margin: `18px 0` }}>
           {punchlineSubmitted ? `Punchline sent!` : `Choose a Punchline:`}
         </h5>
         {punchlines.map((punchline) => {

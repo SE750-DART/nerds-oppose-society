@@ -16,7 +16,7 @@
   margin-left: -24px;
   padding: 24px 24px 36px 24px;
   position: sticky;
-  top: 127px;
+  top: 115px;
   width: 100vw;
   z-index: 5;
 }
@@ -29,6 +29,10 @@
 .theManText {
   font-size: 36px;
   font-style: italic;
+}
+
+.punchlineText {
+  overflow: hidden;
 }
 
 .bottomBtns {
