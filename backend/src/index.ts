@@ -41,16 +41,6 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   next();
 });
 
-if (process.env.NODE_ENV == "prod") {
-  app.use(express.static(path.join(__dirname, "build")));
-}
-
-if (process.env.NODE_ENV == "prod") {
-  app.get("/*", (req, res) => {
-    res.sendFile(path.join(__dirname, "build", "index.html"));
-  });
-}
-
 // Activate Server
 const server = http.createServer(app);
 
@@ -70,3 +60,13 @@ io.use(Auth);
 io.on("connection", async (socket) => {
   await Connection(io, socket);
 });
+
+if (process.env.NODE_ENV == "prod") {
+  app.use(express.static(path.join(__dirname, "build")));
+}
+
+if (process.env.NODE_ENV == "prod") {
+  app.get("/*", (req, res) => {
+    res.sendFile(path.join(__dirname, "../frontend/build", "index.html"));
+  });
+}

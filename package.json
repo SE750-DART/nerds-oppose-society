@@ -8,7 +8,9 @@
     "format": "prettier . --write",
     "prepare": "husky install",
     "start": "cd backend && npm start",
-    "build": "cd backend && npm install --only=dev && npm install && npm run build && cd ../frontend && npm install --only=dev && npm install && npm run build && cp -R build ../backend/dist/build && cd .."
+    "build": "cd backend && npm install --only=dev && npm install && npm run build && cd ../frontend && npm install --only=dev && npm install && npm run build && cp -R build ../backend/dist/build && cd ..",
+    "dev": "concurrently --kill-others-on-fail \"npm run api\" \"npm run frontend\"",
+    "heroku-postbuild": "cd frontend && npm install && npm run build"
   },
   "repository": {
     "type": "git",
