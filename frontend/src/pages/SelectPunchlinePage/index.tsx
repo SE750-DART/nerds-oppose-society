@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import styles from "./style.module.css";
 import Dropdown from "../../components/Dropdown";
@@ -6,6 +6,7 @@ import PlayerList from "../../components/PlayerList";
 import ProgressBar from "../../components/ProgressBar";
 import PunchlineCard from "../../components/PunchlineCard";
 import Button from "../../components/Button";
+import { RoundContext } from "../../providers/ContextProviders/RoundContextProvider";
 
 interface Punchline {
   id: string;
@@ -13,8 +14,10 @@ interface Punchline {
   blurred: boolean;
 }
 
-const SelectPunchlinePage = () => {
+const SelectPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
   const memoryHistory = useHistory();
+
+  const { roundNumber } = useContext(RoundContext);
 
   const dummyPunchlines: Punchline[] = [
     {
@@ -128,7 +131,11 @@ const SelectPunchlinePage = () => {
   return (
     <>
       <Dropdown
-        aboveDrop={<h4 style={{ textAlign: `center` }}>Round X of X</h4>}
+        aboveDrop={
+          <h4 style={{ textAlign: `center` }}>
+            Round {roundNumber} of {roundLimit}
+          </h4>
+        }
         belowDrop={<PlayerList gameState="midround" />}
         header="Scoreboard"
       />

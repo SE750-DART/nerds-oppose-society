@@ -15,6 +15,7 @@ import {
   StartRoundPage,
   SubmitPunchlinePage,
 } from "./pages";
+import { RoundContext } from "./providers/ContextProviders/RoundContextProvider";
 
 export type Settings = {
   roundLimit: number;
@@ -45,6 +46,7 @@ const setupSockets = ({
     PlayersContext
   );
   const { addPunchlines } = useContext(PunchlinesContext);
+  const { setRoundNumber } = useContext(RoundContext);
 
   // Connection
   const handleNavigate = useCallback(
@@ -90,6 +92,7 @@ const setupSockets = ({
 
   // Round
   const handlePunchlinesAdd = useCallback(addPunchlines, [addPunchlines]);
+  const handleRoundNumber = useCallback(setRoundNumber, [setRoundNumber]);
 
   useEffect(() => {
     // Connection
@@ -106,6 +109,7 @@ const setupSockets = ({
 
     // Round
     socket.on("punchlines:add", handlePunchlinesAdd);
+    socket.on("round:number", handleRoundNumber);
 
     return () => {
       // Remove event handlers when component is unmounted to prevent buildup of identical handlers
@@ -123,6 +127,7 @@ const setupSockets = ({
 
       // Round
       socket.off("punchlines:add", handlePunchlinesAdd);
+      socket.off("round:number", handleRoundNumber);
     };
   });
 };
@@ -155,15 +160,15 @@ const GameRouter = () => {
         </Route>
 
         <Route path="/players_choose">
-          <SubmitPunchlinePage />
+          <SubmitPunchlinePage roundLimit={settings.roundLimit} />
         </Route>
 
         <Route path="/host_chooses">
-          <SelectPunchlinePage />
+          <SelectPunchlinePage roundLimit={settings.roundLimit} />
         </Route>
 
         <Route path="/after">
-          <EndRoundPage />
+          <EndRoundPage roundLimit={settings.roundLimit} />
         </Route>
 
         <Route path="/scoreboard">

@@ -1,11 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import styles from "./style.module.css";
 import PlayerList from "../../components/PlayerList";
 import PunchlineCard from "../../components/PunchlineCard";
+import { RoundContext } from "../../providers/ContextProviders/RoundContextProvider";
 
-const EndRoundPage = () => {
+const EndRoundPage = ({ roundLimit }: { roundLimit: number }) => {
   const memoryHistory = useHistory();
+
+  const { roundNumber } = useContext(RoundContext);
 
   const [setup] = useState("Daddy, why is Mommy crying?");
   const [winningPunchline] = useState(
@@ -32,7 +35,9 @@ const EndRoundPage = () => {
 
   return (
     <div className={styles.container}>
-      <h4 className={styles.round}>Round X of X</h4>
+      <h4 className={styles.round}>
+        Round {roundNumber} of {roundLimit}
+      </h4>
       <div className={styles.endOfRound}>
         <div style={{ margin: `24px 0` }}>
           <h5>The Setup:</h5>

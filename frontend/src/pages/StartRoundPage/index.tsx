@@ -1,18 +1,19 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import Button from "../../components/Button";
 import styles from "./style.module.css";
 import socket from "../../socket";
+import { RoundContext } from "../../providers/ContextProviders/RoundContextProvider";
 
-type Props = {
-  roundLimit: number;
-};
-
-const StartRoundPage = ({ roundLimit }: Props) => {
+const StartRoundPage = ({ roundLimit }: { roundLimit: number }) => {
   const [isTheMan] = useState(true);
+
+  const { roundNumber } = useContext(RoundContext);
 
   return (
     <div className={styles.container}>
-      <h4 className={styles.round}>Round X of {roundLimit}</h4>
+      <h4 className={styles.round}>
+        Round {roundNumber} of {roundLimit}
+      </h4>
       <div className={styles.theMan}>
         <p className={styles.theManText}>
           {isTheMan ? "You are The Man™." : "USERNAME is The Man™."}
