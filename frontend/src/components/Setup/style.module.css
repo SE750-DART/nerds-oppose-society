@@ -6,6 +6,7 @@
     #bbdefb 80%,
     rgba(255, 255, 255, 0) 100%
   );
+  max-width: 690px; /* magic number to limit width on desktop */
   padding: 24px 24px 36px 24px;
   position: sticky;
   top: 115px;
