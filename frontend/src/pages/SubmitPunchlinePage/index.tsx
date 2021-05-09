@@ -1,4 +1,5 @@
 import React, { useContext, useState } from "react";
+import createPersistedState from "use-persisted-state";
 import styles from "./style.module.css";
 import Dropdown from "../../components/Dropdown";
 import PlayerList from "../../components/PlayerList";
@@ -11,10 +12,12 @@ import { PunchlinesContext } from "../../providers/ContextProviders/PunchlinesCo
 import { RoundContext } from "../../providers/ContextProviders/RoundContextProvider";
 import socket from "../../socket";
 
+const usePlayerIdState = createPersistedState("playerId");
+
 const SubmitPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
   const [, setResponse] = useState("");
 
-  const { players } = useContext(PlayersContext);
+  const { host, players } = useContext(PlayersContext);
   const { punchlines } = useContext(PunchlinesContext);
   const {
     roundNumber,
@@ -22,6 +25,9 @@ const SubmitPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
     numPlayersChosen,
     incrementPlayersChosen,
   } = useContext(RoundContext);
+
+  const [playerId] = usePlayerIdState("");
+  const playerIsHost = playerId === host;
 
   const [punchlineSelected, setPunchlineSelected] = useState("");
   const [punchlineSubmitted, setPunchlineSubmitted] = useState("");
@@ -52,32 +58,33 @@ const SubmitPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
 
         <ProgressBar
           playersChosen={numPlayersChosen}
-          playersTotal={players.length}
+          playersTotal={players.length - 1}
         />
 
         <h5 style={{ margin: `18px 0` }}>
           {punchlineSubmitted ? `Punchline sent!` : `Choose a Punchline:`}
         </h5>
-        {punchlines.map((punchline) => {
-          let punchlineStatus: "available" | "selected" | "submitted";
-          if (punchline.text === punchlineSubmitted) {
-            punchlineStatus = "submitted";
-          } else if (punchline.text === punchlineSelected) {
-            punchlineStatus = "selected";
-          } else {
-            punchlineStatus = "available";
-          }
+        {!playerIsHost &&
+          punchlines.map((punchline) => {
+            let punchlineStatus: "available" | "selected" | "submitted";
+            if (punchline.text === punchlineSubmitted) {
+              punchlineStatus = "submitted";
+            } else if (punchline.text === punchlineSelected) {
+              punchlineStatus = "selected";
+            } else {
+              punchlineStatus = "available";
+            }
 
-          return (
-            <PunchlineCard
-              key={punchline.text}
-              text={punchline.text}
-              handleOnClick={() => selectPunchline(punchline.text)}
-              status={punchlineStatus}
-              newCard={punchline.new}
-            />
-          );
-        })}
+            return (
+              <PunchlineCard
+                key={punchline.text}
+                text={punchline.text}
+                handleOnClick={() => selectPunchline(punchline.text)}
+                status={punchlineStatus}
+                newCard={punchline.new}
+              />
+            );
+          })}
       </div>
       {punchlineSelected && (
         <div className={styles.bottomBtns}>
