@@ -218,6 +218,15 @@ describe("allocateCards Service", () => {
     expect((await getPlayer(gameCode, playerId)).punchlines.length).toBe(10);
   });
 
+  it("should not save card allocation", async () => {
+    const game: Game = await getGame(gameCode);
+    const newCards = (
+      await allocatePlayerPunchlines(game, playerId, punchlineLimit, false)
+    ).addedPunchlines;
+    expect(newCards.length).toBe(10);
+    expect((await getPlayer(gameCode, playerId)).punchlines.length).toBe(0);
+  });
+
   it("should remove a players punchlines if they are over the limit", async () => {
     let game: Game = await getGame(gameCode);
     const player = game.players.id(playerId);
