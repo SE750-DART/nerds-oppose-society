@@ -7,9 +7,11 @@ import {
   initialisePlayer,
   removePlayer,
 } from "../player.service";
-import { createGame, getGame } from "../game.service";
 import * as GameServices from "../game.service";
-import { validate as validateUUID, v4 as uuid } from "uuid";
+import { createGame, getGame } from "../game.service";
+import { v4 as uuid, validate as validateUUID } from "uuid";
+import { GameState } from "../../models";
+import { ErrorType, ServiceError } from "../../util";
 
 beforeAll(async () => {
   await mongoose.connect(global.__MONGO_URI__, {
@@ -64,10 +66,38 @@ describe("createPlayer Service", () => {
       "Duplicate player nickname"
     );
   });
+
+  it("should throw an error when the game is finished", async () => {
+    const gameCode = await createGame();
+
+    const game = await getGame(gameCode);
+
+    game.state = GameState.finished;
+    await game.save();
+    await expect(createPlayer(gameCode, "Fred")).rejects.toThrow(
+      new ServiceError(ErrorType.gameError, "Game is finished")
+    );
+  });
+
+  it("should throw an error when the game has the max number of players", async () => {
+    const gameCode = await createGame();
+
+    const game = await getGame(gameCode);
+
+    game.settings.maxPlayers = 5;
+
+    for (let i = 0; i < 5; i++) {
+      game.players.push({ nickname: `Bob${i}` });
+    }
+    await game.save();
+    await expect(createPlayer(gameCode, "Fred")).rejects.toThrow(
+      new ServiceError(ErrorType.gameError, "Too many players in the game")
+    );
+  });
 });
 
 describe("removePlayer Service", () => {
-  it("removes a player from a game is score is zero", async () => {
+  it("removes a player from a game if score is zero", async () => {
     const gameCode = await createGame();
     const { playerId } = await createPlayer(gameCode, "Dave");
 
