@@ -6,6 +6,7 @@ import PlayerList from "../../components/PlayerList";
 import ProgressBar from "../../components/ProgressBar";
 import PunchlineCard from "../../components/PunchlineCard";
 import Button from "../../components/Button";
+import Setup from "../../components/Setup";
 
 interface Punchline {
   id: string;
@@ -70,6 +71,7 @@ const SelectPunchlinePage = () => {
       blurred: true,
     },
   ];
+  const setup: string = "Daddy, why is mommy crying?";
 
   const [punchlineSelected, setPunchlineSelected] = useState("");
   const [punchlines, setPunchlines] = useState<Punchline[]>([]);
@@ -137,14 +139,7 @@ const SelectPunchlinePage = () => {
         <p className={styles.theManText}>You are The Man™.</p>
         <p style={{ fontStyle: `italic` }}>{promptMessage}</p>
 
-        <div
-          className={`${styles.setup} ${
-            waiting ? styles.setupNoGradient : undefined
-          }`}
-        >
-          <h5>The Setup:</h5>
-          <h2>Daddy, why is mommy crying?</h2>
-        </div>
+        <Setup setupText={setup} />
 
         {waiting && <ProgressBar playersChosen={0} playersTotal={0} />}
 
