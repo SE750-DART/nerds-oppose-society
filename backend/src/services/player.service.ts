@@ -11,10 +11,7 @@ export const createPlayer = async (
 }> => {
   const game = await getGame(gameCode);
   // TODO - add the const for MaxPlayers defined when the discard shuffle PR is merged
-  const gameMax =
-    game.settings !== undefined && game.settings.maxPlayers !== undefined
-      ? game.settings.maxPlayers
-      : 40;
+  const gameMax = game?.settings?.maxPlayers || 40;
   if (game.state === GameState.finished) {
     throw new ServiceError(ErrorType.gameError, "Game is finished");
   } else if (game.players.length >= gameMax) {
