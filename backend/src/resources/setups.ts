@@ -65,7 +65,7 @@ export default <Setup[]>[
   },
   {
     setup:
-      "While the United States raced the Soviet Union to the moon, the Mexican government funneled millions of pesos into research on _____________________.",
+      "While the United States raced the Soviet Union to the moon, the Mexican government funneled millions of pesos into research on __________.",
     type: SetupType.pickOne,
   },
   {
