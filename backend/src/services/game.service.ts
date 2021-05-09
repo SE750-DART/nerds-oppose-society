@@ -111,7 +111,13 @@ export const allocatePlayerPunchlines = async (
 export const shuffleDiscardedSetups = async (game: Game): Promise<void> => {
   if (game.setups.length <= 5) {
     const discardedSetups: Setup[] = game.discardedSetups;
-    game.setups.push(...shuffle(discardedSetups));
+    const shuffledDiscard: Setup[] = shuffle(discardedSetups);
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    game.setups.push({
+      $each: shuffledDiscard,
+      $position: 0,
+    });
     game.discardedSetups.remove(...discardedSetups);
     await game.save();
   }
