@@ -4,6 +4,7 @@ import useCrud from "../../hooks/useCrud";
 export type Punchline = {
   text: string;
   new?: boolean;
+  viewed?: boolean;
 };
 
 const equals = (punchline1: Punchline, punchline2: Punchline) =>
@@ -42,6 +43,7 @@ const PunchlinesContextProvider = ({
         newPunchlines.map((punchline) => ({
           text: punchline,
           new: false,
+          viewed: false,
         }))
       );
       return;
@@ -51,6 +53,7 @@ const PunchlinesContextProvider = ({
       updateItem({
         ...punchline,
         new: false,
+        viewed: false,
       });
     });
 
@@ -58,6 +61,7 @@ const PunchlinesContextProvider = ({
       newPunchlines.map((punchline) => ({
         text: punchline,
         new: true,
+        viewed: false,
       }))
     );
   };

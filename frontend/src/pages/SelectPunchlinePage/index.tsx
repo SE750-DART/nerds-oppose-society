@@ -12,12 +12,6 @@ import socket from "../../socket";
 
 const usePlayerIdState = createPersistedState("playerId");
 
-interface Punchline {
-  id: string;
-  text: string;
-  blurred: boolean;
-}
-
 const SelectPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
   const [, setResponse] = useState("");
 
@@ -26,92 +20,29 @@ const SelectPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
   const playerIsHost = playerId === host;
 
   const { players } = useContext(PlayersContext);
-  const { roundNumber, setup, numPlayersChosen } = useContext(RoundContext);
-
-  const dummyPunchlines: Punchline[] = [
-    {
-      id: "1",
-      text: "Me time.",
-      blurred: false,
-    },
-    {
-      id: "2",
-      text:
-        "Looking in the mirror, applying lipstick, and whispering “tonight, you will have sex with Tom Cruise.”",
-      blurred: true,
-    },
-    {
-      id: "3",
-      text: "The violation of our most basic human rights.",
-      blurred: true,
-    },
-    {
-      id: "4",
-      text:
-        "Getting married, having a few kids, buying some stuff, retiring to Florida, and dying..",
-      blurred: true,
-    },
-    {
-      id: "5",
-      text: "Dark and mysterious forces beyond our control.",
-      blurred: true,
-    },
-    {
-      id: "6",
-      text: "Not vaccinating my children because I am stupid.",
-      blurred: true,
-    },
-    {
-      id: "7",
-      text: "Rap music.",
-      blurred: true,
-    },
-    {
-      id: "8",
-      text: "Listening to her problems without trying to solve them.",
-      blurred: true,
-    },
-    {
-      id: "9",
-      text: "Preteens.",
-      blurred: true,
-    },
-    {
-      id: "10",
-      text: "Alcoholism.",
-      blurred: true,
-    },
-  ];
+  const {
+    roundNumber,
+    setup,
+    numPlayersChosen,
+    punchlinesChosen: punchlines,
+    markPunchlineRead,
+  } = useContext(RoundContext);
 
   const [punchlineSelected, setPunchlineSelected] = useState("");
-  const [punchlines, setPunchlines] = useState<Punchline[]>([]);
   const [waiting, setWaiting] = useState(true);
   const [finishedReading, setFinishedReading] = useState(false);
-
-  // This is only to demonstrate the full user flow without the backend connected.
-  // This can be a little buggy sometimes (usually when you edit something and hot reload),
-  // and it always seems to run one more time than it needs to.
-  // But I figure it won't matter because it's about to be deleted.
-  // TODO: Load in the real punchlines via setPunchlines from the backend and delete this hook
-  useEffect(() => {
-    const loadPunchlines = setTimeout(
-      () => setPunchlines(dummyPunchlines),
-      3000
-    );
-    return () => clearTimeout(loadPunchlines);
-  }, [waiting]);
 
   useEffect(() => {
     if (punchlines.length !== 0) {
       setWaiting(false);
 
-      if (punchlines.every((value) => !value.blurred)) {
+      if (punchlines.every((value) => value.viewed)) {
         setFinishedReading(true);
       }
     }
   }, [punchlines]);
 
-  let promptMessage: string = "";
+  let promptMessage: string;
   if (waiting) {
     promptMessage = "Waiting on players to choose punchlines...";
   } else if (!finishedReading) {
@@ -119,15 +50,6 @@ const SelectPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
   } else {
     promptMessage = "Choose the best punchline!";
   }
-
-  const markPunchlineRead = (index: number) => {
-    const newPunchlines = [...punchlines];
-    newPunchlines[index] = {
-      ...punchlines[index],
-      blurred: false,
-    };
-    setPunchlines(newPunchlines);
-  };
 
   const selectPunchline = (text: string, index: number) => {
     if (!playerIsHost) return;
@@ -192,7 +114,7 @@ const SelectPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
         {punchlines &&
           punchlines.map((punchline, index) => (
             <PunchlineCard
-              key={punchline.id}
+              key={punchline.text}
               text={punchline.text}
               handleOnClick={() => selectPunchline(punchline.text, index)}
               status={
@@ -200,7 +122,7 @@ const SelectPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
                   ? "selected"
                   : "available"
               }
-              blurred={punchline.blurred}
+              blurred={!punchline.viewed}
             />
           ))}
       </div>

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Punchline } from "./PunchlinesContextProvider";
 
 type Setup = {
   setup: string;
@@ -24,8 +25,9 @@ type Context = {
   incrementPlayersChosen: () => void;
 
   // round:chosen-punchlines
-  punchlinesChosen: string[][];
+  punchlinesChosen: Punchline[];
   setPunchlinesChosen: (punchlines: string[][]) => void;
+  markPunchlineRead: (index: number) => void;
 
   // round:host-view
   hostViewIndex: number;
@@ -55,6 +57,7 @@ const RoundContext = React.createContext<Context>({
   // round:chosen-punchlines
   punchlinesChosen: [],
   setPunchlinesChosen: () => null,
+  markPunchlineRead: () => null,
 
   // round:host-view
   hostViewIndex: 0,
@@ -81,7 +84,24 @@ const RoundContextProvider = ({ children }: { children: React.ReactNode }) => {
     setNumPlayersChosen(numPlayersChosenState + 1);
 
   // round:chosen-punchlines
-  const [punchlinesChosenState, setPunchlinesChosen] = useState<string[][]>([]);
+  const [punchlinesChosenState, setPunchlinesChosenState] = useState<
+    Punchline[]
+  >([]);
+  const setPunchlinesChosen = (punchlines: string[][]) => {
+    const punchlineObjs = punchlines.map((punchlinesOnePlayer) => ({
+      text: punchlinesOnePlayer[0],
+      viewed: false,
+    }));
+    setPunchlinesChosenState(punchlineObjs);
+  };
+  const markPunchlineRead = (index: number) => {
+    const newPunchlines = [...punchlinesChosenState];
+    newPunchlines[index] = {
+      ...punchlinesChosenState[index],
+      viewed: true,
+    };
+    setPunchlinesChosenState(newPunchlines);
+  };
 
   // round:host-view
   const [hostViewIndexState, setHostViewIndex] = useState(0);
@@ -131,8 +151,8 @@ const RoundContextProvider = ({ children }: { children: React.ReactNode }) => {
 
     // round:chosen-punchlines
     punchlinesChosen: punchlinesChosenState,
-    setPunchlinesChosen: (punchlines: string[][]) =>
-      setPunchlinesChosen(punchlines),
+    setPunchlinesChosen,
+    markPunchlineRead,
 
     // round:host-view
     hostViewIndex: hostViewIndexState,
