@@ -1,5 +1,4 @@
 import React, { useCallback, useContext, useEffect, useState } from "react";
-import { useHistory } from "react-router-dom";
 import createPersistedState from "use-persisted-state";
 import debounce from "lodash/debounce";
 import Button from "../../components/Button";
@@ -18,8 +17,9 @@ type Props = {
   settings?: Settings;
 };
 
+const MINIMUM_PLAYERS = 3;
+
 const LobbyPage = ({ gameCode, settings }: Props) => {
-  const memoryHistory = useHistory();
   const { host, players } = useContext(PlayersContext);
   const [playerId] = usePlayerIdState("");
   const playerIsHost = playerId === host;
@@ -115,10 +115,13 @@ const LobbyPage = ({ gameCode, settings }: Props) => {
           <PlayerList gameState="lobby" />
         </div>
 
-        <Button
-          text="Start game"
-          handleOnClick={() => memoryHistory.push("/preRound")}
-        />
+        {playerIsHost && (
+          <Button
+            text="Start game"
+            handleOnClick={() => socket.emit("start")}
+            disabled={players.length < MINIMUM_PLAYERS}
+          />
+        )}
       </div>
     </>
   );
