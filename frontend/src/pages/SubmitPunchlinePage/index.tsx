@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { CSSProperties, useState } from "react";
 import { useHistory } from "react-router-dom";
 import styles from "./style.module.css";
 import Dropdown from "../../components/Dropdown";
@@ -86,6 +86,15 @@ const SubmitPunchlinePage = () => {
     }
   };
 
+  const setup: string = "Daddy, why is mommy crying?";
+
+  let setupSize: CSSProperties = {};
+  if (setup.length > 75) {
+    setupSize = { fontSize: "24px" };
+  } else if (setup.length > 45) {
+    setupSize = { fontSize: "32px" };
+  }
+
   return (
     <>
       <Dropdown
@@ -94,10 +103,13 @@ const SubmitPunchlinePage = () => {
         header="Scoreboard"
       />
       <div className={styles.container}>
-        <div className={styles.spacer}>
+        <div className={`${styles.setup}`}>
           <h5>The Setup:</h5>
-          <h2>Daddy, why is mommy crying?</h2>
+          <h2 className={styles.punchlineText} style={setupSize}>
+            {setup}
+          </h2>
         </div>
+
         <div className={styles.spacer}>
           <ProgressBar playersChosen={0} playersTotal={0} />
         </div>

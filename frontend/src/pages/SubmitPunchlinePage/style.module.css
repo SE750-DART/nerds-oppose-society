@@ -5,6 +5,27 @@
   padding: 24px;
 }
 
+.setup {
+  background: #bbdefb;
+  background: linear-gradient(
+    180deg,
+    #bbdefb 0%,
+    #bbdefb 80%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  margin-left: -24px;
+  padding: 24px 24px 36px 24px;
+  position: sticky;
+  top: 115px;
+  width: 100vw;
+  z-index: 5;
+}
+
+.setupNoGradient {
+  background: #bbdefb;
+  padding-bottom: 24px;
+}
+
 .spacer {
   margin-bottom: 24px;
 }
