@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { useHistory } from "react-router-dom";
+import createPersistedState from "use-persisted-state";
 import styles from "./style.module.css";
 import Dropdown from "../../components/Dropdown";
 import PlayerList from "../../components/PlayerList";
@@ -8,6 +8,9 @@ import PunchlineCard from "../../components/PunchlineCard";
 import Button from "../../components/Button";
 import { PlayersContext } from "../../providers/ContextProviders/PlayersContextProvider";
 import { RoundContext } from "../../providers/ContextProviders/RoundContextProvider";
+import socket from "../../socket";
+
+const usePlayerIdState = createPersistedState("playerId");
 
 interface Punchline {
   id: string;
@@ -16,7 +19,11 @@ interface Punchline {
 }
 
 const SelectPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
-  const memoryHistory = useHistory();
+  const [, setResponse] = useState("");
+
+  const { host } = useContext(PlayersContext);
+  const [playerId] = usePlayerIdState("");
+  const playerIsHost = playerId === host;
 
   const { players } = useContext(PlayersContext);
   const { roundNumber, setup, numPlayersChosen } = useContext(RoundContext);
@@ -113,7 +120,17 @@ const SelectPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
     promptMessage = "Choose the best punchline!";
   }
 
+  const markPunchlineRead = (index: number) => {
+    const newPunchlines = [...punchlines];
+    newPunchlines[index] = {
+      ...punchlines[index],
+      blurred: false,
+    };
+    setPunchlines(newPunchlines);
+  };
+
   const selectPunchline = (text: string, index: number) => {
+    if (!playerIsHost) return;
     if (finishedReading) {
       if (text === punchlineSelected) {
         setPunchlineSelected("");
@@ -121,14 +138,24 @@ const SelectPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
         setPunchlineSelected(text);
       }
     } else {
-      const newPunchlines = [...punchlines];
-      newPunchlines[index] = {
-        ...punchlines[index],
-        blurred: false,
-      };
-      setPunchlines(newPunchlines);
+      markPunchlineRead(index);
+      socket.emit("round:host-view", index, (response: string) => {
+        console.log(response);
+        setResponse(response);
+      });
     }
   };
+
+  useEffect(() => {
+    if (!playerIsHost) {
+      socket.on("round:host-view", (index: number) => {
+        markPunchlineRead(index);
+      });
+    }
+    return () => {
+      socket.off("round:host-view");
+    };
+  });
 
   return (
     <>
@@ -191,8 +218,14 @@ const SelectPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
             <Button
               text="Send it"
               handleOnClick={() => {
-                setPunchlineSelected("");
-                memoryHistory.push("/after");
+                socket.emit(
+                  "round:host-choose",
+                  punchlineSelected,
+                  (response: string) => {
+                    console.log(response);
+                    setResponse(response);
+                  }
+                );
               }}
             />
           </div>
