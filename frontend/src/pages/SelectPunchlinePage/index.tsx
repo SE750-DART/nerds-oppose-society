@@ -131,6 +131,7 @@ const SelectPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
 
   const selectPunchline = (text: string, index: number) => {
     if (!playerIsHost) return;
+
     if (finishedReading) {
       if (text === punchlineSelected) {
         setPunchlineSelected("");
@@ -140,7 +141,6 @@ const SelectPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
     } else {
       markPunchlineRead(index);
       socket.emit("round:host-view", index, (response: string) => {
-        console.log(response);
         setResponse(response);
       });
     }
@@ -222,7 +222,6 @@ const SelectPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
                   "round:host-choose",
                   punchlineSelected,
                   (response: string) => {
-                    console.log(response);
                     setResponse(response);
                   }
                 );
