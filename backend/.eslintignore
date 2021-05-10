@@ -1,0 +1,3 @@
+**/*.yaml
+**/Procfile
+**/Dockerfile
