@@ -2,5 +2,7 @@
 build
 coverage
 *.yaml
+*.yml
 Dockerfile
 .eslintignore
+.dockerignore

@@ -4,5 +4,7 @@ coverage
 Procfile
 .prettierignore
 *.yaml
+*.yml
 Dockerfile
 .eslintignore
+.dockerignore

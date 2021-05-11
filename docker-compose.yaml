@@ -1,7 +1,0 @@
-version: "3.9"
-services:
-  mongo:
-    container_name: "nos-db"
-    image: "mongo:latest"
-    ports:
-      - "27017:27017"
