@@ -14,7 +14,16 @@
     "sourceType": "module"
   },
   "plugins": ["react", "@typescript-eslint"],
-  "ignorePatterns": ["**/*.css", "**/*.svg"],
+  "ignorePatterns": [
+    "**/*.css",
+    "**/*.svg",
+    "**/*.png",
+    "**/*.ico",
+    "**/*.yaml",
+    "**/*.yml",
+    "**/Procfile",
+    "**/Dockerfile"
+  ],
   "rules": {
     "no-use-before-define": "off",
     "@typescript-eslint/no-use-before-define": ["error"],

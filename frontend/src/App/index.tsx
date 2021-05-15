@@ -1,4 +1,4 @@
-import React, { createContext } from "react";
+import React, { createContext, useEffect } from "react";
 import { Router, Switch, Route, Redirect } from "react-router-dom";
 import { createBrowserHistory } from "history";
 import { AboutPage, HomePage, LegalPage } from "../pages";
@@ -9,6 +9,9 @@ const browserHistory = createBrowserHistory();
 export const BrowserHistoryContext = createContext(browserHistory);
 
 function App() {
+  useEffect(() => {
+    document.title = "Nerds Oppose Society";
+  }, []);
   return (
     <Router history={browserHistory}>
       <main>

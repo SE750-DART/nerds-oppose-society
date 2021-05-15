@@ -41,12 +41,14 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   next();
 });
 
-// if (process.env.NODE_ENV == 'production') {
-app.use(express.static(path.resolve(__dirname, "../src/build/")));
+// Statically serve the frontend from the backend
+if (process.env.NODE_ENV == "prod") {
+  app.use(express.static(path.resolve(__dirname, "../src/build/")));
 
-app.get("/*", (req, res) => {
-  res.sendFile(path.resolve(__dirname, "../src/build/", "index.html"));
-});
+  app.get("/*", (req, res) => {
+    res.sendFile(path.resolve(__dirname, "../src/build/", "index.html"));
+  });
+}
 
 // Activate Server
 const server = http.createServer(app);

@@ -28,6 +28,11 @@ const index = convict({
     default: "mongodb://localhost:27017/nos-db",
     env: "MONGO_URI",
   },
+  static_react: {
+    format: "Boolean",
+    default: false,
+    env: "INLINE_RUNTIME_CHUNK",
+  },
 });
 
 const env = index.get("env");
