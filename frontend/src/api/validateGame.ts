@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from "axios";
 import ApiResponse from "./ApiResponse";
-import axiosCall, { BASE_URL } from "./axiosCall";
+import axiosCall from "./axiosCall";
 
 const NO_CONTENT_204 = 204;
 
@@ -27,7 +27,7 @@ const validateGame: ({ gameCode }: Props) => Promise<ApiResponse<{}>> = async ({
     };
   }
 
-  const url = `${BASE_URL}/game/validate`;
+  const url = `/game/validate`;
   const axiosMethod = async () =>
     axios.get<any, AxiosResponse<{}>>(url, {
       params: { gameCode },

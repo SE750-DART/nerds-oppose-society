@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from "axios";
 import ApiResponse from "./ApiResponse";
-import axiosCall, { BASE_URL } from "./axiosCall";
+import axiosCall from "./axiosCall";
 
 const CREATED_201 = 201;
 
@@ -35,7 +35,7 @@ const createPlayer: (player: Props) => Promise<ApiResponse<Response>> = async ({
     };
   }
 
-  const url = `${BASE_URL}/player/create`;
+  const url = `/player/create`;
   const axiosMethod = async () =>
     axios.post<any, AxiosResponse<Response>>(url, undefined, {
       params: {
