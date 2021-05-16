@@ -345,6 +345,7 @@ describe("hostChoosesWinner Service", () => {
 
     game = await getGame(game.gameCode);
     expect(game.rounds[0].state).toBe(RoundState.after);
+    expect(game.rounds[0].winner.toString()).toBe(playerId);
     expect(winningPlayerId).toBe(playerId);
 
     const player = game.players.id(winningPlayerId);

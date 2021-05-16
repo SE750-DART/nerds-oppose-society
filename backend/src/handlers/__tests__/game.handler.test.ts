@@ -1,10 +1,9 @@
 import { Server, Socket } from "socket.io";
-import { Game, GameState, SetupType } from "../../models";
+import { Game, SetupType } from "../../models";
 import * as GameService from "../../services/game.service";
 import registerGameHandler, {
   assignNextHost,
   emitHost,
-  emitNavigate,
   getActivePlayers,
   getHost,
   getSockets,
@@ -387,36 +386,6 @@ describe("intialiseNextRound handler", () => {
       type: SetupType.pickOne,
     });
     expect(emitMock).toHaveBeenNthCalledWith(3, "navigate", RoundState.before);
-  });
-});
-
-describe("emitNavigate handler", () => {
-  let socket: Socket;
-  let game: Game;
-
-  beforeEach(() => {
-    socket = ({
-      emit: jest.fn(),
-    } as unknown) as Socket;
-
-    game = ({
-      state: GameState.lobby,
-      players: [
-        { nickname: "Bob", new: true },
-        { nickname: "Fred", new: false },
-      ],
-      settings: {
-        roundLimit: 69,
-        maxPlayers: 25,
-      },
-    } as unknown) as Game;
-  });
-
-  it("navigates player to lobby", () => {
-    emitNavigate(socket, game);
-
-    expect(socket.emit).toHaveBeenCalledTimes(1);
-    expect(socket.emit).toHaveBeenCalledWith("navigate", GameState.lobby);
   });
 });
 

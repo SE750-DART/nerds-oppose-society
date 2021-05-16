@@ -3,16 +3,17 @@ import * as GameService from "../../services/game.service";
 import * as PlayerService from "../../services/player.service";
 import * as GameHandler from "../game.handler";
 import registerPlayerHandler, { playerJoin } from "../player.handler";
-import { Game, GameState, Player } from "../../models";
+import { Game, GameState, Player, SetupType } from "../../models";
 import { ErrorType, ServiceError } from "../../util";
+import { RoundState } from "../../models/round.model";
 
 describe("playerJoin handler", () => {
   let getGameSpy: jest.SpyInstance;
-  let emitNavigateSpy: jest.SpyInstance;
   let emitHostSpy: jest.SpyInstance;
   let getPlayerSpy: jest.SpyInstance;
   let initialisePlayerSpy: jest.SpyInstance;
   let setHostSpy: jest.SpyInstance;
+  let allocateSpy: jest.SpyInstance;
 
   let emitMock: jest.Mock;
   let fetchMock: jest.Mock;
@@ -58,6 +59,7 @@ describe("playerJoin handler", () => {
 
     game = ({
       gameCode: "42069",
+      state: GameState.lobby,
       players: [
         {
           id: "abc123",
@@ -78,6 +80,7 @@ describe("playerJoin handler", () => {
           new: false,
         },
       ],
+      rounds: [],
       settings: {
         roundLimit: 69,
         maxPlayers: 25,
@@ -87,24 +90,24 @@ describe("playerJoin handler", () => {
     getGameSpy = jest
       .spyOn(GameService, "getGame")
       .mockImplementation(async () => game);
-    emitNavigateSpy = jest
-      .spyOn(GameHandler, "emitNavigate")
-      .mockImplementation(() => null);
     emitHostSpy = jest.spyOn(GameHandler, "emitHost").mockImplementation();
     getPlayerSpy = jest.spyOn(PlayerService, "getPlayer");
     initialisePlayerSpy = jest
       .spyOn(PlayerService, "initialisePlayer")
       .mockImplementation();
     setHostSpy = jest.spyOn(GameHandler, "setHost").mockImplementation();
+    allocateSpy = jest
+      .spyOn(GameService, "allocatePlayerPunchlines")
+      .mockImplementation();
   });
 
   afterEach(() => {
     getGameSpy.mockRestore();
-    emitNavigateSpy.mockRestore();
     emitHostSpy.mockRestore();
     getPlayerSpy.mockRestore();
     initialisePlayerSpy.mockRestore();
     setHostSpy.mockRestore();
+    allocateSpy.mockRestore();
   });
 
   it("broadcasts player to game room if player is new", async () => {
@@ -122,7 +125,7 @@ describe("playerJoin handler", () => {
     expect(getGameSpy).toHaveBeenCalledTimes(1);
     expect(getGameSpy).toHaveBeenCalledWith("42069");
 
-    expect(emitMock).toHaveBeenCalledTimes(2);
+    expect(emitMock).toHaveBeenCalledTimes(3);
     expect(emitMock).toHaveBeenCalledWith("players:initial", [
       {
         id: "abc123",
@@ -139,9 +142,7 @@ describe("playerJoin handler", () => {
       roundLimit: 69,
       maxPlayers: 25,
     });
-
-    expect(emitNavigateSpy).toHaveBeenCalledTimes(1);
-    expect(emitNavigateSpy).toHaveBeenCalledWith(socket, game);
+    expect(emitMock).toHaveBeenCalledWith("navigate", GameState.lobby);
 
     expect(getPlayerSpy).toHaveBeenCalledTimes(1);
     expect(getPlayerSpy).toHaveBeenCalledWith(game.gameCode, "abc123", game);
@@ -179,7 +180,7 @@ describe("playerJoin handler", () => {
 
     expect(toMock).toHaveBeenCalledTimes(0);
 
-    expect(emitMock).toHaveBeenCalledTimes(2);
+    expect(emitMock).toHaveBeenCalledTimes(3);
 
     expect(emitHostSpy).toHaveBeenCalledTimes(1);
     expect(emitHostSpy).toHaveBeenCalledWith(io, socket);
@@ -240,6 +241,289 @@ describe("playerJoin handler", () => {
     await playerJoin(io, socket);
 
     expect(socket.data.nickname).toBe("Bob");
+  });
+
+  it("joins the user when the game is active and round is in before state", async () => {
+    game.state = GameState.active;
+    game.rounds.push({
+      setup: {
+        setup: "Why did the chicken cross the road?",
+        type: SetupType.pickOne,
+      },
+      state: RoundState.before,
+    });
+
+    const player: Player = ({
+      nickname: "Bob",
+      new: true,
+      punchlines: ["To get to the other side", "To go to KFC"],
+    } as unknown) as Player;
+    getPlayerSpy.mockReturnValue(player);
+
+    fetchMock.mockReturnValue(["1"]);
+
+    await playerJoin(io, socket);
+
+    expect(allocateSpy).toHaveBeenCalledTimes(1);
+
+    expect(emitMock).toHaveBeenCalledTimes(6);
+    expect(emitMock).toHaveBeenCalledWith("players:initial", [
+      {
+        id: "abc123",
+        nickname: "Bob",
+        score: 0,
+      },
+      {
+        id: "ghi789",
+        nickname: "James",
+        score: 1,
+      },
+    ]);
+    expect(emitMock).toHaveBeenCalledWith("settings:initial", {
+      roundLimit: 69,
+      maxPlayers: 25,
+    });
+    expect(emitMock).toHaveBeenCalledWith("round:number", 1);
+    expect(emitMock).toHaveBeenCalledWith("round:setup", {
+      setup: "Why did the chicken cross the road?",
+      type: SetupType.pickOne,
+    });
+    expect(emitMock).toHaveBeenCalledWith("punchlines:add", [
+      "To get to the other side",
+      "To go to KFC",
+    ]);
+    expect(emitMock).toHaveBeenCalledWith("navigate", RoundState.before);
+  });
+
+  it("joins the user when the game is active and round is in the players choose state", async () => {
+    game.state = GameState.active;
+    game.rounds.push({
+      setup: {
+        setup: "Why did the chicken cross the road?",
+        type: SetupType.pickOne,
+      },
+      state: RoundState.playersChoose,
+      punchlinesByPlayer: new Map([
+        ["a", 1],
+        ["b", 2],
+      ]),
+    });
+
+    const player: Player = ({
+      nickname: "Bob",
+      new: true,
+      punchlines: ["To get to the other side", "To go to KFC"],
+    } as unknown) as Player;
+    getPlayerSpy.mockReturnValue(player);
+
+    fetchMock.mockReturnValue(["1"]);
+
+    await playerJoin(io, socket);
+
+    expect(allocateSpy).toHaveBeenCalledTimes(1);
+
+    expect(emitMock).toHaveBeenCalledTimes(7);
+    expect(emitMock).toHaveBeenCalledWith("players:initial", [
+      {
+        id: "abc123",
+        nickname: "Bob",
+        score: 0,
+      },
+      {
+        id: "ghi789",
+        nickname: "James",
+        score: 1,
+      },
+    ]);
+    expect(emitMock).toHaveBeenCalledWith("settings:initial", {
+      roundLimit: 69,
+      maxPlayers: 25,
+    });
+    expect(emitMock).toHaveBeenCalledWith("round:number", 1);
+    expect(emitMock).toHaveBeenCalledWith("round:setup", {
+      setup: "Why did the chicken cross the road?",
+      type: SetupType.pickOne,
+    });
+    expect(emitMock).toHaveBeenCalledWith("punchlines:add", [
+      "To get to the other side",
+      "To go to KFC",
+    ]);
+    expect(emitMock).toHaveBeenCalledWith("round:init-players-chosen", 2);
+    expect(emitMock).toHaveBeenCalledWith("navigate", RoundState.playersChoose);
+  });
+
+  it("joins the user when the game is active and round is in the host chooses state", async () => {
+    game.state = GameState.active;
+    game.rounds.push({
+      setup: {
+        setup: "Why did the chicken cross the road?",
+        type: SetupType.pickOne,
+      },
+      state: RoundState.hostChooses,
+      punchlinesByPlayer: new Map([
+        ["a", 1],
+        ["b", 2],
+      ]),
+    });
+
+    const player: Player = ({
+      nickname: "Bob",
+      new: true,
+      punchlines: ["To get to the other side", "To go to KFC"],
+    } as unknown) as Player;
+    getPlayerSpy.mockReturnValue(player);
+
+    fetchMock.mockReturnValue(["1"]);
+
+    await playerJoin(io, socket);
+
+    expect(allocateSpy).toHaveBeenCalledTimes(1);
+
+    expect(emitMock).toHaveBeenCalledTimes(7);
+    expect(emitMock).toHaveBeenCalledWith("players:initial", [
+      {
+        id: "abc123",
+        nickname: "Bob",
+        score: 0,
+      },
+      {
+        id: "ghi789",
+        nickname: "James",
+        score: 1,
+      },
+    ]);
+    expect(emitMock).toHaveBeenCalledWith("settings:initial", {
+      roundLimit: 69,
+      maxPlayers: 25,
+    });
+    expect(emitMock).toHaveBeenCalledWith("round:number", 1);
+    expect(emitMock).toHaveBeenCalledWith("round:setup", {
+      setup: "Why did the chicken cross the road?",
+      type: SetupType.pickOne,
+    });
+    expect(emitMock).toHaveBeenCalledWith("punchlines:add", [
+      "To get to the other side",
+      "To go to KFC",
+    ]);
+    expect(emitMock).toHaveBeenCalledWith("round:chosen-punchlines", [1, 2]);
+    expect(emitMock).toHaveBeenCalledWith("navigate", RoundState.hostChooses);
+  });
+
+  it("joins the user when the game is active and round is in the after state", async () => {
+    game.state = GameState.active;
+    game.rounds.push({
+      setup: {
+        setup: "Why did the chicken cross the road?",
+        type: SetupType.pickOne,
+      },
+      state: RoundState.after,
+      punchlinesByPlayer: new Map([
+        ["a", 1],
+        ["b", 2],
+      ]),
+      winner: "abc123",
+    });
+
+    const player: Player = ({
+      nickname: "Bob",
+      new: true,
+      punchlines: ["To get to the other side", "To go to KFC"],
+    } as unknown) as Player;
+    getPlayerSpy.mockReturnValue(player);
+
+    fetchMock.mockReturnValue(["1"]);
+
+    await playerJoin(io, socket);
+
+    expect(allocateSpy).toHaveBeenCalledTimes(1);
+
+    expect(emitMock).toHaveBeenCalledTimes(7);
+    expect(emitMock).toHaveBeenCalledWith("players:initial", [
+      {
+        id: "abc123",
+        nickname: "Bob",
+        score: 0,
+      },
+      {
+        id: "ghi789",
+        nickname: "James",
+        score: 1,
+      },
+    ]);
+    expect(emitMock).toHaveBeenCalledWith("settings:initial", {
+      roundLimit: 69,
+      maxPlayers: 25,
+    });
+    expect(emitMock).toHaveBeenCalledWith("round:number", 1);
+    expect(emitMock).toHaveBeenCalledWith("round:setup", {
+      setup: "Why did the chicken cross the road?",
+      type: SetupType.pickOne,
+    });
+    expect(emitMock).toHaveBeenCalledWith("punchlines:add", [
+      "To get to the other side",
+      "To go to KFC",
+    ]);
+    expect(emitMock).toHaveBeenCalledWith("round:winner", "abc123");
+    expect(emitMock).toHaveBeenCalledWith("navigate", RoundState.after);
+  });
+
+  it("assigns the user cards for drawTwoPickThree when joining mid-game", async () => {
+    game.state = GameState.active;
+    game.rounds.push({
+      setup: {
+        setup: "Make a haiku.",
+        type: SetupType.drawTwoPickThree,
+      },
+      state: RoundState.after,
+      punchlinesByPlayer: new Map([
+        ["a", 1],
+        ["b", 2],
+      ]),
+      winner: "abc123",
+    });
+
+    const player: Player = ({
+      nickname: "Bob",
+      new: true,
+      punchlines: ["To get to the other side", "To go to KFC"],
+    } as unknown) as Player;
+    getPlayerSpy.mockReturnValue(player);
+
+    fetchMock.mockReturnValue(["1"]);
+
+    await playerJoin(io, socket);
+
+    expect(allocateSpy).toHaveBeenCalledTimes(1);
+    expect(allocateSpy).toHaveBeenCalledWith(game, "abc123", 12);
+
+    expect(emitMock).toHaveBeenCalledTimes(7);
+    expect(emitMock).toHaveBeenCalledWith("players:initial", [
+      {
+        id: "abc123",
+        nickname: "Bob",
+        score: 0,
+      },
+      {
+        id: "ghi789",
+        nickname: "James",
+        score: 1,
+      },
+    ]);
+    expect(emitMock).toHaveBeenCalledWith("settings:initial", {
+      roundLimit: 69,
+      maxPlayers: 25,
+    });
+    expect(emitMock).toHaveBeenCalledWith("round:number", 1);
+    expect(emitMock).toHaveBeenCalledWith("round:setup", {
+      setup: "Make a haiku.",
+      type: SetupType.drawTwoPickThree,
+    });
+    expect(emitMock).toHaveBeenCalledWith("punchlines:add", [
+      "To get to the other side",
+      "To go to KFC",
+    ]);
+    expect(emitMock).toHaveBeenCalledWith("round:winner", "abc123");
+    expect(emitMock).toHaveBeenCalledWith("navigate", RoundState.after);
   });
 
   it("catches error thrown by getGame and disconnects player", async () => {

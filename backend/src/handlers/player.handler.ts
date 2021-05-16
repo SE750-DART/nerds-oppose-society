@@ -4,16 +4,11 @@ import {
   removePlayer,
 } from "../services/player.service";
 import { Server, Socket } from "socket.io";
-import { GameState } from "../models";
-import {
-  assignNextHost,
-  emitHost,
-  emitNavigate,
-  getSockets,
-  setHost,
-} from "./game.handler";
-import { getGame } from "../services/game.service";
+import { GameState, SetupType } from "../models";
+import { assignNextHost, emitHost, getSockets, setHost } from "./game.handler";
+import { allocatePlayerPunchlines, getGame } from "../services/game.service";
 import { MinPlayers } from "../models/settings.model";
+import { RoundState } from "../models/round.model";
 
 export default (
   io: Server,
@@ -98,7 +93,46 @@ export const playerJoin = async (io: Server, socket: Socket): Promise<void> => {
       roundLimit: game.settings.roundLimit,
       maxPlayers: game.settings.maxPlayers,
     });
-    emitNavigate(socket, game);
+
+    if (game.state === GameState.active) {
+      const round = game.rounds.slice(-1)[0];
+
+      socket.emit("round:number", game.rounds.length);
+      socket.emit("round:setup", {
+        setup: round.setup.setup,
+        type: round.setup.type,
+      });
+
+      await allocatePlayerPunchlines(
+        game,
+        playerId,
+        round.setup.type === SetupType.drawTwoPickThree ? 12 : 10
+      );
+      const player = await getPlayer(gameCode, playerId);
+      socket.emit("punchlines:add", player.punchlines);
+
+      switch (round.state) {
+        case RoundState.playersChoose:
+          socket.emit(
+            "round:init-players-chosen",
+            round.punchlinesByPlayer.size
+          );
+          break;
+        case RoundState.hostChooses:
+          socket.emit(
+            "round:chosen-punchlines",
+            Array.from(round.punchlinesByPlayer.values())
+          );
+          break;
+        case RoundState.after:
+          socket.emit("round:winner", round.winner);
+          break;
+      }
+
+      socket.emit("navigate", round.state);
+    } else {
+      socket.emit("navigate", game.state);
+    }
 
     const sockets = await io.in(gameCode).fetchSockets();
     await socket.join(game.gameCode);

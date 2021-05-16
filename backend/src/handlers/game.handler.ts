@@ -1,4 +1,4 @@
-import { Game, GameState, Player } from "../models";
+import { Game, Player } from "../models";
 import { Server, Socket } from "socket.io";
 import {
   getGame,
@@ -94,16 +94,11 @@ export const initialiseNextRound = async (
   );
 
   io.to(gameCode).emit("round:number", roundNumber);
-  io.to(gameCode).emit("round:setup", setup);
+  io.to(gameCode).emit("round:setup", {
+    setup: setup.setup,
+    type: setup.type,
+  });
   io.to(gameCode).emit("navigate", RoundState.before);
-};
-
-export const emitNavigate = (socket: Socket, game: Game): void => {
-  switch (game.state) {
-    case GameState.lobby:
-      socket.emit("navigate", GameState.lobby);
-      break;
-  }
 };
 
 export const emitHost = async (io: Server, socket: Socket): Promise<void> => {
