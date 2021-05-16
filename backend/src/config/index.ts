@@ -9,7 +9,7 @@ convict.addFormat(url);
 
 const index = convict({
   env: {
-    format: ["prod", "dev", "test"],
+    format: ["production", "dev", "test"],
     default: "dev",
     env: "NODE_ENV",
   },
@@ -27,6 +27,11 @@ const index = convict({
     format: "String",
     default: "mongodb://localhost:27017/nos-db",
     env: "MONGO_URI",
+  },
+  static_react: {
+    format: "Boolean",
+    default: false,
+    env: "INLINE_RUNTIME_CHUNK",
   },
 });
 

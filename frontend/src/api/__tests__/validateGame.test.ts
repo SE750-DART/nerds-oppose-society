@@ -1,7 +1,6 @@
 import mockAxios from "jest-mock-axios";
 import { AxiosError, AxiosResponse } from "axios";
 import validateGame from "../validateGame";
-import { BASE_URL } from "../axiosCall";
 
 const testGameCode = { gameCode: "12345" };
 
@@ -18,12 +17,13 @@ test("should return success on valid game code", async () => {
     config: {},
   };
 
+  // @ts-ignore
   mockAxios.get.mockImplementationOnce(() => Promise.resolve(mockResponse));
 
   const res = await validateGame(testGameCode);
 
   expect(mockAxios.get).toHaveBeenCalledTimes(1);
-  expect(mockAxios.get).toHaveBeenCalledWith(`${BASE_URL}/game/validate`, {
+  expect(mockAxios.get).toHaveBeenCalledWith(`/game/validate`, {
     params: testGameCode,
   });
 
@@ -50,12 +50,13 @@ test("should return error on 404 not found (invalid code)", async () => {
     toJSON: () => ({}),
   };
 
+  // @ts-ignore
   mockAxios.get.mockImplementationOnce(() => Promise.reject(mockError));
 
   const res = await validateGame(testGameCode);
 
   expect(mockAxios.get).toHaveBeenCalledTimes(1);
-  expect(mockAxios.get).toHaveBeenCalledWith(`${BASE_URL}/game/validate`, {
+  expect(mockAxios.get).toHaveBeenCalledWith(`/game/validate`, {
     params: testGameCode,
   });
 
@@ -75,13 +76,13 @@ test("should return error on 500 server error", async () => {
     isAxiosError: true,
     toJSON: () => ({}),
   };
-
+  // @ts-ignore
   mockAxios.get.mockImplementationOnce(() => Promise.reject(mockError));
 
   const res = await validateGame(testGameCode);
 
   expect(mockAxios.get).toHaveBeenCalledTimes(1);
-  expect(mockAxios.get).toHaveBeenCalledWith(`${BASE_URL}/game/validate`, {
+  expect(mockAxios.get).toHaveBeenCalledWith(`/game/validate`, {
     params: testGameCode,
   });
 

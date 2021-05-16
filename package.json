@@ -6,16 +6,19 @@
     "lint": "(cd backend && npm run lint); (cd frontend && npm run lint)",
     "lint:fix": "(cd backend && npm run lint:fix); (cd frontend && npm run lint:fix)",
     "format": "prettier . --write",
-    "prepare": "husky install"
+    "prepare": "[ \"$NODE_ENV\" != production ] && husky install || echo \"Husky skipped due to production\"",
+    "start": "cd backend && npm run start-prod",
+    "build": "cd backend && npm install --include=dev && npm run build && cd ../frontend && npm install --include=dev && npm run build && cp -R build ../backend/build/src/ && cd ..",
+    "dev": "concurrently --kill-others-on-fail \"npm run api\" \"npm run frontend\""
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/taitfuller/nerds-oppose-society.git"
+    "url": "git+https://github.com/SE750-DART/nerds-oppose-society.git"
   },
   "bugs": {
-    "url": "https://github.com/taitfuller/nerds-oppose-society/issues"
+    "url": "https://github.com/SE750-DART/nerds-oppose-society/issues"
   },
-  "homepage": "https://github.com/taitfuller/nerds-oppose-society#readme",
+  "homepage": "https://github.com/SE750-DART/nerds-oppose-society#readme",
   "devDependencies": {
     "eslint": "^7.25.0",
     "husky": "^6.0.0",
@@ -32,5 +35,8 @@
       "prettier --write --ignore-unknown"
     ],
     "!((backend|frontend)/**/*)": "prettier --write"
+  },
+  "engines": {
+    "node": "15.x"
   }
 }

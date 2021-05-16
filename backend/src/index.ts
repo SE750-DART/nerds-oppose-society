@@ -7,6 +7,7 @@ import config from "./config";
 import { Connection, Auth } from "./handlers";
 import routes from "./routes";
 import mongoose from "mongoose";
+import path from "path";
 
 // Init DB
 // Connect to local running instance of mongodb, on telosdatabase db
@@ -39,6 +40,15 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   res.status(500).send("Server Error");
   next();
 });
+
+// Statically serve the frontend from the backend
+if (process.env.NODE_ENV == "production") {
+  app.use(express.static(path.resolve(__dirname, "../src/build/")));
+
+  app.get("/*", (req, res) => {
+    res.sendFile(path.resolve(__dirname, "../src/build/", "index.html"));
+  });
+}
 
 // Activate Server
 const server = http.createServer(app);

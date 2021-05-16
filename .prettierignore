@@ -1,3 +1,10 @@
 # Ignore artifacts:
 build
 coverage
+Procfile
+.prettierignore
+*.yaml
+*.yml
+Dockerfile
+.eslintignore
+.dockerignore
