@@ -35,5 +35,8 @@
       "prettier --write --ignore-unknown"
     ],
     "!((backend|frontend)/**/*)": "prettier --write"
+  },
+  "engines": {
+    "node": "15.x"
   }
 }
