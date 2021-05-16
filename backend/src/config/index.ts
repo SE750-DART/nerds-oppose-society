@@ -9,7 +9,7 @@ convict.addFormat(url);
 
 const index = convict({
   env: {
-    format: ["prod", "dev", "test"],
+    format: ["production", "dev", "test"],
     default: "dev",
     env: "NODE_ENV",
   },

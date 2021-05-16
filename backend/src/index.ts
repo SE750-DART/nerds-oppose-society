@@ -42,7 +42,7 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 });
 
 // Statically serve the frontend from the backend
-if (process.env.NODE_ENV == "prod") {
+if (process.env.NODE_ENV == "production") {
   app.use(express.static(path.resolve(__dirname, "../src/build/")));
 
   app.get("/*", (req, res) => {
