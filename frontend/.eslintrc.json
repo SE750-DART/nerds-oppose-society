@@ -22,7 +22,8 @@
     "**/*.yaml",
     "**/*.yml",
     "**/Procfile",
-    "**/Dockerfile"
+    "**/Dockerfile",
+    "**/public/index.html"
   ],
   "rules": {
     "no-use-before-define": "off",

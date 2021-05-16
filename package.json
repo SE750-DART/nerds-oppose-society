@@ -6,7 +6,7 @@
     "lint": "(cd backend && npm run lint); (cd frontend && npm run lint)",
     "lint:fix": "(cd backend && npm run lint:fix); (cd frontend && npm run lint:fix)",
     "format": "prettier . --write",
-    "prepare": "husky install",
+    "prepare": "[ \"$NODE_ENV\" != production ] && husky install || exit 0",
     "start": "cd backend && npm run start-prod",
     "build": "cd backend && npm install --only=dev && npm install && npm run build && cd ../frontend && npm install --only=dev && npm install && npm run build && cp -R build ../backend/build/src/ && cd ..",
     "dev": "concurrently --kill-others-on-fail \"npm run api\" \"npm run frontend\""

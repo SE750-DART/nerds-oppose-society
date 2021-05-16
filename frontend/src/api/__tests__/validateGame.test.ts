@@ -17,6 +17,7 @@ test("should return success on valid game code", async () => {
     config: {},
   };
 
+  // @ts-ignore
   mockAxios.get.mockImplementationOnce(() => Promise.resolve(mockResponse));
 
   const res = await validateGame(testGameCode);
@@ -49,6 +50,7 @@ test("should return error on 404 not found (invalid code)", async () => {
     toJSON: () => ({}),
   };
 
+  // @ts-ignore
   mockAxios.get.mockImplementationOnce(() => Promise.reject(mockError));
 
   const res = await validateGame(testGameCode);
@@ -74,7 +76,7 @@ test("should return error on 500 server error", async () => {
     isAxiosError: true,
     toJSON: () => ({}),
   };
-
+  // @ts-ignore
   mockAxios.get.mockImplementationOnce(() => Promise.reject(mockError));
 
   const res = await validateGame(testGameCode);

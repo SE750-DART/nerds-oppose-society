@@ -23,6 +23,7 @@ test("should return user id on successful creation", async () => {
     config: {},
   };
 
+  // @ts-ignore
   mockAxios.post.mockImplementationOnce(() => Promise.resolve(mockResponse));
 
   const res = await createPlayer(testPlayer);
@@ -58,6 +59,7 @@ test("should return error on 400 bad request (invalid code or nickname)", async 
     toJSON: () => ({}),
   };
 
+  // @ts-ignore
   mockAxios.post.mockImplementationOnce(() => Promise.reject(mockError));
 
   const res = await createPlayer(testPlayer);
@@ -84,6 +86,7 @@ test("should return error on 500 server error", async () => {
     toJSON: () => ({}),
   };
 
+  // @ts-ignore
   mockAxios.post.mockImplementationOnce(() => Promise.reject(mockError));
 
   const res = await createPlayer(testPlayer);
