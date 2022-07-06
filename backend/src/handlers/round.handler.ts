@@ -42,25 +42,20 @@ export default (
       if (isHost(socket, gameCode)) {
         await enterPlayersChooseState(gameCode, playerId);
 
-        const {
-          activePlayers,
-          game,
-          socketsByPlayerId,
-        } = await getActivePlayers(io, gameCode);
+        const { activePlayers, game, socketsByPlayerId } =
+          await getActivePlayers(io, gameCode);
 
         const round = game.rounds.slice(-1)[0];
         if (round === undefined) throw Error();
 
         activePlayers.map(async (player) => {
-          const {
-            addedPunchlines,
-            removedPunchlines,
-          } = await allocatePlayerPunchlines(
-            game,
-            player.id,
-            round.setup.type === SetupType.drawTwoPickThree ? 12 : 10,
-            false
-          );
+          const { addedPunchlines, removedPunchlines } =
+            await allocatePlayerPunchlines(
+              game,
+              player.id,
+              round.setup.type === SetupType.drawTwoPickThree ? 12 : 10,
+              false
+            );
           socketsByPlayerId
             .get(player.id)
             ?.emit("punchlines:add", addedPunchlines);
@@ -94,9 +89,9 @@ export default (
 
       socket.to(gameCode).emit("round:increment-players-chosen");
 
-      const sockets = ((await io
+      const sockets = (await io
         .in(gameCode)
-        .fetchSockets()) as unknown) as Socket[];
+        .fetchSockets()) as unknown as Socket[];
 
       if (
         sockets

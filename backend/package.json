@@ -1,15 +1,14 @@
 {
-  "name": "nerds-oppose-society.backend",
+  "name": "@nos/backend",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "start": "nodemon src/index.ts",
     "build": "tsc --project ./",
-    "test": "jest --coverage",
+    "test": "cd .. && jest",
     "lint": "eslint src/ --ext .ts",
-    "lint:fix": "npm run lint -- --fix",
-    "format": "prettier --write .",
-    "prepare": "cd .. && npm install"
+    "lint:fix": "eslint src/ --ext .ts --fix",
+    "format": "prettier --write ."
   },
   "dependencies": {
     "convict": "^6.0.1",
@@ -18,7 +17,7 @@
     "dotenv": "^16.0.1",
     "express": "^4.18.1",
     "helmet": "^5.1.0",
-    "mongoose": "^5.13.14",
+    "mongoose": "^6.4.3",
     "socket.io": "^4.0.1",
     "uuid": "^8.3.2"
   },

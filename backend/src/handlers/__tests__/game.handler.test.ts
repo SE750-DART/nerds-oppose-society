@@ -16,14 +16,14 @@ import { ErrorType, ServiceError } from "../../util";
 import { RoundState } from "../../models/round.model";
 
 describe("Game handler", () => {
-  const io = ("io" as unknown) as Server;
-  const socket: Socket = ({
+  const io = "io" as unknown as Server;
+  const socket: Socket = {
     data: {
       gameCode: "42069",
       playerId: "12345",
     },
     on: jest.fn(),
-  } as unknown) as Socket;
+  } as unknown as Socket;
 
   let handlers: {
     startGame: (callback: (data: string) => void) => Promise<void>;
@@ -69,7 +69,7 @@ describe("Game handler", () => {
 
       fetchMock = jest.fn();
       emitMock = jest.fn();
-      io = ({
+      io = {
         in: jest.fn(() => {
           return {
             fetchSockets: fetchMock,
@@ -80,16 +80,16 @@ describe("Game handler", () => {
             emit: emitMock,
           };
         }),
-      } as unknown) as Server;
+      } as unknown as Server;
 
-      socket = ({
+      socket = {
         data: {
           gameCode: "42069",
           playerId: "12345",
         },
         rooms: new Set(["<socket asdadas>", "42069", "42069:host"]),
         on: jest.fn(),
-      } as unknown) as Socket;
+      } as unknown as Socket;
 
       handlers = registerGameHandler(io, socket);
     });
@@ -207,7 +207,7 @@ describe("Game handler", () => {
     beforeEach(() => {
       gameSpy = jest
         .spyOn(GameService, "getGame")
-        .mockResolvedValue(({ settings: {} } as unknown) as Game);
+        .mockResolvedValue({ settings: {} } as unknown as Game);
       maxPlayerSpy = jest
         .spyOn(GameService, "setMaxPlayers")
         .mockImplementation();
@@ -216,7 +216,7 @@ describe("Game handler", () => {
         .mockImplementation();
 
       emitMock = jest.fn();
-      socket = ({
+      socket = {
         data: { gameCode: "42069" },
         rooms: new Set(["<socket-1>", "42069", "42069:host"]),
         on: jest.fn(),
@@ -225,7 +225,7 @@ describe("Game handler", () => {
             emit: emitMock,
           };
         }),
-      } as unknown) as Socket;
+      } as unknown as Socket;
 
       handlers = registerGameHandler(io, socket);
     });
@@ -351,13 +351,13 @@ describe("intialiseNextRound handler", () => {
     initialiseSpy = jest.spyOn(GameService, "initialiseNextRound");
 
     emitMock = jest.fn();
-    io = ({
+    io = {
       to: jest.fn(() => {
         return {
           emit: emitMock,
         };
       }),
-    } as unknown) as Server;
+    } as unknown as Server;
   });
 
   afterEach(() => {
@@ -395,11 +395,11 @@ describe("emitNavigate handler", () => {
   let game: Game;
 
   beforeEach(() => {
-    socket = ({
+    socket = {
       emit: jest.fn(),
-    } as unknown) as Socket;
+    } as unknown as Socket;
 
-    game = ({
+    game = {
       state: GameState.lobby,
       players: [
         { nickname: "Bob", new: true },
@@ -409,7 +409,7 @@ describe("emitNavigate handler", () => {
         roundLimit: 69,
         maxPlayers: 25,
       },
-    } as unknown) as Game;
+    } as unknown as Game;
   });
 
   it("navigates player to lobby", () => {
@@ -435,16 +435,16 @@ describe("emitHost handler", () => {
       };
     });
 
-    io = ({
+    io = {
       in: inMock,
-    } as unknown) as Server;
+    } as unknown as Server;
 
-    socket = ({
+    socket = {
       data: {
         gameCode: "42069",
       },
       emit: jest.fn(),
-    } as unknown) as Socket;
+    } as unknown as Socket;
   });
 
   it("emits the current host", async () => {
@@ -471,9 +471,9 @@ describe("getHost handler", () => {
       };
     });
 
-    io = ({
+    io = {
       in: inMock,
-    } as unknown) as Server;
+    } as unknown as Server;
   });
 
   it("gets the id of the current host", async () => {
@@ -520,18 +520,18 @@ describe("setHost handler", () => {
       };
     });
 
-    io = ({
+    io = {
       to: toMock,
-    } as unknown) as Server;
+    } as unknown as Server;
 
-    socket = ({
+    socket = {
       data: {
         gameCode: "42069",
         playerId: "abc123",
         nickname: "Bob",
       },
       join: joinMock,
-    } as unknown) as Socket;
+    } as unknown as Socket;
   });
 
   it("adds socket to game:host room and broadcasts to all players", () => {
@@ -550,17 +550,17 @@ describe("setHost handler", () => {
 
 describe("isHost handler", () => {
   it("returns true if player is the host", () => {
-    const socket = ({
+    const socket = {
       rooms: new Set(["<socket-1>", "42069", "42069:host"]),
-    } as unknown) as Socket;
+    } as unknown as Socket;
 
     expect(isHost(socket, "42069")).toBeTruthy();
   });
 
   it("returns false if player is not the host", () => {
-    const socket = ({
+    const socket = {
       rooms: new Set(["<socket-1>", "42069"]),
-    } as unknown) as Socket;
+    } as unknown as Socket;
 
     expect(isHost(socket, "42069")).toBeFalsy();
   });
@@ -581,7 +581,7 @@ describe("assignNextHost handler", () => {
     fetchMock = jest.fn();
     joinMock = jest.fn();
     emitMock = jest.fn();
-    io = ({
+    io = {
       in: jest.fn(() => {
         return {
           fetchSockets: fetchMock,
@@ -592,7 +592,7 @@ describe("assignNextHost handler", () => {
           emit: emitMock,
         };
       }),
-    } as unknown) as Server;
+    } as unknown as Server;
 
     gameSpy = jest.spyOn(GameService, "getGame");
     gameSpy.mockReturnValue({
@@ -613,14 +613,14 @@ describe("assignNextHost handler", () => {
   });
 
   it("does nothing if player is not host", async () => {
-    const socket = ({
+    const socket = {
       data: {
         gameCode: "42069",
         playerId: "1",
       },
       rooms: new Set(["<socket fosirghidhfs>", "42069"]),
       on: jest.fn(),
-    } as unknown) as Socket;
+    } as unknown as Socket;
 
     await assignNextHost(io, socket);
 
@@ -632,13 +632,13 @@ describe("assignNextHost handler", () => {
   });
 
   it("does not assign new host if player is host but the only player", async () => {
-    socket = ({
+    socket = {
       data: {
         gameCode: "42069",
         playerId: "1",
       },
       rooms: new Set(["<socket fosirghidhfs>", "42069", "42069:host"]),
-    } as unknown) as Socket;
+    } as unknown as Socket;
 
     fetchMock.mockReturnValue([{ data: { playerId: "1" } }]);
 
@@ -657,13 +657,13 @@ describe("assignNextHost handler", () => {
   });
 
   it("assigns new host", async () => {
-    socket = ({
+    socket = {
       data: {
         gameCode: "42069",
         playerId: "1",
       },
       rooms: new Set(["<socket fosirghidhfs>", "42069", "42069:host"]),
-    } as unknown) as Socket;
+    } as unknown as Socket;
 
     fetchMock.mockReturnValue([
       { data: { playerId: "1" } },
@@ -682,14 +682,14 @@ describe("assignNextHost handler", () => {
   });
 
   it("assigns new host looping to start of active players array", async () => {
-    socket = ({
+    socket = {
       data: {
         gameCode: "42069",
         playerId: "5",
         nickname: "Steve",
       },
       rooms: new Set(["<socket fosirghidhfs>", "42069", "42069:host"]),
-    } as unknown) as Socket;
+    } as unknown as Socket;
 
     fetchMock.mockReturnValue([
       { data: { gameCode: "42069", playerId: "1" }, join: joinMock },
@@ -708,14 +708,14 @@ describe("assignNextHost handler", () => {
   });
 
   it("assigns new host skipping non-active players", async () => {
-    socket = ({
+    socket = {
       data: {
         gameCode: "42069",
         playerId: "1",
         nickname: "Steve",
       },
       rooms: new Set(["<socket fosirghidhfs>", "42069", "42069:host"]),
-    } as unknown) as Socket;
+    } as unknown as Socket;
 
     fetchMock.mockReturnValue([
       { data: { playerId: "1" } },
@@ -734,13 +734,13 @@ describe("assignNextHost handler", () => {
   });
 
   it("does not set host if new host socket is somehow undefined", async () => {
-    socket = ({
+    socket = {
       data: {
         gameCode: "42069",
         playerId: "5",
       },
       rooms: new Set(["<socket fosirghidhfs>", "42069", "42069:host"]),
-    } as unknown) as Socket;
+    } as unknown as Socket;
 
     fetchMock.mockReturnValue([
       { data: { playerId: "1" } },
@@ -767,13 +767,13 @@ describe("getActivePlayers handler", () => {
 
   beforeEach(() => {
     fetchMock = jest.fn();
-    io = ({
+    io = {
       in: jest.fn(() => {
         return {
           fetchSockets: fetchMock,
         };
       }),
-    } as unknown) as Server;
+    } as unknown as Server;
 
     gameSpy = jest.spyOn(GameService, "getGame");
     gameSpy.mockReturnValue({
@@ -837,13 +837,13 @@ describe("getSockets handler", () => {
 
   beforeEach(() => {
     fetchMock = jest.fn();
-    io = ({
+    io = {
       in: jest.fn(() => {
         return {
           fetchSockets: fetchMock,
         };
       }),
-    } as unknown) as Server;
+    } as unknown as Server;
   });
 
   it("returns sockets", async () => {

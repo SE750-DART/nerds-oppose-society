@@ -22,12 +22,8 @@ const SubmitPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
 
   const { host, players } = useContext(PlayersContext);
   const { punchlines, removePunchline } = useContext(PunchlinesContext);
-  const {
-    roundNumber,
-    setup,
-    numPlayersChosen,
-    incrementPlayersChosen,
-  } = useContext<RoundContextType>(RoundContext);
+  const { roundNumber, setup, numPlayersChosen, incrementPlayersChosen } =
+    useContext<RoundContextType>(RoundContext);
 
   const [playerId] = usePlayerIdState("");
   const playerIsHost = playerId === host;

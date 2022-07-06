@@ -27,10 +27,7 @@ import { RoundState } from "../../models/round.model";
 import { MaxPlayers } from "../../models/settings.model";
 
 beforeAll(async () => {
-  await mongoose.connect(global.__MONGO_URI__, {
-    useUnifiedTopology: true,
-    useNewUrlParser: true,
-  });
+  await mongoose.connect(global.__MONGO_URI__);
 });
 
 afterAll(async () => {

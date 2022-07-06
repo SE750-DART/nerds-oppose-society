@@ -25,8 +25,8 @@ describe("Connection handler", () => {
   });
 
   it("registers handlers to socket", async () => {
-    const io = ("io" as unknown) as Server;
-    const socket = ("socket" as unknown) as Socket;
+    const io = "io" as unknown as Server;
+    const socket = "socket" as unknown as Socket;
 
     await Connection(io, socket);
 

@@ -14,10 +14,7 @@ import { GameState } from "../../models";
 import { ErrorType, ServiceError } from "../../util";
 
 beforeAll(async () => {
-  await mongoose.connect(global.__MONGO_URI__, {
-    useUnifiedTopology: true,
-    useNewUrlParser: true,
-  });
+  await mongoose.connect(global.__MONGO_URI__);
 });
 
 afterAll(async () => {
@@ -241,7 +238,7 @@ describe("authenticatePlayer Service", () => {
   it("returns false for an invalid gameCode", async () => {
     const result = await authenticatePlayer(
       "9846541654",
-      mongoose.Types.ObjectId().toHexString(),
+      new mongoose.Types.ObjectId(),
       uuid()
     );
 
@@ -253,7 +250,7 @@ describe("authenticatePlayer Service", () => {
 
     const result = await authenticatePlayer(
       gameCode,
-      mongoose.Types.ObjectId().toHexString(),
+      new mongoose.Types.ObjectId(),
       uuid()
     );
 

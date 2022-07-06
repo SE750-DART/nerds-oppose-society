@@ -5,7 +5,7 @@ import { Socket } from "socket.io";
 describe("auth Handler", () => {
   let spy: jest.SpyInstance;
 
-  const socket = ({
+  const socket = {
     handshake: {
       auth: {
         gameCode: "42069",
@@ -14,7 +14,7 @@ describe("auth Handler", () => {
       },
     },
     data: {},
-  } as unknown) as Socket;
+  } as unknown as Socket;
 
   beforeEach(() => {
     spy = jest.spyOn(PlayerService, "authenticatePlayer");

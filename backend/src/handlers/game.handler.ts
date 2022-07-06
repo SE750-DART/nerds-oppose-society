@@ -184,5 +184,5 @@ export const getSockets = async (
   io: Server,
   gameCode: Game["gameCode"]
 ): Promise<Socket[]> => {
-  return ((await io.in(gameCode).fetchSockets()) as unknown) as Socket[];
+  return (await io.in(gameCode).fetchSockets()) as unknown as Socket[];
 };

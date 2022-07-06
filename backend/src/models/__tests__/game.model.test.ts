@@ -11,10 +11,7 @@ describe("Game Model", () => {
   let gameData: any;
 
   beforeAll(async () => {
-    await mongoose.connect(global.__MONGO_URI__, {
-      useUnifiedTopology: true,
-      useNewUrlParser: true,
-    });
+    await mongoose.connect(global.__MONGO_URI__);
   });
 
   afterAll(async () => {
