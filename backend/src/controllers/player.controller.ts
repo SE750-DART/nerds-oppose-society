@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { createPlayer as createPlayerService } from "../services/player.service";
-import { ErrorType } from "../util";
+import { ErrorType, ServiceError } from "../util";
 
 export const createPlayer = async (
   req: Request,
@@ -25,14 +25,15 @@ export const createPlayer = async (
     });
     return;
   } catch (e) {
-    if (e.type === ErrorType.gameCode) {
-      res.status(400).send("Could not get game");
-      return;
-    } else if (e.type === ErrorType.playerName) {
-      res.status(400).send("Nickname taken");
-      return;
-    } else {
-      return next(e);
+    if (e instanceof ServiceError) {
+      if (e.type === ErrorType.gameCode) {
+        res.status(400).send("Could not get game");
+        return;
+      } else if (e.type === ErrorType.playerName) {
+        res.status(400).send("Nickname taken");
+        return;
+      }
     }
+    return next(e);
   }
 };

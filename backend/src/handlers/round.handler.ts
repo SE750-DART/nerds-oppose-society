@@ -73,7 +73,6 @@ export default (
         io.to(gameCode).emit("navigate", RoundState.playersChoose);
       }
     } catch (e) {
-      console.log(e);
       if (e instanceof ServiceError) {
         callback(e.message);
       } else {

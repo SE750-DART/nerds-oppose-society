@@ -12,6 +12,7 @@ import { createPlayer } from "../player.service";
 
 beforeAll(async () => {
   await mongoose.connect(global.__MONGO_URI__, {
+    useUnifiedTopology: true,
     useNewUrlParser: true,
   });
 });
