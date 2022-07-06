@@ -16,21 +16,21 @@ const Button = ({
   handleOnClick,
   disabled = false,
 }: ButtonProps) => {
-  let buttonTypeStyle: string = "";
+  let buttonTypeStyle = "";
   if (variant === "primary") {
     buttonTypeStyle = styles.button__primary;
   } else if (variant === "secondary") {
     buttonTypeStyle = styles.button__secondary;
   }
 
-  let buttonSizeStyle: string = "";
+  let buttonSizeStyle = "";
   if (size === "big") {
     buttonSizeStyle = styles.button__big;
   } else if (size === "small") {
     buttonSizeStyle = styles.button__small;
   }
 
-  let buttonDisabledStyle: string = "";
+  let buttonDisabledStyle = "";
   if (disabled) {
     buttonDisabledStyle = styles.button__disabled;
   }

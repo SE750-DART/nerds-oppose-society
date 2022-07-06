@@ -3,8 +3,8 @@ import renderer from "react-test-renderer";
 import PunchlineCard from "../PunchlineCard";
 
 it("Punchline card snapshot testing", () => {
-  const shortPunchline: string = "Me time.";
-  const longPunchline: string =
+  const shortPunchline = "Me time.";
+  const longPunchline =
     "Looking in the mirror, applying lipstick, and whispering “tonight, you will have sex with Tom Cruise.”";
 
   const treeBasicPunchline = renderer

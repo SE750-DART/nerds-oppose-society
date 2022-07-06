@@ -11,7 +11,7 @@ type Winner = {
   winningPunchlines: string[];
 };
 
-type Context = {
+export type RoundContextType = {
   // round:number
   roundNumber: number;
   setRoundNumber: (roundNumber: number) => void;
@@ -38,7 +38,7 @@ type Context = {
   setWinner: (winningPlayerId: string, winningPunchlines: string[]) => void;
 };
 
-const RoundContext = React.createContext<Context>({
+const RoundContext = React.createContext<RoundContextType>({
   // round:number
   roundNumber: 0,
   setRoundNumber: () => null,

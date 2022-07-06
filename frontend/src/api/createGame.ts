@@ -11,7 +11,8 @@ const CREATED_201 = 201;
  */
 const createGame: () => Promise<ApiResponse<string>> = async () => {
   const url = `${BASE_URL}/game/create`;
-  const axiosMethod = async () => axios.post<any, AxiosResponse<string>>(url);
+  const axiosMethod = async () =>
+    axios.post<unknown, AxiosResponse<string>>(url);
   const acceptedCodes = [CREATED_201];
 
   return axiosCall<string>({ axiosMethod, acceptedCodes });

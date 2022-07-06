@@ -21,14 +21,14 @@ const PunchlineCard = ({
   blurred = false,
 }: PunchlineCardProps) => {
   // Max length of a punchline before it needs to be made smaller to fit
-  const textBreakpoint: number = 69;
+  const textBreakpoint = 69;
 
-  let textStyle: string = "";
+  let textStyle = "";
   if (text.length > textBreakpoint) {
     textStyle = styles.textSmall;
   }
 
-  let cardStyle: string = styles.punchlineAvailable;
+  let cardStyle = styles.punchlineAvailable;
   if (status === "selected") {
     cardStyle = styles.punchlineSelected;
   } else if (status === "submitted") {

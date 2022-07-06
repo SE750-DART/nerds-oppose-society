@@ -20,7 +20,7 @@ const Dropdown = ({ aboveDrop, belowDrop, header }: DropdownProps) => {
     if (height) {
       setDropdownHeight(height);
     }
-  });
+  }, []);
 
   const toggleDrop = () => {
     setShowDrop(!showDrop);

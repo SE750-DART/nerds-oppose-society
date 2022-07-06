@@ -20,8 +20,8 @@ const PlayerList = ({ gameState }: PlayerListProps) => {
   const isHost = (player: PlayerType) => player.id === host;
   const isMe = (player: PlayerType) => player.id === playerId;
 
-  let showScores: boolean = true;
-  let showHost: boolean = false;
+  let showScores = true;
+  let showHost = false;
 
   if (gameState === "lobby") {
     showScores = false;

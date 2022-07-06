@@ -15,9 +15,9 @@ type Props = {
  * 500 - Server Error
  * @param gameCode - game code to validate
  */
-const validateGame: ({ gameCode }: Props) => Promise<ApiResponse<{}>> = async ({
+const validateGame: ({
   gameCode,
-}: Props) => {
+}: Props) => Promise<ApiResponse<unknown>> = async ({ gameCode }: Props) => {
   // Check that game code is a number
   if (!gameCode.match(/^\d+$/)) {
     return {
@@ -29,12 +29,12 @@ const validateGame: ({ gameCode }: Props) => Promise<ApiResponse<{}>> = async ({
 
   const url = `${BASE_URL}/game/validate`;
   const axiosMethod = async () =>
-    axios.get<any, AxiosResponse<{}>>(url, {
+    axios.get<unknown, AxiosResponse<unknown>>(url, {
       params: { gameCode },
     });
   const acceptedCodes = [NO_CONTENT_204];
 
-  return axiosCall<{}>({ axiosMethod, acceptedCodes });
+  return axiosCall<unknown>({ axiosMethod, acceptedCodes });
 };
 
 export default validateGame;

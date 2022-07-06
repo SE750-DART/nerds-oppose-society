@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import createPersistedState from "use-persisted-state";
 import TextField from "../../components/TextField";
 import Button from "../../components/Button";
@@ -22,7 +22,7 @@ const NicknamePage = ({ gameCode }: Props) => {
   const [token, setToken] = useTokenState("");
   const browserHistory = useContext(BrowserHistoryContext);
 
-  const tryConnect = async () => {
+  const tryConnect = useCallback(async () => {
     const res = await validateGame({ gameCode });
 
     const gameCodeIsValid = res.success;
@@ -35,7 +35,7 @@ const NicknamePage = ({ gameCode }: Props) => {
       // but it does not connect again because playerId and token are falsy
       socket.connect();
     }
-  };
+  }, [browserHistory, gameCode, playerId, token]);
 
   useEffect(() => {
     let mounted = true;
@@ -45,7 +45,7 @@ const NicknamePage = ({ gameCode }: Props) => {
     return () => {
       mounted = false;
     };
-  }, [gameCode, token]);
+  }, [gameCode, token, tryConnect]);
 
   const handleSubmit = async () => {
     const res = await createPlayer({ gameCode, nickname });
