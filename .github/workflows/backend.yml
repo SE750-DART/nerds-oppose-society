@@ -6,10 +6,6 @@ on:
   push:
     branches: [main]
 
-defaults:
-  run:
-    working-directory: backend
-
 jobs:
   backend-ci:
     name: Run Backend Tests and Linter
@@ -17,21 +13,22 @@ jobs:
 
     steps:
       - name: Check out Git repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set up Node.js
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v3
         with:
-          node-version: 14
+          node-version: latest
+          cache: "npm"
 
       - name: Install Node.js dependencies
-        run: npm ci
+        run: npm ci -w=backend
 
       - name: Run linter
-        run: npm run lint
-
-      - name: Run tests
-        run: npm test
+        run: npm run lint -w=backend
 
       - name: Run build
-        run: npm run build --if-present
+        run: npm run build -w=backend
+
+      - name: Run tests
+        run: npm test -w=backend
