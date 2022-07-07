@@ -47,7 +47,9 @@ const NicknamePage = ({ gameCode }: Props) => {
     };
   }, [gameCode, token, tryConnect]);
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
     const res = await createPlayer({ gameCode, nickname });
 
     if (res.success) {
@@ -66,15 +68,17 @@ const NicknamePage = ({ gameCode }: Props) => {
   return (
     <div className={styles.container}>
       <h4>Nickname:</h4>
-      <div className={styles.spacer}>
-        <TextField
-          label="Nickname"
-          textValue={nickname}
-          onChangeHandler={setNickname}
-        />
-      </div>
-      <h5 style={{ color: "red", textAlign: "center" }}>{error}</h5>
-      <Button text="Submit" onClick={handleSubmit} disabled={!nickname} />
+      <form onSubmit={handleSubmit} action="">
+        <div className={styles.spacer}>
+          <TextField
+            label="Nickname"
+            textValue={nickname}
+            onChangeHandler={setNickname}
+          />
+        </div>
+        <h5 style={{ color: "red", textAlign: "center" }}>{error}</h5>
+        <Button text="Submit" type="submit" disabled={!nickname} />
+      </form>
     </div>
   );
 };
