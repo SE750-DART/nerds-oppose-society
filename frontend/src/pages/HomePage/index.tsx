@@ -13,7 +13,9 @@ const HomePage = () => {
 
   const browserHistory = useHistory();
 
-  const handleJoinGame = async () => {
+  const handleJoinGame = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
     const res = await validateGame({ gameCode });
 
     if (res.success) {
@@ -44,19 +46,17 @@ const HomePage = () => {
         Your favourite online game that coincidentally uses the writing from
         Cards Against Humanity®.
       </p>
-      <TextField
-        label="Game code"
-        textValue={gameCode}
-        onChangeHandler={setGameCode}
-      />
-      <h5 style={{ color: "red", textAlign: "center" }}>{gameCodeError}</h5>
-      <div className={styles.btnContainer}>
-        <Button
-          text="Join game"
-          onClick={handleJoinGame}
-          disabled={!gameCode}
+      <form onSubmit={handleJoinGame} action="">
+        <TextField
+          label="Game code"
+          textValue={gameCode}
+          onChangeHandler={setGameCode}
         />
-      </div>
+        <h5 style={{ color: "red", textAlign: "center" }}>{gameCodeError}</h5>
+        <div className={styles.btnContainer}>
+          <Button text="Join game" type="submit" disabled={!gameCode} />
+        </div>
+      </form>
       <p className={`${styles.text} ${styles.btnSpacer}`}>OR</p>
       <Button
         variant="secondary"
