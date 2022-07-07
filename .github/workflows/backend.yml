@@ -21,6 +21,7 @@ jobs:
           node-version: latest
           cache: "npm"
 
+      - run: npm set-script prepare ""
       - name: Install Node.js dependencies
         run: npm ci -w=backend
 
