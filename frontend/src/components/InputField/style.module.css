@@ -11,6 +11,7 @@
   padding: 0 24px;
   text-align: center;
   transition: 0.3s;
+  outline: none;
 }
 
 .inputField__big {
