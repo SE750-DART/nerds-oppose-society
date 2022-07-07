@@ -16,7 +16,9 @@ test("should return game code on successful creation", async () => {
     config: {},
   };
 
-  mockAxios.post.mockImplementationOnce(() => Promise.resolve(mockResponse));
+  mockAxios.post.mockImplementationOnce(
+    () => Promise.resolve(mockResponse) as never
+  );
 
   const res = await createGame();
 
@@ -40,7 +42,9 @@ test("should return error on 500 server error", async () => {
     toJSON: () => ({}),
   };
 
-  mockAxios.post.mockImplementationOnce(() => Promise.reject(mockError));
+  mockAxios.post.mockImplementationOnce(
+    () => Promise.reject(mockError) as never
+  );
 
   const res = await createGame();
 
