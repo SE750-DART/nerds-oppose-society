@@ -48,6 +48,8 @@ const HomePage = () => {
       </p>
       <form onSubmit={handleJoinGame} action="">
         <InputField
+          type="number"
+          inputMode="decimal"
           label="Game code"
           textValue={gameCode}
           onChange={setGameCode}
