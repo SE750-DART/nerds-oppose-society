@@ -1,6 +1,6 @@
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import createPersistedState from "use-persisted-state";
-import TextField from "../../components/TextField";
+import InputField from "../../components/InputField";
 import Button from "../../components/Button";
 import styles from "./style.module.css";
 import { BrowserHistoryContext } from "../../App";
@@ -70,10 +70,10 @@ const NicknamePage = ({ gameCode }: Props) => {
       <h4>Nickname:</h4>
       <form onSubmit={handleSubmit} action="">
         <div className={styles.spacer}>
-          <TextField
+          <InputField
             label="Nickname"
             textValue={nickname}
-            onChangeHandler={setNickname}
+            onChange={setNickname}
           />
         </div>
         <h5 style={{ color: "red", textAlign: "center" }}>{error}</h5>

@@ -4,7 +4,7 @@ import debounce from "lodash/debounce";
 import Button from "../../components/Button";
 import PlayerList from "../../components/PlayerList";
 import styles from "./style.module.css";
-import TextField from "../../components/TextField";
+import InputField from "../../components/InputField";
 import Dropdown from "../../components/Dropdown";
 import { Settings } from "../../GameRouter";
 import socket from "../../socket";
@@ -86,19 +86,19 @@ const LobbyPage = ({ gameCode, settings }: Props) => {
     <>
       <div className={styles.setting}>
         <p>Max players</p>
-        <TextField
+        <InputField
           textValue={maxPlayers}
           size="small"
-          onChangeHandler={handleChangeMaxPlayers}
+          onChange={handleChangeMaxPlayers}
           disabled={!playerIsHost}
         />
       </div>
       <div className={styles.setting}>
         <p>Round limit</p>
-        <TextField
+        <InputField
           textValue={roundLimit}
           size="small"
-          onChangeHandler={handleChangeRoundLimit}
+          onChange={handleChangeRoundLimit}
           disabled={!playerIsHost}
         />
       </div>

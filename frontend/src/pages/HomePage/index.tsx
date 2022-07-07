@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useHistory } from "react-router-dom";
 import Button from "../../components/Button";
-import TextField from "../../components/TextField";
+import InputField from "../../components/InputField";
 import styles from "./style.module.css";
 import validateGame from "../../api/validateGame";
 import createGame from "../../api/createGame";
@@ -47,10 +47,10 @@ const HomePage = () => {
         Cards Against Humanity®.
       </p>
       <form onSubmit={handleJoinGame} action="">
-        <TextField
+        <InputField
           label="Game code"
           textValue={gameCode}
-          onChangeHandler={setGameCode}
+          onChange={setGameCode}
         />
         <h5 style={{ color: "red", textAlign: "center" }}>{gameCodeError}</h5>
         <div className={styles.btnContainer}>
