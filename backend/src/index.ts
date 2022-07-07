@@ -24,7 +24,7 @@ db.once("open", () => {
 // Setup Express
 const app = express();
 
-app.use(() => helmet());
+app.use(helmet());
 app.use(
   cors({
     origin: config.origin,
