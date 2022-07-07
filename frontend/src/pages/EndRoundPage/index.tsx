@@ -42,7 +42,7 @@ const EndRoundPage = ({ roundLimit }: { roundLimit: number }) => {
       {playerIsHost ? (
         <Button
           text="Let's go again!"
-          handleOnClick={() =>
+          onClick={() =>
             socket.emit("round:host-next", (response: string) =>
               setResponse(response)
             )

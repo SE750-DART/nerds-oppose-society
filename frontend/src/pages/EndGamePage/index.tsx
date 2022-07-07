@@ -21,13 +21,13 @@ const EndGamePage = () => {
       <div className={styles.bottomBtn}>
         <Button
           text="Play again"
-          handleOnClick={() => memoryHistory.push("/lobby")}
+          onClick={() => memoryHistory.push("/lobby")}
         />
       </div>
       <div className={styles.bottomBtn}>
         <Button
           text="Never mind"
-          handleOnClick={() => browserHistory.push("/")}
+          onClick={() => browserHistory.push("/")}
           variant="secondary"
         />
       </div>

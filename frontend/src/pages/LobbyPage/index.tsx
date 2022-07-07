@@ -74,7 +74,7 @@ const LobbyPage = ({ gameCode, settings }: Props) => {
           variant="secondary"
           size="small"
           text="Copy"
-          handleOnClick={() => {
+          onClick={() => {
             navigator.clipboard.writeText(gameCode).catch();
           }}
         />
@@ -121,7 +121,7 @@ const LobbyPage = ({ gameCode, settings }: Props) => {
         {playerIsHost && (
           <Button
             text="Start game"
-            handleOnClick={() =>
+            onClick={() =>
               socket.emit("start", (response: string) => setResponse(response))
             }
             disabled={players.length < MINIMUM_PLAYERS}

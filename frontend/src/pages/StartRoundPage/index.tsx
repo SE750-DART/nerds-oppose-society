@@ -31,7 +31,7 @@ const StartRoundPage = ({ roundLimit }: { roundLimit: number }) => {
       {playerIsHost ? (
         <Button
           text="Leshgo!"
-          handleOnClick={() =>
+          onClick={() =>
             socket.emit("round:host-begin", (response: string) =>
               setResponse(response)
             )

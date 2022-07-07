@@ -4,16 +4,18 @@ import styles from "./style.module.css";
 interface ButtonProps {
   variant?: "primary" | "secondary";
   size?: "big" | "small";
+  type?: "button" | "submit" | "reset";
   text: string;
-  handleOnClick: React.MouseEventHandler;
+  onClick?: React.MouseEventHandler;
   disabled?: boolean;
 }
 
 const Button = ({
   variant = "primary",
   size = "big",
+  type = "button",
   text,
-  handleOnClick,
+  onClick,
   disabled = false,
 }: ButtonProps) => {
   let buttonTypeStyle = "";
@@ -38,8 +40,8 @@ const Button = ({
   return (
     <button
       className={`${styles.button} ${buttonTypeStyle} ${buttonSizeStyle} ${buttonDisabledStyle}`}
-      type="button"
-      onClick={handleOnClick}
+      type={type}
+      onClick={onClick}
       disabled={disabled}
     >
       {text}

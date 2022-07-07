@@ -74,7 +74,7 @@ const NicknamePage = ({ gameCode }: Props) => {
         />
       </div>
       <h5 style={{ color: "red", textAlign: "center" }}>{error}</h5>
-      <Button text="Submit" handleOnClick={handleSubmit} disabled={!nickname} />
+      <Button text="Submit" onClick={handleSubmit} disabled={!nickname} />
     </div>
   );
 };

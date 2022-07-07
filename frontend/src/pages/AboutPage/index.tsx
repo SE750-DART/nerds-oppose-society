@@ -45,14 +45,11 @@ const AboutPage = () => {
       </p>
 
       <div className={styles.btnContainer}>
-        <Button
-          text="I don't care"
-          handleOnClick={() => browserHistory.push("/")}
-        />
+        <Button text="I don't care" onClick={() => browserHistory.push("/")} />
         <div className={styles.btnContainer}>
           <Button
             text="See our GitHub"
-            handleOnClick={() =>
+            onClick={() =>
               window.open(
                 "https://github.com/SE750-DART/nerds-oppose-society/",
                 "_blank"

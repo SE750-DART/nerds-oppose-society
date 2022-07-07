@@ -129,14 +129,14 @@ const SelectPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
           <div className={styles.btnNah}>
             <Button
               text="Nah"
-              handleOnClick={() => setPunchlineSelected("")}
+              onClick={() => setPunchlineSelected("")}
               variant="secondary"
             />
           </div>
           <div className={styles.btnSend}>
             <Button
               text="Send it"
-              handleOnClick={() => {
+              onClick={() => {
                 socket.emit(
                   "round:host-choose",
                   [punchlineSelected],

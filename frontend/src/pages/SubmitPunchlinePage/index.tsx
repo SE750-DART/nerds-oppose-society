@@ -87,14 +87,14 @@ const SubmitPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
           <div className={styles.btnNah}>
             <Button
               text="Nah"
-              handleOnClick={() => setPunchlineSelected("")}
+              onClick={() => setPunchlineSelected("")}
               variant="secondary"
             />
           </div>
           <div className={styles.btnSend}>
             <Button
               text="Send it"
-              handleOnClick={() => {
+              onClick={() => {
                 setPunchlineSubmitted(punchlineSelected);
                 removePunchline(punchlineSelected);
                 setPunchlineSelected("");

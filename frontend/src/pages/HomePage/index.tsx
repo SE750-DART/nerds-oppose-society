@@ -53,7 +53,7 @@ const HomePage = () => {
       <div className={styles.btnContainer}>
         <Button
           text="Join game"
-          handleOnClick={handleJoinGame}
+          onClick={handleJoinGame}
           disabled={!gameCode}
         />
       </div>
@@ -61,7 +61,7 @@ const HomePage = () => {
       <Button
         variant="secondary"
         text="Start new game"
-        handleOnClick={handleNewGame}
+        onClick={handleNewGame}
       />
       <h5 style={{ color: "red", textAlign: "center" }}>{newGameError}</h5>
       <div className={styles.footer}>

@@ -54,7 +54,7 @@ const LegalPage = () => {
       <div className={styles.btnContainer}>
         <Button
           text="Good for you bro"
-          handleOnClick={() => browserHistory.push("/")}
+          onClick={() => browserHistory.push("/")}
         />
       </div>
     </div>
