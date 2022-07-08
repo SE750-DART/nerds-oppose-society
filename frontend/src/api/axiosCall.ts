@@ -38,7 +38,8 @@ const axiosCall = async <Type>({
       return {
         success: false,
         status: err.response?.status ?? SERVER_ERROR_500,
-        error: err.response?.data ?? "Server error, please try again.",
+        error:
+          (err.response?.data as string) ?? "Server error, please try again.",
       };
     }
     return {

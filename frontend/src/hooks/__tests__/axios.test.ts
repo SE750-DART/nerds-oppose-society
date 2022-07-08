@@ -1,4 +1,4 @@
-import axios, { AxiosError } from "axios";
+import axios, { AxiosError, CanceledError } from "axios";
 import { act, renderHook } from "@testing-library/react-hooks";
 import { getRequestErrorMessage, useGet, usePost } from "../axios";
 import { AxiosResponse } from "axios";
@@ -21,9 +21,9 @@ describe("useGet()", () => {
     const [, request] = result.current;
 
     /*
-    This throws an intentional warning in the Jest consÏole as we are not
-    resolving `requestPromise` to simulate the request pending and inspect the
-    `loading` and `error` values - nothing to see here!
+    This throws an intentional warning in the Jest console as we are not resolving
+    the request promise to simulate the request pending and inspect the `loading`
+    and `error` values - nothing to see here!
      */
     act(() => {
       request();
@@ -120,9 +120,9 @@ describe("useGet()", () => {
     mockAxios.get.mockImplementation(() => new Promise(() => null));
 
     /*
-    This throws an intentional warning in the Jest consÏole as we are not
-    resolving `requestPromise` to simulate the request pending and inspect the
-    `loading` and `error` values - nothing to see here!
+    This throws an intentional warning in the Jest console as we are not resolving
+    the request promise to simulate the request pending and inspect the `loading`
+    and `error` values - nothing to see here!
      */
     act(() => {
       request();
@@ -130,6 +130,38 @@ describe("useGet()", () => {
 
     const [{ error: errorPending }] = result.current;
     expect(errorPending).toBeUndefined();
+  });
+
+  it("cancelled request returns null, loading is false and error is undefined", async () => {
+    const mockCancelledErrorBody = {
+      config: {},
+      isAxiosError: true,
+      message: "",
+      name: "",
+      __CANCEL__: true,
+    };
+    const mockCancelledError: CanceledError<string> = {
+      ...mockCancelledErrorBody,
+      toJSON: () => mockCancelledErrorBody,
+    };
+
+    mockAxios.get.mockRejectedValue(mockCancelledError);
+
+    const { result } = renderHook(() => useGet("/"));
+    const [, request] = result.current;
+
+    await act(async () => {
+      const controller = new AbortController();
+      const response = await request(controller);
+      expect(response).toBeNull();
+      expect(mockAxios.get).toHaveBeenCalledWith("/", {
+        signal: controller.signal,
+      });
+    });
+
+    const [{ loading, error }] = result.current;
+    expect(loading).toBeTruthy();
+    expect(error).toBeUndefined();
   });
 });
 
@@ -149,9 +181,9 @@ describe("usePost()", () => {
     const [, request] = result.current;
 
     /*
-    This throws an intentional warning in the Jest consÏole as we are not
-    resolving `requestPromise` to simulate the request pending and inspect the
-    `loading` and `error` values - nothing to see here!
+    This throws an intentional warning in the Jest console as we are not resolving
+    the request promise to simulate the request pending and inspect the `loading`
+    and `error` values - nothing to see here!
      */
     act(() => {
       request();
@@ -248,9 +280,9 @@ describe("usePost()", () => {
     mockAxios.post.mockImplementation(() => new Promise(() => null));
 
     /*
-    This throws an intentional warning in the Jest consÏole as we are not
-    resolving `requestPromise` to simulate the request pending and inspect the
-    `loading` and `error` values - nothing to see here!
+    This throws an intentional warning in the Jest console as we are not resolving
+    the request promise to simulate the request pending and inspect the `loading`
+    and `error` values - nothing to see here!
      */
     act(() => {
       request();
@@ -258,6 +290,38 @@ describe("usePost()", () => {
 
     const [{ error: errorPending }] = result.current;
     expect(errorPending).toBeUndefined();
+  });
+
+  it("cancelled request returns null, loading is true and error is undefined", async () => {
+    const mockCancelledErrorBody = {
+      config: {},
+      isAxiosError: true,
+      message: "",
+      name: "",
+      __CANCEL__: true,
+    };
+    const mockCancelledError: CanceledError<string> = {
+      ...mockCancelledErrorBody,
+      toJSON: () => mockCancelledErrorBody,
+    };
+
+    mockAxios.post.mockRejectedValue(mockCancelledError);
+
+    const { result } = renderHook(() => usePost("/"));
+    const [, request] = result.current;
+
+    await act(async () => {
+      const controller = new AbortController();
+      const response = await request(controller);
+      expect(response).toBeNull();
+      expect(mockAxios.post).toHaveBeenCalledWith("/", {
+        signal: controller.signal,
+      });
+    });
+
+    const [{ loading, error }] = result.current;
+    expect(loading).toBeTruthy();
+    expect(error).toBeUndefined();
   });
 });
 

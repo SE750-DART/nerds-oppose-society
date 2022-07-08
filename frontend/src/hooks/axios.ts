@@ -54,7 +54,19 @@ const reducer = <T>(state: State<T>, action: Action<T>): State<T> => {
 };
 
 /**
- * Performs an Axios request using the function specified by `method`.
+ * Invokes an Axios request.
+ *
+ * @param controller - AbortController used to cancel effects -
+ * See [Axios docs](https://axios-http.com/docs/cancellation).
+ * This is important when invoking a request within a `useEffect` to perform
+ * [cleanup](https://reactjs.org/docs/hooks-effect.html#example-using-hooks-1).
+ */
+type Request<T> = (
+  controller?: AbortController
+) => Promise<AxiosResponse<T> | null>;
+
+/**
+ * Manages state for an Axios request of type specified by `method`.
  * Returns request state (`loading`, `error`) and a function to execute the request.
  *
  * @param url - Request URL
@@ -65,35 +77,45 @@ const useAxios = <T>(
   url: string,
   method: AxiosRequest<T>,
   config?: AxiosRequestConfig
-): [State<T>, () => Promise<AxiosResponse<T> | null>] => {
+): [State<T>, Request<T>] => {
   const [state, dispatch] = useReducer<Reducer<State<T>, Action<T>>>(reducer, {
     loading: false,
     error: undefined,
   });
 
-  const request = useCallback(async () => {
-    dispatch({ type: ActionType.REQUEST_START });
+  const request = useCallback<Request<T>>(
+    async (controller) => {
+      dispatch({ type: ActionType.REQUEST_START });
 
-    try {
-      const response = await method(url, config);
-      dispatch({ type: ActionType.REQUEST_SUCCESS });
-      return response;
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        dispatch({ type: ActionType.REQUEST_ERROR, error });
-      } else {
-        const error = Error("Server Error");
-        dispatch({ type: ActionType.REQUEST_ERROR, error });
+      try {
+        let requestConfig = config;
+        if (controller) {
+          requestConfig = { ...requestConfig, signal: controller.signal };
+        }
+
+        const response = await method(url, requestConfig);
+        dispatch({ type: ActionType.REQUEST_SUCCESS });
+        return response;
+      } catch (error) {
+        if (axios.isCancel(error)) {
+          return null;
+        } else if (axios.isAxiosError(error)) {
+          dispatch({ type: ActionType.REQUEST_ERROR, error });
+        } else {
+          const error = Error("Server Error");
+          dispatch({ type: ActionType.REQUEST_ERROR, error });
+        }
+        return null;
       }
-      return null;
-    }
-  }, [config, method, url]);
+    },
+    [config, method, url]
+  );
 
   return useMemo(() => [state, request], [state, request]);
 };
 
 /**
- * Performs an Axios `get` request.
+ * Manages state for an Axios `get` request.
  * Returns request state (`loading`, `error`) and a function to execute the request.
  *
  * @param url - Request URL
@@ -104,7 +126,7 @@ export const useGet = <T>(url: string, config?: AxiosRequestConfig) => {
 };
 
 /**
- * Performs an Axios `post` request.
+ * Manages state for an Axios `post` request.
  * Returns request state (`loading`, `error`) and a function to execute the request.
  *
  * @param url - Request URL
