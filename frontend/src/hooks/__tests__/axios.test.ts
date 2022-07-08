@@ -1,9 +1,37 @@
-import axios, { AxiosError, CanceledError } from "axios";
+import axios, { AxiosError, AxiosResponse, CanceledError } from "axios";
 import { act, renderHook } from "@testing-library/react-hooks";
 import { getRequestErrorMessage, useGet, usePost } from "../axios";
-import { AxiosResponse } from "axios";
 
 const mockAxios = jest.mocked(axios, true);
+
+const mockedAxiosResponse = <T>(
+  data: T,
+  statusText = "OK"
+): AxiosResponse<T> => ({
+  config: {},
+  data: data,
+  headers: {},
+  status: 200,
+  statusText: statusText,
+});
+
+const mockedAxiosError = <T>(
+  isCanceled = false,
+  response?: AxiosResponse<T>
+): AxiosError<T> | CanceledError<T> => {
+  const mockAxiosErrorBody = {
+    config: {},
+    isAxiosError: true,
+    message: "",
+    name: "",
+    response,
+    __CANCEL__: isCanceled,
+  };
+  return {
+    ...mockAxiosErrorBody,
+    toJSON: () => mockAxiosErrorBody,
+  };
+};
 
 describe("useGet()", () => {
   it("initially loading is false and error is undefined", () => {
@@ -35,21 +63,15 @@ describe("useGet()", () => {
   });
 
   it("request success returns axios response, loading is false and error is undefined", async () => {
-    const mockResponse: AxiosResponse<string> = {
-      config: {},
-      data: "testResponse",
-      headers: {},
-      status: 200,
-      statusText: "OK",
-    };
-    mockAxios.get.mockResolvedValue(mockResponse);
+    const mockAxiosResponse = mockedAxiosResponse("textResponse");
+    mockAxios.get.mockResolvedValue(mockAxiosResponse);
 
     const { result } = renderHook(() => useGet<string>("/"));
     const [, request] = result.current;
 
     await act(async () => {
       const response = await request();
-      expect(response).toEqual(mockResponse);
+      expect(response).toEqual(mockAxiosResponse);
     });
 
     const [{ loading, error }] = result.current;
@@ -58,16 +80,7 @@ describe("useGet()", () => {
   });
 
   it("request error of AxiosError returns null, loading is false and error is defined", async () => {
-    const mockAxiosErrorBody = {
-      config: {},
-      isAxiosError: true,
-      message: "",
-      name: "",
-    };
-    const mockAxiosError: AxiosError<string> = {
-      ...mockAxiosErrorBody,
-      toJSON: () => mockAxiosErrorBody,
-    };
+    const mockAxiosError = mockedAxiosError();
     mockAxios.get.mockRejectedValue(mockAxiosError);
 
     const { result } = renderHook(() => useGet<string>("/"));
@@ -133,17 +146,7 @@ describe("useGet()", () => {
   });
 
   it("cancelled request returns null, loading is false and error is undefined", async () => {
-    const mockCancelledErrorBody = {
-      config: {},
-      isAxiosError: true,
-      message: "",
-      name: "",
-      __CANCEL__: true,
-    };
-    const mockCancelledError: CanceledError<string> = {
-      ...mockCancelledErrorBody,
-      toJSON: () => mockCancelledErrorBody,
-    };
+    const mockCancelledError = mockedAxiosError(true);
 
     mockAxios.get.mockRejectedValue(mockCancelledError);
 
@@ -195,21 +198,15 @@ describe("usePost()", () => {
   });
 
   it("request success returns axios response, loading is false and error is undefined", async () => {
-    const mockResponse: AxiosResponse<string> = {
-      config: {},
-      data: "testResponse",
-      headers: {},
-      status: 200,
-      statusText: "OK",
-    };
-    mockAxios.post.mockResolvedValue(mockResponse);
+    const mockAxiosResponse = mockedAxiosResponse("textResponse");
+    mockAxios.post.mockResolvedValue(mockAxiosResponse);
 
     const { result } = renderHook(() => usePost<string>("/"));
     const [, request] = result.current;
 
     await act(async () => {
       const response = await request();
-      expect(response).toEqual(mockResponse);
+      expect(response).toEqual(mockAxiosResponse);
     });
 
     const [{ loading, error }] = result.current;
@@ -218,16 +215,7 @@ describe("usePost()", () => {
   });
 
   it("request error of AxiosError returns null, loading is false and error is defined", async () => {
-    const mockAxiosErrorBody = {
-      config: {},
-      isAxiosError: true,
-      message: "",
-      name: "",
-    };
-    const mockAxiosError: AxiosError<string> = {
-      ...mockAxiosErrorBody,
-      toJSON: () => mockAxiosErrorBody,
-    };
+    const mockAxiosError = mockedAxiosError();
     mockAxios.post.mockRejectedValue(mockAxiosError);
 
     const { result } = renderHook(() => usePost<string>("/"));
@@ -293,17 +281,7 @@ describe("usePost()", () => {
   });
 
   it("cancelled request returns null, loading is true and error is undefined", async () => {
-    const mockCancelledErrorBody = {
-      config: {},
-      isAxiosError: true,
-      message: "",
-      name: "",
-      __CANCEL__: true,
-    };
-    const mockCancelledError: CanceledError<string> = {
-      ...mockCancelledErrorBody,
-      toJSON: () => mockCancelledErrorBody,
-    };
+    const mockCancelledError = mockedAxiosError(true);
 
     mockAxios.post.mockRejectedValue(mockCancelledError);
 
@@ -332,23 +310,8 @@ describe("getRequestErrorMessage()", () => {
   });
 
   it("returns response.statusText when error is AxiosError", () => {
-    const mockAxiosErrorBody = {
-      config: {},
-      isAxiosError: true,
-      message: "",
-      name: "",
-      response: {
-        config: {},
-        data: "axiosError",
-        headers: {},
-        status: 500,
-        statusText: "AxiosError",
-      },
-    };
-    const mockAxiosError: AxiosError<string> = {
-      ...mockAxiosErrorBody,
-      toJSON: () => mockAxiosErrorBody,
-    };
+    const mockAxiosResponse = mockedAxiosResponse("axiosError", "AxiosError");
+    const mockAxiosError = mockedAxiosError(false, mockAxiosResponse);
 
     const message = getRequestErrorMessage(mockAxiosError);
     expect(message).toBe("AxiosError");
