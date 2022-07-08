@@ -19,17 +19,12 @@ const EndGamePage = () => {
       </div>
 
       <div className={styles.bottomBtn}>
-        <Button
-          text="Play again"
-          onClick={() => memoryHistory.push("/lobby")}
-        />
+        <Button onClick={() => memoryHistory.push("/lobby")}>Play again</Button>
       </div>
       <div className={styles.bottomBtn}>
-        <Button
-          text="Never mind"
-          onClick={() => browserHistory.push("/")}
-          variant="secondary"
-        />
+        <Button onClick={() => browserHistory.push("/")} variant="secondary">
+          Never mind
+        </Button>
       </div>
     </div>
   );

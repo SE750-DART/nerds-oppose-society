@@ -5,7 +5,6 @@ interface ButtonProps {
   variant?: "primary" | "secondary";
   size?: "big" | "small";
   type?: "button" | "submit" | "reset";
-  text: string;
   onClick?: React.MouseEventHandler;
   disabled?: boolean;
 }
@@ -14,10 +13,10 @@ const Button = ({
   variant = "primary",
   size = "big",
   type = "button",
-  text,
+  children,
   onClick,
   disabled = false,
-}: ButtonProps) => {
+}: React.PropsWithChildren<ButtonProps>) => {
   let buttonTypeStyle = "";
   if (variant === "primary") {
     buttonTypeStyle = styles.button__primary;
@@ -44,7 +43,7 @@ const Button = ({
       onClick={onClick}
       disabled={disabled}
     >
-      {text}
+      {children}
     </button>
   );
 };

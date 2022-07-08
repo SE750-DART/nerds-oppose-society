@@ -56,15 +56,15 @@ const HomePage = () => {
         />
         <h5 style={{ color: "red", textAlign: "center" }}>{gameCodeError}</h5>
         <div className={styles.btnContainer}>
-          <Button text="Join game" type="submit" disabled={!gameCode} />
+          <Button type="submit" disabled={!gameCode}>
+            Join game
+          </Button>
         </div>
       </form>
       <p className={`${styles.text} ${styles.btnSpacer}`}>OR</p>
-      <Button
-        variant="secondary"
-        text="Start new game"
-        onClick={handleNewGame}
-      />
+      <Button variant="secondary" onClick={handleNewGame}>
+        Start new game
+      </Button>
       <h5 style={{ color: "red", textAlign: "center" }}>{newGameError}</h5>
       <div className={styles.footer}>
         <Link to="/about">About</Link> | <Link to="/legal">Legal</Link>

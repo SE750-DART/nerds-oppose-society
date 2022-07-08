@@ -73,11 +73,12 @@ const LobbyPage = ({ gameCode, settings }: Props) => {
         <Button
           variant="secondary"
           size="small"
-          text="Copy"
           onClick={() => {
             navigator.clipboard.writeText(gameCode).catch();
           }}
-        />
+        >
+          Copy
+        </Button>
       </div>
     </>
   );
@@ -120,12 +121,13 @@ const LobbyPage = ({ gameCode, settings }: Props) => {
 
         {playerIsHost && (
           <Button
-            text="Start game"
             onClick={() =>
               socket.emit("start", (response: string) => setResponse(response))
             }
             disabled={players.length < MINIMUM_PLAYERS}
-          />
+          >
+            Start game
+          </Button>
         )}
       </div>
     </>

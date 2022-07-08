@@ -52,10 +52,9 @@ const LegalPage = () => {
       </p>
       <p className={styles.text}>Please don&apos;t sue us :)</p>
       <div className={styles.btnContainer}>
-        <Button
-          text="Good for you bro"
-          onClick={() => browserHistory.push("/")}
-        />
+        <Button onClick={() => browserHistory.push("/")}>
+          Good for you bro
+        </Button>
       </div>
     </div>
   );
