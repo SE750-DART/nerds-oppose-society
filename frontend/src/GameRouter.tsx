@@ -6,7 +6,6 @@ import socket from "./socket";
 import { PlayersContext } from "./contexts/players";
 import { PunchlinesContext } from "./contexts/punchlines";
 import {
-  BasicPage,
   EndGamePage,
   EndRoundPage,
   NicknamePage,
@@ -211,10 +210,6 @@ const GameRouter = () => {
 
         <Route path="/scoreboard">
           <EndGamePage />
-        </Route>
-
-        <Route path="/switchboard">
-          <BasicPage gameCode={gameCode} path="switchboard" />
         </Route>
 
         <Route path="*">
