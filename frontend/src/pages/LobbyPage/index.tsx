@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import createPersistedState from "use-persisted-state";
 import debounce from "lodash/debounce";
 import Button from "../../components/Button";
@@ -8,7 +8,7 @@ import TextField from "../../components/TextField";
 import Dropdown from "../../components/Dropdown";
 import { Settings } from "../../GameRouter";
 import socket from "../../socket";
-import { PlayersContext } from "../../contexts/players";
+import { usePlayers } from "../../contexts/players";
 
 const usePlayerIdState = createPersistedState("playerId");
 
@@ -22,7 +22,7 @@ const MINIMUM_PLAYERS = 3;
 const LobbyPage = ({ gameCode, settings }: Props) => {
   const [, setResponse] = useState("");
 
-  const { host, players } = useContext(PlayersContext);
+  const { host, players } = usePlayers();
   const [playerId] = usePlayerIdState("");
   const playerIsHost = playerId === host;
 

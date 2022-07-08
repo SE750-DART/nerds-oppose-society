@@ -5,17 +5,17 @@ import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { PunchlinesContextProvider } from "./contexts/punchlines";
 import { RoundContextProvider } from "./contexts/round";
-import { PlayersContextProvider } from "./contexts/players";
+import { PlayersProvider } from "./contexts/players";
 
 ReactDOM.render(
   <React.StrictMode>
-    <PlayersContextProvider>
+    <PlayersProvider>
       <PunchlinesContextProvider>
         <RoundContextProvider>
           <App />
         </RoundContextProvider>
       </PunchlinesContextProvider>
-    </PlayersContextProvider>
+    </PlayersProvider>
   </React.StrictMode>,
   document.getElementById("root")
 );

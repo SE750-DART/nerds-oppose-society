@@ -4,7 +4,7 @@ import styles from "./style.module.css";
 import PlayerList from "../../components/PlayerList";
 import PunchlineCard from "../../components/PunchlineCard";
 import { RoundContext } from "../../contexts/round";
-import { PlayersContext } from "../../contexts/players";
+import { usePlayers } from "../../contexts/players";
 import Button from "../../components/Button";
 import socket from "../../socket";
 
@@ -13,7 +13,7 @@ const usePlayerIdState = createPersistedState("playerId");
 const EndRoundPage = ({ roundLimit }: { roundLimit: number }) => {
   const [, setResponse] = useState("");
 
-  const { host } = useContext(PlayersContext);
+  const { host } = usePlayers();
   const [playerId] = usePlayerIdState("");
   const playerIsHost = playerId === host;
 
