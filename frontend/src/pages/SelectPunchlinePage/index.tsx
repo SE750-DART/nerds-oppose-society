@@ -7,8 +7,8 @@ import ProgressBar from "../../components/ProgressBar";
 import PunchlineCard from "../../components/PunchlineCard";
 import Button from "../../components/Button";
 import Setup from "../../components/Setup";
-import { PlayersContext } from "../../providers/ContextProviders/PlayersContextProvider";
-import { RoundContext } from "../../providers/ContextProviders/RoundContextProvider";
+import { PlayersContext } from "../../contexts/players";
+import { RoundContext } from "../../contexts/round";
 import socket from "../../socket";
 
 const usePlayerIdState = createPersistedState("playerId");

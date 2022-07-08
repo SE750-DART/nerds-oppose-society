@@ -1,7 +1,7 @@
 import React from "react";
-import { PlayersContextProvider } from "./PlayersContextProvider";
-import { PunchlinesContextProvider } from "./PunchlinesContextProvider";
-import { RoundContextProvider } from "./RoundContextProvider";
+import { PlayersContextProvider } from "./players";
+import { PunchlinesContextProvider } from "./punchlines";
+import { RoundContextProvider } from "./round";
 
 const ContextProviders = ({ children }: { children: React.ReactNode }) => (
   <PlayersContextProvider>

@@ -3,8 +3,8 @@ import createPersistedState from "use-persisted-state";
 import styles from "./style.module.css";
 import PlayerList from "../../components/PlayerList";
 import PunchlineCard from "../../components/PunchlineCard";
-import { RoundContext } from "../../providers/ContextProviders/RoundContextProvider";
-import { PlayersContext } from "../../providers/ContextProviders/PlayersContextProvider";
+import { RoundContext } from "../../contexts/round";
+import { PlayersContext } from "../../contexts/players";
 import Button from "../../components/Button";
 import socket from "../../socket";
 

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Punchline } from "./PunchlinesContextProvider";
+import { Punchline } from "./punchlines";
 
 type Setup = {
   setup: string;
