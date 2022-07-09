@@ -1,12 +1,18 @@
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import createPersistedState from "use-persisted-state";
 import InputField from "../../components/InputField";
 import Button from "../../components/Button";
 import styles from "./style.module.css";
 import { BrowserHistoryContext } from "../../App";
-import validateGame from "../../api/validateGame";
 import createPlayer from "../../api/createPlayer";
 import socket from "../../socket";
+import { useGet } from "../../hooks/axios";
 
 const usePlayerIdState = createPersistedState("playerId");
 const useTokenState = createPersistedState("token");
@@ -22,20 +28,40 @@ const NicknamePage = ({ gameCode }: Props) => {
   const [token, setToken] = useTokenState("");
   const browserHistory = useContext(BrowserHistoryContext);
 
-  const tryConnect = useCallback(async () => {
-    const res = await validateGame({ gameCode });
+  const [, validateGameCode] = useGet(
+    "/api/game/validate",
+    /*
+    As `validateGameCode` runs inside a `useEffect()` we need to create the
+    config object with `useMemo()` to prevent necessary re-renders.
+     */
+    useMemo(
+      () => ({
+        params: { gameCode },
+      }),
+      [gameCode]
+    )
+  );
 
-    const gameCodeIsValid = res.success;
-    if (!gameCodeIsValid) {
-      browserHistory.push("/");
-    } else if (playerId && token) {
+  useEffect(() => {
+    const controller = new AbortController();
+    (async () => {
+      const response = await validateGameCode(controller);
+      if (response === null) {
+        browserHistory.push("/");
+      }
+    })();
+    return () => controller.abort();
+  }, [browserHistory, validateGameCode]);
+
+  const tryConnect = useCallback(async () => {
+    if (playerId && token) {
       socket.auth = { gameCode, playerId, token };
       // If the connection fails here, playerId and token are cleared by event handler in GameRouter
       // This reruns this useEffect since playerId and token changed,
       // but it does not connect again because playerId and token are falsy
       socket.connect();
     }
-  }, [browserHistory, gameCode, playerId, token]);
+  }, [gameCode, playerId, token]);
 
   useEffect(() => {
     let mounted = true;

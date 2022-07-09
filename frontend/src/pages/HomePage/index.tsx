@@ -3,31 +3,31 @@ import { Link, useHistory } from "react-router-dom";
 import Button from "../../components/Button";
 import InputField from "../../components/InputField";
 import styles from "./style.module.css";
-import validateGame from "../../api/validateGame";
 import createGame from "../../api/createGame";
+import { getRequestErrorMessage, useGet } from "../../hooks/axios";
 
 const HomePage = () => {
   const [gameCode, setGameCode] = useState("");
-  const [gameCodeError, setGameCodeError] = useState("");
   const [newGameError, setNewGameError] = useState("");
+
+  const [{ error: gameCodeError }, validateGameCode] = useGet(
+    "/api/game/validate",
+    { params: { gameCode } }
+  );
 
   const browserHistory = useHistory();
 
   const handleJoinGame = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const res = await validateGame({ gameCode });
-
-    if (res.success) {
+    const response = await validateGameCode();
+    if (response?.status === 204) {
       browserHistory.push(`/${gameCode}`);
-    } else {
-      setGameCodeError(res.error);
     }
   };
 
   const handleNewGame = async () => {
     const res = await createGame();
-
     if (res.success) {
       if (res.data) {
         browserHistory.push(`/${res.data}`);
@@ -54,9 +54,14 @@ const HomePage = () => {
           textValue={gameCode}
           onChange={setGameCode}
         />
-        <h5 style={{ color: "red", textAlign: "center" }}>{gameCodeError}</h5>
+        <h5 style={{ color: "red", textAlign: "center" }}>
+          {getRequestErrorMessage(gameCodeError)}
+        </h5>
         <div className={styles.btnContainer}>
-          <Button type="submit" disabled={!gameCode}>
+          <Button
+            type="submit"
+            disabled={!gameCode || !Number.isInteger(Number(gameCode))}
+          >
             Join game
           </Button>
         </div>
