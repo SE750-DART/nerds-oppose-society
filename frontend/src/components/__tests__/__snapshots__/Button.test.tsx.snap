@@ -6,9 +6,7 @@ exports[`Button snapshot testing 1`] = `
   disabled={false}
   onClick={[Function]}
   type="button"
->
-  Start game
-</button>
+/>
 `;
 
 exports[`Button snapshot testing 2`] = `
@@ -17,7 +15,5 @@ exports[`Button snapshot testing 2`] = `
   disabled={false}
   onClick={[Function]}
   type="button"
->
-  Start game
-</button>
+/>
 `;

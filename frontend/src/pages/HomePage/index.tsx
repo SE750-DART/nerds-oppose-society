@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useHistory } from "react-router-dom";
 import Button from "../../components/Button";
-import TextField from "../../components/TextField";
+import InputField from "../../components/InputField";
 import styles from "./style.module.css";
 import validateGame from "../../api/validateGame";
 import createGame from "../../api/createGame";
@@ -13,7 +13,9 @@ const HomePage = () => {
 
   const browserHistory = useHistory();
 
-  const handleJoinGame = async () => {
+  const handleJoinGame = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
     const res = await validateGame({ gameCode });
 
     if (res.success) {
@@ -44,25 +46,25 @@ const HomePage = () => {
         Your favourite online game that coincidentally uses the writing from
         Cards Against Humanity®.
       </p>
-      <TextField
-        label="Game code"
-        textValue={gameCode}
-        onChangeHandler={setGameCode}
-      />
-      <h5 style={{ color: "red", textAlign: "center" }}>{gameCodeError}</h5>
-      <div className={styles.btnContainer}>
-        <Button
-          text="Join game"
-          handleOnClick={handleJoinGame}
-          disabled={!gameCode}
+      <form onSubmit={handleJoinGame} action="">
+        <InputField
+          type="number"
+          inputMode="decimal"
+          label="Game code"
+          textValue={gameCode}
+          onChange={setGameCode}
         />
-      </div>
+        <h5 style={{ color: "red", textAlign: "center" }}>{gameCodeError}</h5>
+        <div className={styles.btnContainer}>
+          <Button type="submit" disabled={!gameCode}>
+            Join game
+          </Button>
+        </div>
+      </form>
       <p className={`${styles.text} ${styles.btnSpacer}`}>OR</p>
-      <Button
-        variant="secondary"
-        text="Start new game"
-        handleOnClick={handleNewGame}
-      />
+      <Button variant="secondary" onClick={handleNewGame}>
+        Start new game
+      </Button>
       <h5 style={{ color: "red", textAlign: "center" }}>{newGameError}</h5>
       <div className={styles.footer}>
         <Link to="/about">About</Link> | <Link to="/legal">Legal</Link>
