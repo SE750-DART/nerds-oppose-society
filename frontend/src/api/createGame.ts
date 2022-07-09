@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from "axios";
 import ApiResponse from "./ApiResponse";
-import axiosCall, { BASE_URL } from "./axiosCall";
+import axiosCall from "./axiosCall";
 
 const CREATED_201 = 201;
 
@@ -10,7 +10,7 @@ const CREATED_201 = 201;
  * 500 - Server Error
  */
 const createGame: () => Promise<ApiResponse<string>> = async () => {
-  const url = `${BASE_URL}/game/create`;
+  const url = `/api/game/create`;
   const axiosMethod = async () =>
     axios.post<unknown, AxiosResponse<string>>(url);
   const acceptedCodes = [CREATED_201];
