@@ -25,7 +25,7 @@ const index = convict({
   },
   mongo_uri: {
     format: "String",
-    default: "mongodb://localhost:27017/nos-db",
+    default: "mongodb://127.0.0.1:27017/nos-db",
     env: "MONGO_URI",
   },
 });

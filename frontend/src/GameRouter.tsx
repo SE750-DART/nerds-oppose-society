@@ -33,7 +33,7 @@ const useTokenState = createPersistedState("token");
 const INITIAL_ROUND_LIMIT = 69;
 const INITIAL_MAX_PLAYERS = 40;
 
-const setupSockets = ({
+const useSetupSockets = ({
   settings,
   setSettings,
 }: {
@@ -61,7 +61,7 @@ const setupSockets = ({
   // Connection
   const handleNavigate = useCallback(
     (path: string) => memoryHistory.push(path.toLowerCase()),
-    [memoryHistory.push]
+    []
   );
   const handleHost = useCallback(setHost, [setHost]);
   const handlePlayersInitial = useCallback(initialisePlayers, [
@@ -97,7 +97,7 @@ const setupSockets = ({
         setSettings(newSettings);
       }
     },
-    [setSettings]
+    [setSettings, settings]
   );
 
   // Round
@@ -116,7 +116,7 @@ const setupSockets = ({
       setWinner(winningPlayerId, winningPunchlines);
       incrementPlayerScore(winningPlayerId);
     },
-    [setWinner]
+    [incrementPlayerScore, setWinner]
   );
 
   useEffect(() => {
@@ -177,7 +177,7 @@ const GameRouter = () => {
     maxPlayers: INITIAL_MAX_PLAYERS,
   });
 
-  setupSockets({
+  useSetupSockets({
     settings,
     setSettings,
   });

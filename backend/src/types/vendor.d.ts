@@ -1,6 +1,6 @@
-declare namespace NodeJS {
-  interface Global {
-    __MONGO_URI__: string;
-    __MONGO_DB_NAME__: string;
-  }
+declare global {
+  // eslint-disable-next-line no-var
+  var __MONGO_URI__: string;
 }
+
+export {};

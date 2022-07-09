@@ -1,4 +1,4 @@
-import { AxiosResponse } from "axios";
+import axios, { AxiosResponse } from "axios";
 import ApiResponse from "./ApiResponse";
 
 export const BASE_URL = "http://localhost:42069";
@@ -31,15 +31,15 @@ const axiosCall = async <Type>({
     };
   } catch (err) {
     // Error
-    if (err.response) {
+    if (axios.isAxiosError(err)) {
       /*
        * The request was made and the server responded with a
        * status code that falls out of the range of 2xx
        */
       return {
         success: false,
-        status: err.response.status,
-        error: err.response.data,
+        status: err.response?.status ?? SERVER_ERROR_500,
+        error: err.response?.data ?? "Server error, please try again.",
       };
     }
     return {

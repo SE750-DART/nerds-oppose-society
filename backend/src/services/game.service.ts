@@ -38,7 +38,7 @@ export const getGame = async (gameCode: Game["gameCode"]): Promise<Game> => {
 export const validateGameCode = async (
   gameCode: Game["gameCode"]
 ): Promise<boolean> => {
-  return await GameModel.exists({ gameCode: gameCode });
+  return !!(await GameModel.exists({ gameCode: gameCode }));
 };
 
 export const setMaxPlayers = async (

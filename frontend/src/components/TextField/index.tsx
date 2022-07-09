@@ -16,7 +16,7 @@ const TextField = ({
   onChangeHandler,
   disabled = false,
 }: TextFieldProps) => {
-  let sizeStyle: string = "";
+  let sizeStyle = "";
   if (size === "big") {
     sizeStyle = styles.textfield__big;
   } else if (size === "small") {

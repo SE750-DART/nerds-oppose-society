@@ -11,9 +11,7 @@ describe("Game Model", () => {
   let gameData: any;
 
   beforeAll(async () => {
-    await mongoose.connect(global.__MONGO_URI__, {
-      useNewUrlParser: true,
-    });
+    await mongoose.connect(global.__MONGO_URI__);
   });
 
   afterAll(async () => {
@@ -76,7 +74,9 @@ describe("Game Model", () => {
       fail("gameCode is required");
     } catch (e) {
       expect(e).toBeInstanceOf(mongoose.Error.ValidationError);
-      expect(e.errors.gameCode).toBeDefined();
+      if (e instanceof mongoose.Error.ValidationError) {
+        expect(e.errors.gameCode).toBeDefined();
+      }
     }
   });
 
@@ -110,7 +110,9 @@ describe("Game Model", () => {
       fail("setups are required");
     } catch (e) {
       expect(e).toBeInstanceOf(mongoose.Error.ValidationError);
-      expect(e.errors["setups.0.setup"]).toBeDefined();
+      if (e instanceof mongoose.Error.ValidationError) {
+        expect(e.errors["setups.0.setup"]).toBeDefined();
+      }
     }
   });
 
@@ -157,7 +159,9 @@ describe("Game Model", () => {
       fail("nicknames are required");
     } catch (e) {
       expect(e).toBeInstanceOf(mongoose.Error.ValidationError);
-      expect(e.errors.players).toBeDefined();
+      if (e instanceof mongoose.Error.ValidationError) {
+        expect(e.errors.players).toBeDefined();
+      }
     }
   });
 
@@ -171,7 +175,9 @@ describe("Game Model", () => {
       fail("unique nicknames are required");
     } catch (e) {
       expect(e).toBeInstanceOf(mongoose.Error.ValidationError);
-      expect(e.errors.players).toBeDefined();
+      if (e instanceof mongoose.Error.ValidationError) {
+        expect(e.errors.players).toBeDefined();
+      }
     }
   });
 
@@ -228,7 +234,9 @@ describe("Game Model", () => {
       await game.save();
     } catch (e) {
       expect(e).toBeInstanceOf(mongoose.Error.ValidationError);
-      expect(e.errors["rounds.0.setup"]).toBeDefined();
+      if (e instanceof mongoose.Error.ValidationError) {
+        expect(e.errors["rounds.0.setup"]).toBeDefined();
+      }
     }
   });
 
@@ -248,7 +256,9 @@ describe("Game Model", () => {
       await game.save();
     } catch (e) {
       expect(e).toBeInstanceOf(mongoose.Error.ValidationError);
-      expect(e.errors["rounds.0.host"]).toBeDefined();
+      if (e instanceof mongoose.Error.ValidationError) {
+        expect(e.errors["rounds.0.host"]).toBeDefined();
+      }
     }
   });
 
@@ -266,7 +276,9 @@ describe("Game Model", () => {
       fail(`should not allow a ${MaxPlayers + 1}th player`);
     } catch (e) {
       expect(e).toBeInstanceOf(mongoose.Error.ValidationError);
-      expect(e.errors.players).toBeDefined();
+      if (e instanceof mongoose.Error.ValidationError) {
+        expect(e.errors.players).toBeDefined();
+      }
     }
   });
 

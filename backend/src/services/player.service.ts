@@ -74,10 +74,10 @@ export const authenticatePlayer = async (
   playerId: Player["id"],
   token: Player["token"]
 ): Promise<boolean> => {
-  return await GameModel.exists({
+  return !!(await GameModel.exists({
     gameCode: gameCode,
     players: { $elemMatch: { _id: playerId, token: token } },
-  });
+  }));
 };
 
 export const initialisePlayer = async (

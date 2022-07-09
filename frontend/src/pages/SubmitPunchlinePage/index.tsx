@@ -9,7 +9,10 @@ import Button from "../../components/Button";
 import Setup from "../../components/Setup";
 import { PlayersContext } from "../../providers/ContextProviders/PlayersContextProvider";
 import { PunchlinesContext } from "../../providers/ContextProviders/PunchlinesContextProvider";
-import { RoundContext } from "../../providers/ContextProviders/RoundContextProvider";
+import {
+  RoundContext,
+  RoundContextType,
+} from "../../providers/ContextProviders/RoundContextProvider";
 import socket from "../../socket";
 
 const usePlayerIdState = createPersistedState("playerId");
@@ -19,12 +22,8 @@ const SubmitPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
 
   const { host, players } = useContext(PlayersContext);
   const { punchlines, removePunchline } = useContext(PunchlinesContext);
-  const {
-    roundNumber,
-    setup,
-    numPlayersChosen,
-    incrementPlayersChosen,
-  } = useContext(RoundContext);
+  const { roundNumber, setup, numPlayersChosen, incrementPlayersChosen } =
+    useContext<RoundContextType>(RoundContext);
 
   const [playerId] = usePlayerIdState("");
   const playerIsHost = playerId === host;

@@ -8,14 +8,14 @@ import { ErrorType, ServiceError } from "../../util";
 import { Game, GameState, Player, SetupType } from "../../models";
 
 describe("Round handler", () => {
-  const io = ("io" as unknown) as Server;
-  const socket: Socket = ({
+  const io = "io" as unknown as Server;
+  const socket: Socket = {
     data: {
       gameCode: "42069",
       playerId: "12345",
     },
     on: jest.fn(),
-  } as unknown) as Socket;
+  } as unknown as Socket;
 
   let handlers: {
     hostStartRound: (callback: (data: string) => void) => void;
@@ -85,29 +85,29 @@ describe("Round handler", () => {
       callback = jest.fn();
 
       emitMock = jest.fn();
-      io = ({
+      io = {
         to: jest.fn(() => {
           return {
             emit: emitMock,
           };
         }),
-      } as unknown) as Server;
+      } as unknown as Server;
 
       socketMock = jest.fn();
 
-      socket = ({
+      socket = {
         data: {
           gameCode: "42069",
           playerId: "abc123",
         },
         rooms: new Set(["<socket afjshfiou>", "42069", "42069:host"]),
         on: jest.fn(),
-      } as unknown) as Socket;
+      } as unknown as Socket;
 
       handlers = registerRoundHandler(io, socket);
 
-      activePlayers = ([{ id: "1" }] as unknown) as Player[];
-      game = ({
+      activePlayers = [{ id: "1" }] as unknown as Player[];
+      game = {
         gameId: "42069",
         rounds: [
           {
@@ -117,10 +117,10 @@ describe("Round handler", () => {
           },
         ],
         save: jest.fn(),
-      } as unknown) as Game;
-      socketsByPlayerId = (new Map([
+      } as unknown as Game;
+      socketsByPlayerId = new Map([
         ["1", { emit: socketMock }],
-      ]) as unknown) as Map<Player["id"], Socket>;
+      ]) as unknown as Map<Player["id"], Socket>;
 
       activeSpy.mockReturnValue({
         activePlayers: activePlayers,
@@ -198,9 +198,9 @@ describe("Round handler", () => {
     });
 
     it("throws error due to round not being defined", async () => {
-      game = ({
+      game = {
         rounds: [],
-      } as unknown) as Game;
+      } as unknown as Game;
       activeSpy.mockReturnValue({
         activePlayers: activePlayers,
         game: game,
@@ -277,7 +277,7 @@ describe("Round handler", () => {
 
       ioMock = jest.fn();
       fetchMock = jest.fn();
-      io = ({
+      io = {
         to: jest.fn(() => {
           return {
             emit: ioMock,
@@ -288,10 +288,10 @@ describe("Round handler", () => {
             fetchSockets: fetchMock,
           };
         }),
-      } as unknown) as Server;
+      } as unknown as Server;
 
       socketMock = jest.fn();
-      socket = ({
+      socket = {
         data: {
           gameCode: "42069",
           playerId: "abc123",
@@ -302,7 +302,7 @@ describe("Round handler", () => {
             emit: socketMock,
           };
         }),
-      } as unknown) as Socket;
+      } as unknown as Socket;
 
       handlers = registerRoundHandler(io, socket);
 
@@ -440,7 +440,7 @@ describe("Round handler", () => {
 
     beforeEach(() => {
       emitMock = jest.fn();
-      socket = ({
+      socket = {
         data: {
           gameCode: "42069",
           playerId: "abc123",
@@ -452,7 +452,7 @@ describe("Round handler", () => {
             emit: emitMock,
           };
         }),
-      } as unknown) as Socket;
+      } as unknown as Socket;
 
       callback = jest.fn();
 
@@ -524,22 +524,22 @@ describe("Round handler", () => {
       serviceSpy = jest.spyOn(RoundService, "hostChooseWinner");
 
       emitMock = jest.fn();
-      io = ({
+      io = {
         to: jest.fn(() => {
           return {
             emit: emitMock,
           };
         }),
-      } as unknown) as Server;
+      } as unknown as Server;
 
-      socket = ({
+      socket = {
         data: {
           gameCode: "42069",
           playerId: "abc123",
         },
         rooms: new Set(["<socket cqwdqcd>", "42069", "42069:host"]),
         on: jest.fn(),
-      } as unknown) as Socket;
+      } as unknown as Socket;
 
       callback = jest.fn();
 
@@ -624,13 +624,13 @@ describe("Round handler", () => {
       initialiseSpy = jest.spyOn(GameHandler, "initialiseNextRound");
 
       emitMock = jest.fn();
-      io = ({
+      io = {
         to: jest.fn(() => {
           return { emit: emitMock };
         }),
-      } as unknown) as Server;
+      } as unknown as Server;
 
-      socket = ({
+      socket = {
         data: {
           gameCode: "42069",
           playerId: "abc123",
@@ -638,7 +638,7 @@ describe("Round handler", () => {
         rooms: new Set(["<socket cqwdqcd>", "42069", "42069:host"]),
         on: jest.fn(),
         leave: jest.fn(),
-      } as unknown) as Socket;
+      } as unknown as Socket;
 
       callback = jest.fn();
 

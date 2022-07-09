@@ -10,7 +10,7 @@ afterEach(() => {
 });
 
 test("should return success on valid game code", async () => {
-  const mockResponse: AxiosResponse<{}> = {
+  const mockResponse: AxiosResponse<unknown> = {
     data: {},
     status: 204,
     statusText: "NO CONTENT",
@@ -18,7 +18,9 @@ test("should return success on valid game code", async () => {
     config: {},
   };
 
-  mockAxios.get.mockImplementationOnce(() => Promise.resolve(mockResponse));
+  mockAxios.get.mockImplementationOnce(
+    () => Promise.resolve(mockResponse) as never
+  );
 
   const res = await validateGame(testGameCode);
 
@@ -35,6 +37,7 @@ test("should return success on valid game code", async () => {
 });
 
 test("should return error on 404 not found (invalid code)", async () => {
+  // eslint-disable-next-line @typescript-eslint/ban-types
   const mockError: AxiosError<{}> = {
     name: "error",
     message: "test message",
@@ -50,7 +53,9 @@ test("should return error on 404 not found (invalid code)", async () => {
     toJSON: () => ({}),
   };
 
-  mockAxios.get.mockImplementationOnce(() => Promise.reject(mockError));
+  mockAxios.get.mockImplementationOnce(
+    () => Promise.reject(mockError) as never
+  );
 
   const res = await validateGame(testGameCode);
 
@@ -67,7 +72,7 @@ test("should return error on 404 not found (invalid code)", async () => {
 });
 
 test("should return error on 500 server error", async () => {
-  const mockError: AxiosError<{}> = {
+  const mockError: AxiosError<unknown> = {
     name: "error",
     message: "test message",
     config: {},
@@ -76,7 +81,9 @@ test("should return error on 500 server error", async () => {
     toJSON: () => ({}),
   };
 
-  mockAxios.get.mockImplementationOnce(() => Promise.reject(mockError));
+  mockAxios.get.mockImplementationOnce(
+    () => Promise.reject(mockError) as never
+  );
 
   const res = await validateGame(testGameCode);
 

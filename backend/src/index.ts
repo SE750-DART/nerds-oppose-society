@@ -12,10 +12,7 @@ import mongoose from "mongoose";
 // Connect to local running instance of mongodb, on telosdatabase db
 // useNewUrlParser recommended set to true, but must specify a port (using the default 27017)
 // useUnifiedTopology recommended set to true (uses mongodb new connection management engine)
-mongoose.connect(config.mongo_uri, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+mongoose.connect(config.mongo_uri);
 const db = mongoose.connection;
 
 // Callbacks to verify we have connected correctly, or when a connection error occurs

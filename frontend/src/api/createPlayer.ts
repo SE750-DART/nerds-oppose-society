@@ -37,7 +37,7 @@ const createPlayer: (player: Props) => Promise<ApiResponse<Response>> = async ({
 
   const url = `${BASE_URL}/player/create`;
   const axiosMethod = async () =>
-    axios.post<any, AxiosResponse<Response>>(url, undefined, {
+    axios.post<unknown, AxiosResponse<Response>>(url, undefined, {
       params: {
         gameCode,
         nickname,
