@@ -3,8 +3,8 @@ import { Router, Switch, Route, Redirect, useParams } from "react-router-dom";
 import { createMemoryHistory } from "history";
 import createPersistedState from "use-persisted-state";
 import socket from "./socket";
-import { PlayersContext } from "./providers/ContextProviders/PlayersContextProvider";
-import { PunchlinesContext } from "./providers/ContextProviders/PunchlinesContextProvider";
+import { PlayersContext } from "./contexts/players";
+import { PunchlinesContext } from "./contexts/punchlines";
 import {
   BasicPage,
   EndGamePage,
@@ -15,7 +15,7 @@ import {
   StartRoundPage,
   SubmitPunchlinePage,
 } from "./pages";
-import { RoundContext } from "./providers/ContextProviders/RoundContextProvider";
+import { RoundContext } from "./contexts/round";
 
 export type Settings = {
   roundLimit: number;

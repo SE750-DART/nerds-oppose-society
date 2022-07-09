@@ -1,7 +1,6 @@
 import axios, { AxiosResponse } from "axios";
 import ApiResponse from "./ApiResponse";
 
-export const BASE_URL = "http://localhost:42069";
 const SERVER_ERROR_500 = 500;
 
 type Props<Type> = {

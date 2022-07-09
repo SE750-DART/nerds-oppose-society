@@ -3,8 +3,8 @@ import createPersistedState from "use-persisted-state";
 import Button from "../../components/Button";
 import styles from "./style.module.css";
 import socket from "../../socket";
-import { RoundContext } from "../../providers/ContextProviders/RoundContextProvider";
-import { PlayersContext } from "../../providers/ContextProviders/PlayersContextProvider";
+import { RoundContext } from "../../contexts/round";
+import { PlayersContext } from "../../contexts/players";
 
 const usePlayerIdState = createPersistedState("playerId");
 
