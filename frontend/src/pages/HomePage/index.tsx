@@ -3,17 +3,18 @@ import { Link, useHistory } from "react-router-dom";
 import Button from "../../components/Button";
 import InputField from "../../components/InputField";
 import styles from "./style.module.css";
-import createGame from "../../api/createGame";
-import { getRequestErrorMessage, useGet } from "../../hooks/axios";
+import { getRequestErrorMessage, useGet, usePost } from "../../hooks/axios";
 
 const HomePage = () => {
   const [gameCode, setGameCode] = useState("");
-  const [newGameError, setNewGameError] = useState("");
 
-  const [{ error: gameCodeError }, validateGameCode] = useGet(
+  const [{ error: validateGameCodeError }, validateGameCode] = useGet(
     "/api/game/validate",
     { params: { gameCode } }
   );
+
+  const [{ error: createGameError }, createGame] =
+    usePost<number>("/api/game/create");
 
   const browserHistory = useHistory();
 
@@ -27,15 +28,9 @@ const HomePage = () => {
   };
 
   const handleNewGame = async () => {
-    const res = await createGame();
-    if (res.success) {
-      if (res.data) {
-        browserHistory.push(`/${res.data}`);
-      } else {
-        setNewGameError("Unknown Error, please try again");
-      }
-    } else {
-      setNewGameError(res.error);
+    const response = await createGame();
+    if (response?.status === 201) {
+      browserHistory.push(`/${response.data}`);
     }
   };
 
@@ -55,7 +50,7 @@ const HomePage = () => {
           onChange={setGameCode}
         />
         <h5 style={{ color: "red", textAlign: "center" }}>
-          {getRequestErrorMessage(gameCodeError)}
+          {getRequestErrorMessage(validateGameCodeError)}
         </h5>
         <div className={styles.btnContainer}>
           <Button
@@ -70,7 +65,7 @@ const HomePage = () => {
       <Button variant="secondary" onClick={handleNewGame}>
         Start new game
       </Button>
-      <h5 style={{ color: "red", textAlign: "center" }}>{newGameError}</h5>
+      <h5 style={{ color: "red", textAlign: "center" }}>{createGameError}</h5>
       <div className={styles.footer}>
         <Link to="/about">About</Link> | <Link to="/legal">Legal</Link>
       </div>
