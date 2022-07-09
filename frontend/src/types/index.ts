@@ -3,3 +3,9 @@ export type Player = {
   id: string;
   score: number;
 };
+
+export type Punchline = {
+  text: string;
+  new?: boolean;
+  viewed?: boolean;
+};

@@ -7,10 +7,10 @@ import ProgressBar from "../../components/ProgressBar";
 import PunchlineCard from "../../components/PunchlineCard";
 import Button from "../../components/Button";
 import Setup from "../../components/Setup";
-import { PunchlinesContext } from "../../contexts/punchlines";
 import { RoundContext, RoundContextType } from "../../contexts/round";
 import socket from "../../socket";
 import { usePlayers } from "../../contexts/players";
+import { usePunchlines } from "../../contexts/punchlines";
 
 const usePlayerIdState = createPersistedState("playerId");
 
@@ -18,7 +18,7 @@ const SubmitPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
   const [, setResponse] = useState("");
 
   const { host, players } = usePlayers();
-  const { punchlines, removePunchline } = useContext(PunchlinesContext);
+  const { punchlines, removePunchline } = usePunchlines();
   const { roundNumber, setup, numPlayersChosen, incrementPlayersChosen } =
     useContext<RoundContextType>(RoundContext);
 

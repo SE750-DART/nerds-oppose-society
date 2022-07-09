@@ -3,7 +3,6 @@ import { Router, Switch, Route, Redirect, useParams } from "react-router-dom";
 import { createMemoryHistory } from "history";
 import createPersistedState from "use-persisted-state";
 import socket from "./socket";
-import { PunchlinesContext } from "./contexts/punchlines";
 import {
   BasicPage,
   EndGamePage,
@@ -16,6 +15,7 @@ import {
 } from "./pages";
 import { RoundContext } from "./contexts/round";
 import { usePlayers } from "./contexts/players";
+import { usePunchlines } from "./contexts/punchlines";
 
 export type Settings = {
   roundLimit: number;
@@ -49,7 +49,7 @@ const useSetupSockets = ({
     removePlayer,
     incrementPlayerScore,
   } = usePlayers();
-  const { addPunchlines } = useContext(PunchlinesContext);
+  const { addPunchlines } = usePunchlines();
   const {
     setRoundNumber,
     setSetup,

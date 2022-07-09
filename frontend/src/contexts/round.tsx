@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Punchline } from "./punchlines";
+import { Punchline } from "../types";
 
 type Setup = {
   setup: string;
