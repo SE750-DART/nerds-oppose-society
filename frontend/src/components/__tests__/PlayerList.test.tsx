@@ -1,7 +1,7 @@
 import React from "react";
 import renderer from "react-test-renderer";
 import PlayerList from "../PlayerList";
-import { PlayersContextProvider } from "../../providers/ContextProviders/PlayersContextProvider";
+import { PlayersContextProvider } from "../../contexts/players";
 
 it("PlayerList snapshot testing", () => {
   const treeLobby = renderer

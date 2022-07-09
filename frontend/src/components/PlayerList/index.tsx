@@ -2,10 +2,7 @@ import React, { useContext } from "react";
 import createPersistedState from "use-persisted-state";
 import Player from "./Player";
 import styles from "./style.module.css";
-import {
-  Player as PlayerType,
-  PlayersContext,
-} from "../../providers/ContextProviders/PlayersContextProvider";
+import { Player as PlayerType, PlayersContext } from "../../contexts/players";
 
 const usePlayerIdState = createPersistedState("playerId");
 

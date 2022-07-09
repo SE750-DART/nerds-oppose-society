@@ -7,12 +7,9 @@ import ProgressBar from "../../components/ProgressBar";
 import PunchlineCard from "../../components/PunchlineCard";
 import Button from "../../components/Button";
 import Setup from "../../components/Setup";
-import { PlayersContext } from "../../providers/ContextProviders/PlayersContextProvider";
-import { PunchlinesContext } from "../../providers/ContextProviders/PunchlinesContextProvider";
-import {
-  RoundContext,
-  RoundContextType,
-} from "../../providers/ContextProviders/RoundContextProvider";
+import { PlayersContext } from "../../contexts/players";
+import { PunchlinesContext } from "../../contexts/punchlines";
+import { RoundContext, RoundContextType } from "../../contexts/round";
 import socket from "../../socket";
 
 const usePlayerIdState = createPersistedState("playerId");
