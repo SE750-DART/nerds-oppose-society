@@ -38,7 +38,10 @@ const StartRoundPage = ({ roundLimit }: { roundLimit: number }) => {
           }
         />
       ) : (
-        <p className={styles.waitingMsg}>Waiting on X to start the round...</p>
+        <p className={styles.waitingMsg}>
+          Waiting on {players.find((p) => p.id === host)?.nickname} to start the
+          round...
+        </p>
       )}
     </div>
   );
