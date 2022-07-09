@@ -10,9 +10,8 @@ import InputField from "../../components/InputField";
 import Button from "../../components/Button";
 import styles from "./style.module.css";
 import { BrowserHistoryContext } from "../../App";
-import createPlayer from "../../api/createPlayer";
 import socket from "../../socket";
-import { useGet } from "../../hooks/axios";
+import { getRequestErrorMessage, useGet, usePost } from "../../hooks/axios";
 
 const usePlayerIdState = createPersistedState("playerId");
 const useTokenState = createPersistedState("token");
@@ -23,7 +22,6 @@ type Props = {
 
 const NicknamePage = ({ gameCode }: Props) => {
   const [nickname, setNickname] = useState("");
-  const [error, setError] = useState("");
   const [playerId, setPlayerId] = usePlayerIdState("");
   const [token, setToken] = useTokenState("");
   const browserHistory = useContext(BrowserHistoryContext);
@@ -41,6 +39,11 @@ const NicknamePage = ({ gameCode }: Props) => {
       [gameCode]
     )
   );
+
+  const [{ error: createPlayerError }, createPlayer] = usePost<{
+    playerId: string;
+    token: string;
+  }>("/api/player/create", undefined, { params: { gameCode, nickname } });
 
   useEffect(() => {
     const controller = new AbortController();
@@ -76,18 +79,11 @@ const NicknamePage = ({ gameCode }: Props) => {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const res = await createPlayer({ gameCode, nickname });
-
-    if (res.success) {
-      if (res.data) {
-        // This triggers the useEffect to connect to socket.io
-        setPlayerId(res.data.playerId);
-        setToken(res.data.token);
-      } else {
-        setError("Unknown Error, please try again");
-      }
-    } else {
-      setError(res.error);
+    const response = await createPlayer();
+    if (response?.status === 201) {
+      const { playerId, token } = response.data;
+      setPlayerId(playerId);
+      setToken(token);
     }
   };
 
@@ -102,7 +98,9 @@ const NicknamePage = ({ gameCode }: Props) => {
             onChange={setNickname}
           />
         </div>
-        <h5 style={{ color: "red", textAlign: "center" }}>{error}</h5>
+        <h5 style={{ color: "red", textAlign: "center" }}>
+          {getRequestErrorMessage(createPlayerError)}
+        </h5>
         <Button type="submit" disabled={!nickname}>
           Submit
         </Button>
