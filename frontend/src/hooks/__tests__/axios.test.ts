@@ -43,7 +43,7 @@ describe("useGet()", () => {
   });
 
   it("while request pending loading is true and error is undefined", () => {
-    mockAxios.get.mockImplementation(() => new Promise(() => null));
+    mockAxios.mockImplementation(() => new Promise(() => null));
 
     const { result } = renderHook(() => useGet("/"));
     const [, request] = result.current;
@@ -62,9 +62,28 @@ describe("useGet()", () => {
     expect(error).toBeUndefined();
   });
 
+  it("calls axios with config object", async () => {
+    const mockAxiosResponse = mockedAxiosResponse("textResponse");
+    mockAxios.mockResolvedValue(mockAxiosResponse);
+
+    const { result } = renderHook(() =>
+      useGet<string>("/", { params: { testParam: "testValue" } })
+    );
+    const [, request] = result.current;
+
+    await act(async () => {
+      await request();
+      expect(mockAxios).toHaveBeenCalledWith({
+        method: "get",
+        url: "/",
+        params: { testParam: "testValue" },
+      });
+    });
+  });
+
   it("request success returns axios response, loading is false and error is undefined", async () => {
     const mockAxiosResponse = mockedAxiosResponse("textResponse");
-    mockAxios.get.mockResolvedValue(mockAxiosResponse);
+    mockAxios.mockResolvedValue(mockAxiosResponse);
 
     const { result } = renderHook(() => useGet<string>("/"));
     const [, request] = result.current;
@@ -81,7 +100,7 @@ describe("useGet()", () => {
 
   it("request error of AxiosError returns null, loading is false and error is defined", async () => {
     const mockAxiosError = mockedAxiosError();
-    mockAxios.get.mockRejectedValue(mockAxiosError);
+    mockAxios.mockRejectedValue(mockAxiosError);
 
     const { result } = renderHook(() => useGet<string>("/"));
     const [, request] = result.current;
@@ -98,7 +117,7 @@ describe("useGet()", () => {
 
   it("request error of Error returns null, loading is false and error is defined", async () => {
     const mockError = new Error("Error");
-    mockAxios.get.mockRejectedValue(mockError);
+    mockAxios.mockRejectedValue(mockError);
 
     const { result } = renderHook(() => useGet<string>("/"));
     const [, request] = result.current;
@@ -116,7 +135,7 @@ describe("useGet()", () => {
 
   it("error transitions to undefined when request pending", async () => {
     const mockError = new Error("Error");
-    mockAxios.get.mockRejectedValue(mockError);
+    mockAxios.mockRejectedValue(mockError);
 
     const { result } = renderHook(() => useGet("/"));
     const [, request] = result.current;
@@ -130,7 +149,7 @@ describe("useGet()", () => {
     expect(errorPrevious).toBeDefined();
     expect(errorPrevious?.message).toBe("Server Error");
 
-    mockAxios.get.mockImplementation(() => new Promise(() => null));
+    mockAxios.mockImplementation(() => new Promise(() => null));
 
     /*
     This throws an intentional warning in the Jest console as we are not resolving
@@ -148,7 +167,7 @@ describe("useGet()", () => {
   it("cancelled request returns null, loading is false and error is undefined", async () => {
     const mockCancelledError = mockedAxiosError(true);
 
-    mockAxios.get.mockRejectedValue(mockCancelledError);
+    mockAxios.mockRejectedValue(mockCancelledError);
 
     const { result } = renderHook(() => useGet("/"));
     const [, request] = result.current;
@@ -157,7 +176,9 @@ describe("useGet()", () => {
       const controller = new AbortController();
       const response = await request(controller);
       expect(response).toBeNull();
-      expect(mockAxios.get).toHaveBeenCalledWith("/", {
+      expect(mockAxios).toHaveBeenCalledWith({
+        method: "get",
+        url: "/",
         signal: controller.signal,
       });
     });
@@ -178,7 +199,7 @@ describe("usePost()", () => {
   });
 
   it("while request pending loading is true and error is undefined", () => {
-    mockAxios.post.mockImplementation(() => new Promise(() => null));
+    mockAxios.mockImplementation(() => new Promise(() => null));
 
     const { result } = renderHook(() => usePost("/"));
     const [, request] = result.current;
@@ -197,9 +218,31 @@ describe("usePost()", () => {
     expect(error).toBeUndefined();
   });
 
+  it("calls axios with config object", async () => {
+    const mockAxiosResponse = mockedAxiosResponse("textResponse");
+    mockAxios.mockResolvedValue(mockAxiosResponse);
+
+    const { result } = renderHook(() =>
+      usePost<string, string>("/", "testData", {
+        params: { testParam: "testValue" },
+      })
+    );
+    const [, request] = result.current;
+
+    await act(async () => {
+      await request();
+      expect(mockAxios).toHaveBeenCalledWith({
+        method: "post",
+        url: "/",
+        data: "testData",
+        params: { testParam: "testValue" },
+      });
+    });
+  });
+
   it("request success returns axios response, loading is false and error is undefined", async () => {
     const mockAxiosResponse = mockedAxiosResponse("textResponse");
-    mockAxios.post.mockResolvedValue(mockAxiosResponse);
+    mockAxios.mockResolvedValue(mockAxiosResponse);
 
     const { result } = renderHook(() => usePost<string>("/"));
     const [, request] = result.current;
@@ -216,7 +259,7 @@ describe("usePost()", () => {
 
   it("request error of AxiosError returns null, loading is false and error is defined", async () => {
     const mockAxiosError = mockedAxiosError();
-    mockAxios.post.mockRejectedValue(mockAxiosError);
+    mockAxios.mockRejectedValue(mockAxiosError);
 
     const { result } = renderHook(() => usePost<string>("/"));
     const [, request] = result.current;
@@ -233,7 +276,7 @@ describe("usePost()", () => {
 
   it("request error of Error returns null, loading is false and error is defined", async () => {
     const mockError = new Error("Error");
-    mockAxios.post.mockRejectedValue(mockError);
+    mockAxios.mockRejectedValue(mockError);
 
     const { result } = renderHook(() => usePost<string>("/"));
     const [, request] = result.current;
@@ -251,7 +294,7 @@ describe("usePost()", () => {
 
   it("error transitions to undefined when request pending", async () => {
     const mockError = new Error("Error");
-    mockAxios.post.mockRejectedValue(mockError);
+    mockAxios.mockRejectedValue(mockError);
 
     const { result } = renderHook(() => usePost("/"));
     const [, request] = result.current;
@@ -265,7 +308,7 @@ describe("usePost()", () => {
     expect(errorPrevious).toBeDefined();
     expect(errorPrevious?.message).toBe("Server Error");
 
-    mockAxios.post.mockImplementation(() => new Promise(() => null));
+    mockAxios.mockImplementation(() => new Promise(() => null));
 
     /*
     This throws an intentional warning in the Jest console as we are not resolving
@@ -283,7 +326,7 @@ describe("usePost()", () => {
   it("cancelled request returns null, loading is true and error is undefined", async () => {
     const mockCancelledError = mockedAxiosError(true);
 
-    mockAxios.post.mockRejectedValue(mockCancelledError);
+    mockAxios.mockRejectedValue(mockCancelledError);
 
     const { result } = renderHook(() => usePost("/"));
     const [, request] = result.current;
@@ -292,7 +335,9 @@ describe("usePost()", () => {
       const controller = new AbortController();
       const response = await request(controller);
       expect(response).toBeNull();
-      expect(mockAxios.post).toHaveBeenCalledWith("/", {
+      expect(mockAxios).toHaveBeenCalledWith({
+        method: "post",
+        url: "/",
         signal: controller.signal,
       });
     });

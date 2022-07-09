@@ -2,14 +2,6 @@ import { Reducer, useCallback, useMemo, useReducer } from "react";
 import axios, { AxiosResponse, AxiosRequestConfig, AxiosError } from "axios";
 
 /**
- * Function signature for an Axios request. See [Axios docs](https://axios-http.com/docs/api_intro).
- */
-type AxiosRequest<T> = (
-  url: string,
-  config?: AxiosRequestConfig
-) => Promise<AxiosResponse<T>>;
-
-/**
  * Request actions
  */
 enum ActionType {
@@ -21,17 +13,17 @@ enum ActionType {
 /**
  * Request reducer actions
  */
-type Action<T> =
+type Action<T, D> =
   | { type: ActionType.REQUEST_START }
   | { type: ActionType.REQUEST_SUCCESS }
-  | { type: ActionType.REQUEST_ERROR; error: AxiosError<T> | Error };
+  | { type: ActionType.REQUEST_ERROR; error: AxiosError<T, D> | Error };
 
 /**
  * Request state
  */
-type State<T> = {
+type State<T, D> = {
   loading: boolean;
-  error: AxiosError<T> | Error | undefined;
+  error: AxiosError<T, D> | Error | undefined;
 };
 
 /**
@@ -39,7 +31,10 @@ type State<T> = {
  * @param state
  * @param action
  */
-const reducer = <T>(state: State<T>, action: Action<T>): State<T> => {
+const reducer = <T, D>(
+  state: State<T, D>,
+  action: Action<T, D>
+): State<T, D> => {
   switch (action.type) {
     case ActionType.REQUEST_START: {
       return { loading: true, error: undefined };
@@ -61,39 +56,38 @@ const reducer = <T>(state: State<T>, action: Action<T>): State<T> => {
  * This is important when invoking a request within a `useEffect` to perform
  * [cleanup](https://reactjs.org/docs/hooks-effect.html#example-using-hooks-1).
  */
-type Request<T> = (
+type Request<T, D> = (
   controller?: AbortController
-) => Promise<AxiosResponse<T> | null>;
+) => Promise<AxiosResponse<T, D> | null>;
 
 /**
  * Manages state for an Axios request of type specified by `method`.
  * Returns request state (`loading`, `error`) and a function to execute the request.
  *
- * @param url - Request URL
- * @param method - Request method. See [Axios docs](https://axios-http.com/docs/api_intro).
- * @param config - Request config. See [Axios docs](https://axios-http.com/docs/req_config).
+ * @param config - Request config. See [Axios docs](https://axios-http.com/docs/req_config)
  */
-const useAxios = <T>(
-  url: string,
-  method: AxiosRequest<T>,
-  config?: AxiosRequestConfig
-): [State<T>, Request<T>] => {
-  const [state, dispatch] = useReducer<Reducer<State<T>, Action<T>>>(reducer, {
-    loading: false,
-    error: undefined,
-  });
+const useAxios = <T, D>(
+  config: Omit<AxiosRequestConfig<D>, "signal">
+): [State<T, D>, Request<T, D>] => {
+  const [state, dispatch] = useReducer<Reducer<State<T, D>, Action<T, D>>>(
+    reducer,
+    {
+      loading: false,
+      error: undefined,
+    }
+  );
 
-  const request = useCallback<Request<T>>(
+  const request = useCallback<Request<T, D>>(
     async (controller) => {
       dispatch({ type: ActionType.REQUEST_START });
 
       try {
-        let requestConfig = config;
+        let requestConfig: AxiosRequestConfig<D> = config;
         if (controller) {
           requestConfig = { ...requestConfig, signal: controller.signal };
         }
 
-        const response = await method(url, requestConfig);
+        const response = await axios(requestConfig);
         dispatch({ type: ActionType.REQUEST_SUCCESS });
         return response;
       } catch (error) {
@@ -108,7 +102,7 @@ const useAxios = <T>(
         return null;
       }
     },
-    [config, method, url]
+    [config]
   );
 
   return useMemo(() => [state, request], [state, request]);
@@ -119,10 +113,15 @@ const useAxios = <T>(
  * Returns request state (`loading`, `error`) and a function to execute the request.
  *
  * @param url - Request URL
- * @param config - Request config. See [Axios docs](https://axios-http.com/docs/req_config).
+ * @param config - Request config. See [Axios docs](https://axios-http.com/docs/req_config)
  */
-export const useGet = <T>(url: string, config?: AxiosRequestConfig) => {
-  return useAxios<T>(url, axios.get, config);
+export const useGet = <T, D = unknown>(
+  url: string,
+  config?: Omit<AxiosRequestConfig<D>, "method" | "url" | "signal">
+) => {
+  return useAxios<T, D>(
+    useMemo(() => ({ ...config, method: "get", url }), [config, url])
+  );
 };
 
 /**
@@ -130,18 +129,28 @@ export const useGet = <T>(url: string, config?: AxiosRequestConfig) => {
  * Returns request state (`loading`, `error`) and a function to execute the request.
  *
  * @param url - Request URL
- * @param config - Request config. See [Axios docs](https://axios-http.com/docs/req_config).
+ * @param data - Request data
+ * @param config - Request config. See [Axios docs](https://axios-http.com/docs/req_config)
  */
-export const usePost = <T>(url: string, config?: AxiosRequestConfig) => {
-  return useAxios<T>(url, axios.post, config);
+export const usePost = <T, D = unknown>(
+  url: string,
+  data?: D,
+  config?: Omit<AxiosRequestConfig<D>, "method" | "url" | "data" | "signal">
+) => {
+  return useAxios<T, D>(
+    useMemo(
+      () => ({ ...config, method: "post", url, data }),
+      [config, data, url]
+    )
+  );
 };
 
 /**
  * Returns a message from a request error.
  * @param error - Request error
  */
-export const getRequestErrorMessage = <T>(
-  error: AxiosError<T> | Error | undefined
+export const getRequestErrorMessage = <T, D>(
+  error: AxiosError<T, D> | Error | undefined
 ): string | undefined => {
   let errorMessage: string | undefined;
   if (error) {
