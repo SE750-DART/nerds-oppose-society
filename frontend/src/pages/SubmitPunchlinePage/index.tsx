@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import createPersistedState from "use-persisted-state";
 import styles from "./style.module.css";
 import Dropdown from "../../components/Dropdown";
@@ -7,7 +7,7 @@ import ProgressBar from "../../components/ProgressBar";
 import PunchlineCard from "../../components/PunchlineCard";
 import Button from "../../components/Button";
 import Setup from "../../components/Setup";
-import { RoundContext, RoundContextType } from "../../contexts/round";
+import { useRound } from "../../contexts/round";
 import socket from "../../socket";
 import { usePlayers } from "../../contexts/players";
 import { usePunchlines } from "../../contexts/punchlines";
@@ -20,7 +20,7 @@ const SubmitPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
   const { host, players } = usePlayers();
   const { punchlines, removePunchline } = usePunchlines();
   const { roundNumber, setup, numPlayersChosen, incrementPlayersChosen } =
-    useContext<RoundContextType>(RoundContext);
+    useRound();
 
   const [playerId] = usePlayerIdState("");
   const playerIsHost = playerId === host;

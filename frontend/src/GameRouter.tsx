@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Router, Switch, Route, Redirect, useParams } from "react-router-dom";
 import { createMemoryHistory } from "history";
 import createPersistedState from "use-persisted-state";
@@ -13,7 +13,7 @@ import {
   StartRoundPage,
   SubmitPunchlinePage,
 } from "./pages";
-import { RoundContext } from "./contexts/round";
+import { useRound } from "./contexts/round";
 import { usePlayers } from "./contexts/players";
 import { usePunchlines } from "./contexts/punchlines";
 
@@ -56,7 +56,7 @@ const useSetupSockets = ({
     incrementPlayersChosen,
     setPunchlinesChosen,
     setWinner,
-  } = useContext(RoundContext);
+  } = useRound();
 
   // Connection
   const handleNavigate = useCallback(

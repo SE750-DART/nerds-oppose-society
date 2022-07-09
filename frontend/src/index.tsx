@@ -4,16 +4,16 @@ import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { PunchlinesProvider } from "./contexts/punchlines";
-import { RoundContextProvider } from "./contexts/round";
+import { RoundProvider } from "./contexts/round";
 import { PlayersProvider } from "./contexts/players";
 
 ReactDOM.render(
   <React.StrictMode>
     <PlayersProvider>
       <PunchlinesProvider>
-        <RoundContextProvider>
+        <RoundProvider>
           <App />
-        </RoundContextProvider>
+        </RoundProvider>
       </PunchlinesProvider>
     </PlayersProvider>
   </React.StrictMode>,

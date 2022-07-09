@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import createPersistedState from "use-persisted-state";
 import styles from "./style.module.css";
 import Dropdown from "../../components/Dropdown";
@@ -7,9 +7,9 @@ import ProgressBar from "../../components/ProgressBar";
 import PunchlineCard from "../../components/PunchlineCard";
 import Button from "../../components/Button";
 import Setup from "../../components/Setup";
-import { RoundContext } from "../../contexts/round";
 import socket from "../../socket";
 import { usePlayers } from "../../contexts/players";
+import { useRound } from "../../contexts/round";
 
 const usePlayerIdState = createPersistedState("playerId");
 
@@ -26,7 +26,7 @@ const SelectPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
     numPlayersChosen,
     punchlinesChosen: punchlines,
     markPunchlineRead,
-  } = useContext(RoundContext);
+  } = useRound();
 
   const [punchlineSelected, setPunchlineSelected] = useState("");
   const [waiting, setWaiting] = useState(true);
