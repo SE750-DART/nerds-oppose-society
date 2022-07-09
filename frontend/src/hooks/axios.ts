@@ -22,7 +22,7 @@ type Action<T, D> =
  * Request state
  */
 type State<T, D> = {
-  loading: boolean;
+  isLoading: boolean;
   error: AxiosError<T, D> | Error | undefined;
 };
 
@@ -37,13 +37,13 @@ const reducer = <T, D>(
 ): State<T, D> => {
   switch (action.type) {
     case ActionType.REQUEST_START: {
-      return { loading: true, error: undefined };
+      return { isLoading: true, error: undefined };
     }
     case ActionType.REQUEST_SUCCESS: {
-      return { ...state, loading: false };
+      return { isLoading: false, error: undefined };
     }
     case ActionType.REQUEST_ERROR: {
-      return { loading: false, error: action.error };
+      return { isLoading: false, error: action.error };
     }
   }
 };
@@ -72,7 +72,7 @@ const useAxios = <T, D>(
   const [state, dispatch] = useReducer<Reducer<State<T, D>, Action<T, D>>>(
     reducer,
     {
-      loading: false,
+      isLoading: false,
       error: undefined,
     }
   );
@@ -92,6 +92,13 @@ const useAxios = <T, D>(
         return response;
       } catch (error) {
         if (axios.isCancel(error)) {
+          /*
+          This block is executed if `controller` has signalled axios to cancel
+          the request. See [Axios docs](https://axios-http.com/docs/cancellation)
+          for more detail. We return null & do not dispatch here to prevent any
+          state changes as the purpose of this feature is to perform safe
+          [`useEffect()` cleanup](https://reactjs.org/docs/hooks-effect.html#example-using-hooks-1)
+           */
           return null;
         } else if (axios.isAxiosError(error)) {
           dispatch({ type: ActionType.REQUEST_ERROR, error });

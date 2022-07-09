@@ -34,15 +34,15 @@ const mockedAxiosError = <T>(
 };
 
 describe("useGet()", () => {
-  it("initially loading is false and error is undefined", () => {
+  it("initially isLoading is false and error is undefined", () => {
     const { result } = renderHook(() => useGet("/"));
-    const [{ loading, error }] = result.current;
+    const [{ isLoading, error }] = result.current;
 
-    expect(loading).toBeFalsy();
+    expect(isLoading).toBeFalsy();
     expect(error).toBeUndefined();
   });
 
-  it("while request pending loading is true and error is undefined", () => {
+  it("while request pending isLoading is true and error is undefined", () => {
     mockAxios.mockImplementation(() => new Promise(() => null));
 
     const { result } = renderHook(() => useGet("/"));
@@ -50,15 +50,15 @@ describe("useGet()", () => {
 
     /*
     This throws an intentional warning in the Jest console as we are not resolving
-    the request promise to simulate the request pending and inspect the `loading`
+    the request promise to simulate the request pending and inspect the `isLoading`
     and `error` values - nothing to see here!
      */
     act(() => {
       request();
     });
 
-    const [{ loading, error }] = result.current;
-    expect(loading).toBeTruthy();
+    const [{ isLoading, error }] = result.current;
+    expect(isLoading).toBeTruthy();
     expect(error).toBeUndefined();
   });
 
@@ -81,7 +81,7 @@ describe("useGet()", () => {
     });
   });
 
-  it("request success returns axios response, loading is false and error is undefined", async () => {
+  it("request success returns axios response, isLoading is false and error is undefined", async () => {
     const mockAxiosResponse = mockedAxiosResponse("textResponse");
     mockAxios.mockResolvedValue(mockAxiosResponse);
 
@@ -93,12 +93,12 @@ describe("useGet()", () => {
       expect(response).toEqual(mockAxiosResponse);
     });
 
-    const [{ loading, error }] = result.current;
-    expect(loading).toBeFalsy();
+    const [{ isLoading, error }] = result.current;
+    expect(isLoading).toBeFalsy();
     expect(error).toBeUndefined();
   });
 
-  it("request error of AxiosError returns null, loading is false and error is defined", async () => {
+  it("request error of AxiosError returns null, isLoading is false and error is defined", async () => {
     const mockAxiosError = mockedAxiosError();
     mockAxios.mockRejectedValue(mockAxiosError);
 
@@ -110,12 +110,12 @@ describe("useGet()", () => {
       expect(response).toBeNull();
     });
 
-    const [{ loading, error }] = result.current;
-    expect(loading).toBeFalsy();
+    const [{ isLoading, error }] = result.current;
+    expect(isLoading).toBeFalsy();
     expect(error).toEqual(mockAxiosError);
   });
 
-  it("request error of Error returns null, loading is false and error is defined", async () => {
+  it("request error of Error returns null, isLoading is false and error is defined", async () => {
     const mockError = new Error("Error");
     mockAxios.mockRejectedValue(mockError);
 
@@ -127,8 +127,8 @@ describe("useGet()", () => {
       expect(response).toBeNull();
     });
 
-    const [{ loading, error }] = result.current;
-    expect(loading).toBeFalsy();
+    const [{ isLoading, error }] = result.current;
+    expect(isLoading).toBeFalsy();
     expect(error).toBeDefined();
     expect(error?.message).toBe("Server Error");
   });
@@ -153,7 +153,7 @@ describe("useGet()", () => {
 
     /*
     This throws an intentional warning in the Jest console as we are not resolving
-    the request promise to simulate the request pending and inspect the `loading`
+    the request promise to simulate the request pending and inspect the `isLoading`
     and `error` values - nothing to see here!
      */
     act(() => {
@@ -164,7 +164,7 @@ describe("useGet()", () => {
     expect(errorPending).toBeUndefined();
   });
 
-  it("cancelled request returns null, loading is false and error is undefined", async () => {
+  it("cancelled request returns null, isLoading is false and error is undefined", async () => {
     const mockCancelledError = mockedAxiosError(true);
 
     mockAxios.mockRejectedValue(mockCancelledError);
@@ -183,22 +183,22 @@ describe("useGet()", () => {
       });
     });
 
-    const [{ loading, error }] = result.current;
-    expect(loading).toBeTruthy();
+    const [{ isLoading, error }] = result.current;
+    expect(isLoading).toBeTruthy();
     expect(error).toBeUndefined();
   });
 });
 
 describe("usePost()", () => {
-  it("initially loading is false and error is undefined", () => {
+  it("initially isLoading is false and error is undefined", () => {
     const { result } = renderHook(() => usePost("/"));
-    const [{ loading, error }] = result.current;
+    const [{ isLoading, error }] = result.current;
 
-    expect(loading).toBeFalsy();
+    expect(isLoading).toBeFalsy();
     expect(error).toBeUndefined();
   });
 
-  it("while request pending loading is true and error is undefined", () => {
+  it("while request pending isLoading is true and error is undefined", () => {
     mockAxios.mockImplementation(() => new Promise(() => null));
 
     const { result } = renderHook(() => usePost("/"));
@@ -206,15 +206,15 @@ describe("usePost()", () => {
 
     /*
     This throws an intentional warning in the Jest console as we are not resolving
-    the request promise to simulate the request pending and inspect the `loading`
+    the request promise to simulate the request pending and inspect the `isLoading`
     and `error` values - nothing to see here!
      */
     act(() => {
       request();
     });
 
-    const [{ loading, error }] = result.current;
-    expect(loading).toBeTruthy();
+    const [{ isLoading, error }] = result.current;
+    expect(isLoading).toBeTruthy();
     expect(error).toBeUndefined();
   });
 
@@ -240,7 +240,7 @@ describe("usePost()", () => {
     });
   });
 
-  it("request success returns axios response, loading is false and error is undefined", async () => {
+  it("request success returns axios response, isLoading is false and error is undefined", async () => {
     const mockAxiosResponse = mockedAxiosResponse("textResponse");
     mockAxios.mockResolvedValue(mockAxiosResponse);
 
@@ -252,12 +252,12 @@ describe("usePost()", () => {
       expect(response).toEqual(mockAxiosResponse);
     });
 
-    const [{ loading, error }] = result.current;
-    expect(loading).toBeFalsy();
+    const [{ isLoading, error }] = result.current;
+    expect(isLoading).toBeFalsy();
     expect(error).toBeUndefined();
   });
 
-  it("request error of AxiosError returns null, loading is false and error is defined", async () => {
+  it("request error of AxiosError returns null, isLoading is false and error is defined", async () => {
     const mockAxiosError = mockedAxiosError();
     mockAxios.mockRejectedValue(mockAxiosError);
 
@@ -269,12 +269,12 @@ describe("usePost()", () => {
       expect(response).toBeNull();
     });
 
-    const [{ loading, error }] = result.current;
-    expect(loading).toBeFalsy();
+    const [{ isLoading, error }] = result.current;
+    expect(isLoading).toBeFalsy();
     expect(error).toEqual(mockAxiosError);
   });
 
-  it("request error of Error returns null, loading is false and error is defined", async () => {
+  it("request error of Error returns null, isLoading is false and error is defined", async () => {
     const mockError = new Error("Error");
     mockAxios.mockRejectedValue(mockError);
 
@@ -286,8 +286,8 @@ describe("usePost()", () => {
       expect(response).toBeNull();
     });
 
-    const [{ loading, error }] = result.current;
-    expect(loading).toBeFalsy();
+    const [{ isLoading, error }] = result.current;
+    expect(isLoading).toBeFalsy();
     expect(error).toBeDefined();
     expect(error?.message).toBe("Server Error");
   });
@@ -312,7 +312,7 @@ describe("usePost()", () => {
 
     /*
     This throws an intentional warning in the Jest console as we are not resolving
-    the request promise to simulate the request pending and inspect the `loading`
+    the request promise to simulate the request pending and inspect the `isLoading`
     and `error` values - nothing to see here!
      */
     act(() => {
@@ -323,7 +323,7 @@ describe("usePost()", () => {
     expect(errorPending).toBeUndefined();
   });
 
-  it("cancelled request returns null, loading is true and error is undefined", async () => {
+  it("cancelled request returns null, isLoading is true and error is undefined", async () => {
     const mockCancelledError = mockedAxiosError(true);
 
     mockAxios.mockRejectedValue(mockCancelledError);
@@ -342,8 +342,8 @@ describe("usePost()", () => {
       });
     });
 
-    const [{ loading, error }] = result.current;
-    expect(loading).toBeTruthy();
+    const [{ isLoading, error }] = result.current;
+    expect(isLoading).toBeTruthy();
     expect(error).toBeUndefined();
   });
 });
