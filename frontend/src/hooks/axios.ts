@@ -61,10 +61,16 @@ type Request<T, D> = (
 ) => Promise<AxiosResponse<T, D> | null>;
 
 /**
- * Manages state for an Axios request of type specified by `method`.
- * Returns request state (`loading`, `error`) and a function to execute the request.
+ * Returns a state object and a `request` function to initiate an HTTP request.
+ *
+ * The `state` object contains values for `isLoading` and `error`.
+ *
+ * The `request` function receives an optional `controller` parameter for stopping
+ * a request in progress. See [Axios docs](https://axios-http.com/docs/cancellation) for more.
  *
  * @param config - Request config. See [Axios docs](https://axios-http.com/docs/req_config)
+ * @returns [state, request] - Array consisting of a `state` object and a
+ * `request` function to initiate an HTTP request.
  */
 const useAxios = <T, D>(
   config: Omit<AxiosRequestConfig<D>, "signal">
@@ -116,11 +122,17 @@ const useAxios = <T, D>(
 };
 
 /**
- * Manages state for an Axios `get` request.
- * Returns request state (`loading`, `error`) and a function to execute the request.
+ * Returns a state object and a `request` function to initiate a GET request.
+ *
+ * The `state` object contains values for `isLoading` and `error`.
+ *
+ * The `request` function receives an optional `controller` parameter for stopping
+ * a request in progress. See [Axios docs](https://axios-http.com/docs/cancellation) for more.
  *
  * @param url - Request URL
  * @param config - Request config. See [Axios docs](https://axios-http.com/docs/req_config)
+ * @returns [state, request] - Array consisting of a `state` object and a
+ * `request` function to initiate a GET request.
  */
 export const useGet = <T, D = unknown>(
   url: string,
@@ -132,12 +144,18 @@ export const useGet = <T, D = unknown>(
 };
 
 /**
- * Manages state for an Axios `post` request.
- * Returns request state (`loading`, `error`) and a function to execute the request.
+ * Returns a state object and a `request` function to initiate a POST request.
+ *
+ * The `state` object contains values for `isLoading` and `error`.
+ *
+ * The `request` function receives an optional `controller` parameter for stopping
+ * a request in progress. See [Axios docs](https://axios-http.com/docs/cancellation) for more.
  *
  * @param url - Request URL
- * @param data - Request data
+ * @param data - Request data used for the body of the request
  * @param config - Request config. See [Axios docs](https://axios-http.com/docs/req_config)
+ * @returns [state, request] - Array consisting of a `state` object and a
+ * `request` function to initiate a POST request.
  */
 export const usePost = <T, D = unknown>(
   url: string,
