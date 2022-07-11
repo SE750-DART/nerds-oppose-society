@@ -1,10 +1,6 @@
 import React from "react";
 import { render } from "@testing-library/react";
-import ProviderWrapper from "../../utils/testing/ProviderWrapper";
-import { PunchlinesProvider } from "../punchlines";
-import { useRound } from "../round";
-
-const RoundProvider = () => <ProviderWrapper Provider={PunchlinesProvider} />;
+import { RoundProvider, useRound } from "../round";
 
 describe("useRound()", () => {
   const Component = () => {
@@ -19,9 +15,9 @@ describe("useRound()", () => {
     expect(roundNumber).toBe(0);
     expect(setup).toEqual({ setup: "", type: "PICK_ONE" });
     expect(numPlayersChosen).toBe(0);
-    expect(punchlinesChosen).toBe(0);
+    expect(punchlinesChosen).toEqual([]);
     expect(hostViewIndex).toBe(0);
-    expect(winner).toBe({ winningPlayerId: "", winningPunchlines: [] });
+    expect(winner).toEqual({ winningPlayerId: "", winningPunchlines: [] });
     return <></>;
   };
 

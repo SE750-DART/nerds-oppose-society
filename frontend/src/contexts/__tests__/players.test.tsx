@@ -1,9 +1,6 @@
 import React from "react";
 import { PlayersProvider, usePlayers } from "../players";
 import { render } from "@testing-library/react";
-import ProviderWrapper from "../../utils/testing/ProviderWrapper";
-
-const PlayersWrapper = () => <ProviderWrapper Provider={PlayersProvider} />;
 
 describe("usePlayers()", () => {
   const Component = () => {
@@ -14,7 +11,7 @@ describe("usePlayers()", () => {
   };
 
   it("returns players context when used inside PlayerProvider", () => {
-    render(<Component />, { wrapper: PlayersWrapper });
+    render(<Component />, { wrapper: PlayersProvider });
   });
 
   it("throws error when used outside PlayerProvider", () => {

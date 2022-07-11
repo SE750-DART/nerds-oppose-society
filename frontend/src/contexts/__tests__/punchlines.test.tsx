@@ -1,11 +1,6 @@
 import React from "react";
 import { render } from "@testing-library/react";
-import ProviderWrapper from "../../utils/testing/ProviderWrapper";
 import { PunchlinesProvider, usePunchlines } from "../punchlines";
-
-const PunchlinesWrapper = () => (
-  <ProviderWrapper Provider={PunchlinesProvider} />
-);
 
 describe("usePunchlines()", () => {
   const Component = () => {
@@ -15,7 +10,7 @@ describe("usePunchlines()", () => {
   };
 
   it("returns punchlines context when used inside PunchlinesProvider", () => {
-    render(<Component />, { wrapper: PunchlinesWrapper });
+    render(<Component />, { wrapper: PunchlinesProvider });
   });
 
   it("throws error when used outside PunchlinesProvider", () => {
