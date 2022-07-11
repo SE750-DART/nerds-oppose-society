@@ -1,10 +1,8 @@
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Router, Switch, Route, Redirect, useParams } from "react-router-dom";
 import { createMemoryHistory } from "history";
 import createPersistedState from "use-persisted-state";
 import socket from "./socket";
-import { PlayersContext } from "./contexts/players";
-import { PunchlinesContext } from "./contexts/punchlines";
 import {
   EndGamePage,
   EndRoundPage,
@@ -14,7 +12,9 @@ import {
   StartRoundPage,
   SubmitPunchlinePage,
 } from "./pages";
-import { RoundContext } from "./contexts/round";
+import { useRound } from "./contexts/round";
+import { usePlayers } from "./contexts/players";
+import { usePunchlines } from "./contexts/punchlines";
 
 export type Settings = {
   roundLimit: number;
@@ -47,15 +47,15 @@ const useSetupSockets = ({
     addPlayer,
     removePlayer,
     incrementPlayerScore,
-  } = useContext(PlayersContext);
-  const { addPunchlines } = useContext(PunchlinesContext);
+  } = usePlayers();
+  const { addPunchlines } = usePunchlines();
   const {
     setRoundNumber,
     setSetup,
     incrementPlayersChosen,
     setPunchlinesChosen,
     setWinner,
-  } = useContext(RoundContext);
+  } = useRound();
 
   // Connection
   const handleNavigate = useCallback(

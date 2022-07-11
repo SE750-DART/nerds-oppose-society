@@ -1,19 +1,19 @@
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import createPersistedState from "use-persisted-state";
 import Button from "../../components/Button";
 import styles from "./style.module.css";
 import socket from "../../socket";
-import { RoundContext } from "../../contexts/round";
-import { PlayersContext } from "../../contexts/players";
+import { useRound } from "../../contexts/round";
+import { usePlayers } from "../../contexts/players";
 
 const usePlayerIdState = createPersistedState("playerId");
 
 const StartRoundPage = ({ roundLimit }: { roundLimit: number }) => {
-  const { host, players } = useContext(PlayersContext);
+  const { host, players } = usePlayers();
   const [playerId] = usePlayerIdState("");
   const playerIsHost = playerId === host;
   const [, setResponse] = useState("");
-  const { roundNumber } = useContext(RoundContext);
+  const { roundNumber } = useRound();
 
   return (
     <div className={styles.container}>
