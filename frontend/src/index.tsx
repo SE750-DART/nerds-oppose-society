@@ -3,19 +3,19 @@ import ReactDOM from "react-dom";
 import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
-import { PunchlinesContextProvider } from "./contexts/punchlines";
-import { RoundContextProvider } from "./contexts/round";
-import { PlayersContextProvider } from "./contexts/players";
+import { PunchlinesProvider } from "./contexts/punchlines";
+import { RoundProvider } from "./contexts/round";
+import { PlayersProvider } from "./contexts/players";
 
 ReactDOM.render(
   <React.StrictMode>
-    <PlayersContextProvider>
-      <PunchlinesContextProvider>
-        <RoundContextProvider>
+    <PlayersProvider>
+      <PunchlinesProvider>
+        <RoundProvider>
           <App />
-        </RoundContextProvider>
-      </PunchlinesContextProvider>
-    </PlayersContextProvider>
+        </RoundProvider>
+      </PunchlinesProvider>
+    </PlayersProvider>
   </React.StrictMode>,
   document.getElementById("root")
 );

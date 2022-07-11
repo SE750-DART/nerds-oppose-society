@@ -1,8 +1,9 @@
-import React, { useContext } from "react";
+import React from "react";
 import createPersistedState from "use-persisted-state";
 import Player from "./Player";
 import styles from "./style.module.css";
-import { Player as PlayerType, PlayersContext } from "../../contexts/players";
+import { usePlayers } from "../../contexts/players";
+import { Player as PlayerType } from "../../types";
 
 const usePlayerIdState = createPersistedState("playerId");
 
@@ -11,7 +12,7 @@ interface PlayerListProps {
 }
 
 const PlayerList = ({ gameState }: PlayerListProps) => {
-  const { host, players } = useContext(PlayersContext);
+  const { host, players } = usePlayers();
   const [playerId] = usePlayerIdState("");
 
   const isHost = (player: PlayerType) => player.id === host;

@@ -1,34 +1,29 @@
-import React from "react";
+import React, {
+  PropsWithChildren,
+  useCallback,
+  useContext,
+  useMemo,
+} from "react";
 import useCrud from "../hooks/useCrud";
+import { Punchline } from "../types";
 
-export type Punchline = {
-  text: string;
-  new?: boolean;
-  viewed?: boolean;
-};
-
-const equals = (punchline1: Punchline, punchline2: Punchline) =>
-  punchline1.text === punchline2.text;
-
-type Context = {
+type PunchlinesContextType = {
   punchlines: Punchline[];
   initialisePunchlines: (arg0: Punchline[]) => void;
   addPunchlines: (arg0: string[]) => void;
   removePunchline: (arg0: string) => void;
 };
 
-const PunchlinesContext = React.createContext<Context>({
-  punchlines: [],
-  initialisePunchlines: () => null,
-  addPunchlines: () => null,
-  removePunchline: () => null,
-});
+const PunchlinesContext = React.createContext<
+  PunchlinesContextType | undefined
+>(undefined);
 
-const PunchlinesContextProvider = ({
+const equals = (punchline1: Punchline, punchline2: Punchline) =>
+  punchline1.text === punchline2.text;
+
+export const PunchlinesProvider = ({
   children,
-}: {
-  children: React.ReactNode;
-}) => {
+}: PropsWithChildren<unknown>) => {
   const {
     items: punchlines,
     initialiseItems: initialisePunchlines,
@@ -37,52 +32,61 @@ const PunchlinesContextProvider = ({
     updateItem,
   } = useCrud<Punchline>(equals);
 
-  const addPunchlines = (newPunchlines: string[]) => {
-    if (punchlines.length === 0) {
+  const addPunchlines = useCallback(
+    (newPunchlines: string[]) => {
+      if (punchlines.length === 0) {
+        addItems(
+          newPunchlines.map((punchline) => ({
+            text: punchline,
+            new: false,
+            viewed: false,
+          }))
+        );
+        return;
+      }
+
+      punchlines.forEach((punchline) => {
+        updateItem({
+          ...punchline,
+          new: false,
+          viewed: false,
+        });
+      });
+
       addItems(
         newPunchlines.map((punchline) => ({
           text: punchline,
-          new: false,
+          new: true,
           viewed: false,
         }))
       );
-      return;
-    }
+    },
+    [addItems, punchlines, updateItem]
+  );
 
-    punchlines.forEach((punchline) => {
-      updateItem({
-        ...punchline,
-        new: false,
-        viewed: false,
-      });
-    });
+  const removePunchline = useCallback(
+    (punchline: string) => {
+      const punchlineToRemove = punchlines.find(
+        (p: Punchline) => p.text === punchline
+      );
+      if (!punchlineToRemove) {
+        return;
+      }
 
-    addItems(
-      newPunchlines.map((punchline) => ({
-        text: punchline,
-        new: true,
-        viewed: false,
-      }))
-    );
-  };
+      removeItem(punchlineToRemove);
+    },
+    [punchlines, removeItem]
+  );
 
-  const removePunchline = (punchline: string) => {
-    const punchlineToRemove = punchlines.find(
-      (p: Punchline) => p.text === punchline
-    );
-    if (!punchlineToRemove) {
-      return;
-    }
-
-    removeItem(punchlineToRemove);
-  };
-
-  const context = {
-    punchlines,
-    initialisePunchlines,
-    addPunchlines,
-    removePunchline,
-  };
+  const context = useMemo(
+    () => ({
+      punchlines,
+      initialisePunchlines,
+      addPunchlines,
+      removePunchline,
+    }),
+    [addPunchlines, initialisePunchlines, punchlines, removePunchline]
+  );
 
   return (
     <PunchlinesContext.Provider value={context}>
@@ -91,4 +95,12 @@ const PunchlinesContextProvider = ({
   );
 };
 
-export { PunchlinesContext, PunchlinesContextProvider };
+export const usePunchlines = (): PunchlinesContextType => {
+  const punchlines = useContext(PunchlinesContext);
+
+  if (punchlines === undefined) {
+    throw new Error("usePunchlines() must be used within a PunchlinesProvider");
+  }
+
+  return punchlines;
+};

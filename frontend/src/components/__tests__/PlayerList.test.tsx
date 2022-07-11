@@ -1,23 +1,23 @@
 import React from "react";
 import renderer from "react-test-renderer";
 import PlayerList from "../PlayerList";
-import { PlayersContextProvider } from "../../contexts/players";
+import { PlayersProvider } from "../../contexts/players";
 
 it("PlayerList snapshot testing", () => {
   const treeLobby = renderer
     .create(
-      <PlayersContextProvider>
+      <PlayersProvider>
         <PlayerList gameState="lobby" />
-      </PlayersContextProvider>
+      </PlayersProvider>
     )
     .toJSON();
   expect(treeLobby).toMatchSnapshot();
 
   const treeMidgame = renderer
     .create(
-      <PlayersContextProvider>
+      <PlayersProvider>
         <PlayerList gameState="midround" />
-      </PlayersContextProvider>
+      </PlayersProvider>
     )
     .toJSON();
   expect(treeMidgame).toMatchSnapshot();
