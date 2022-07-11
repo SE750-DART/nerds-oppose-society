@@ -4,16 +4,18 @@ exports[`Button snapshot testing 1`] = `
 <button
   className="button button__primary button__big "
   disabled={false}
-  onClick={[Function]}
   type="button"
-/>
+>
+  Start game
+</button>
 `;
 
 exports[`Button snapshot testing 2`] = `
 <button
   className="button button__secondary button__big "
   disabled={false}
-  onClick={[Function]}
   type="button"
-/>
+>
+  Start game
+</button>
 `;
