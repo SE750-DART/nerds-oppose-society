@@ -2,7 +2,7 @@
 
 exports[`Text field snapshot testing 1`] = `
 <input
-  className="textfield textfield__big"
+  className="inputField inputField__big"
   disabled={false}
   onChange={[Function]}
   placeholder="Game code"
@@ -13,7 +13,7 @@ exports[`Text field snapshot testing 1`] = `
 
 exports[`Text field snapshot testing 2`] = `
 <input
-  className="textfield textfield__small"
+  className="inputField inputField__small"
   disabled={false}
   onChange={[Function]}
   placeholder=""

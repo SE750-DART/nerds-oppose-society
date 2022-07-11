@@ -1,5 +1,4 @@
 export { default as AboutPage } from "./AboutPage";
-export { default as BasicPage } from "./BasicPage";
 export { default as EndGamePage } from "./EndGamePage";
 export { default as EndRoundPage } from "./EndRoundPage";
 export { default as HomePage } from "./HomePage";

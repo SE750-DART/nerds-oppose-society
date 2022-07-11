@@ -1,6 +1,6 @@
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import createPersistedState from "use-persisted-state";
-import TextField from "../../components/TextField";
+import InputField from "../../components/InputField";
 import Button from "../../components/Button";
 import styles from "./style.module.css";
 import { BrowserHistoryContext } from "../../App";
@@ -47,7 +47,9 @@ const NicknamePage = ({ gameCode }: Props) => {
     };
   }, [gameCode, token, tryConnect]);
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
     const res = await createPlayer({ gameCode, nickname });
 
     if (res.success) {
@@ -66,15 +68,19 @@ const NicknamePage = ({ gameCode }: Props) => {
   return (
     <div className={styles.container}>
       <h4>Nickname:</h4>
-      <div className={styles.spacer}>
-        <TextField
-          label="Nickname"
-          textValue={nickname}
-          onChangeHandler={setNickname}
-        />
-      </div>
-      <h5 style={{ color: "red", textAlign: "center" }}>{error}</h5>
-      <Button text="Submit" handleOnClick={handleSubmit} disabled={!nickname} />
+      <form onSubmit={handleSubmit} action="">
+        <div className={styles.spacer}>
+          <InputField
+            label="Nickname"
+            textValue={nickname}
+            onChange={setNickname}
+          />
+        </div>
+        <h5 style={{ color: "red", textAlign: "center" }}>{error}</h5>
+        <Button type="submit" disabled={!nickname}>
+          Submit
+        </Button>
+      </form>
     </div>
   );
 };

@@ -30,15 +30,19 @@ const StartRoundPage = ({ roundLimit }: { roundLimit: number }) => {
 
       {playerIsHost ? (
         <Button
-          text="Leshgo!"
-          handleOnClick={() =>
+          onClick={() =>
             socket.emit("round:host-begin", (response: string) =>
               setResponse(response)
             )
           }
-        />
+        >
+          Leshgo!
+        </Button>
       ) : (
-        <p className={styles.waitingMsg}>Waiting on X to start the round...</p>
+        <p className={styles.waitingMsg}>
+          Waiting on {players.find((p) => p.id === host)?.nickname} to start the
+          round...
+        </p>
       )}
     </div>
   );

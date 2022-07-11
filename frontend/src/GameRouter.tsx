@@ -4,7 +4,6 @@ import { createMemoryHistory } from "history";
 import createPersistedState from "use-persisted-state";
 import socket from "./socket";
 import {
-  BasicPage,
   EndGamePage,
   EndRoundPage,
   NicknamePage,
@@ -211,10 +210,6 @@ const GameRouter = () => {
 
         <Route path="/scoreboard">
           <EndGamePage />
-        </Route>
-
-        <Route path="/switchboard">
-          <BasicPage gameCode={gameCode} path="switchboard" />
         </Route>
 
         <Route path="*">
