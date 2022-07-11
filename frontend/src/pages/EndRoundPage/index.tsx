@@ -5,12 +5,13 @@ import PlayerList from "../../components/PlayerList";
 import PunchlineCard from "../../components/PunchlineCard";
 import { usePlayers } from "../../contexts/players";
 import Button from "../../components/Button";
-import socket from "../../socket";
 import { useRound } from "../../contexts/round";
+import { useSocket } from "../../contexts/socket";
 
 const usePlayerIdState = createPersistedState("playerId");
 
 const EndRoundPage = ({ roundLimit }: { roundLimit: number }) => {
+  const socket = useSocket();
   const [, setResponse] = useState("");
 
   const { host } = usePlayers();

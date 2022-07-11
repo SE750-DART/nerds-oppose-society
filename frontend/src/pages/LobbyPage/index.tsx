@@ -7,8 +7,8 @@ import styles from "./style.module.css";
 import InputField from "../../components/InputField";
 import Dropdown from "../../components/Dropdown";
 import { Settings } from "../../GameRouter";
-import socket from "../../socket";
 import { usePlayers } from "../../contexts/players";
+import { useSocket } from "../../contexts/socket";
 
 const usePlayerIdState = createPersistedState("playerId");
 
@@ -21,6 +21,7 @@ const MINIMUM_PLAYERS = 3;
 
 const LobbyPage = ({ gameCode, settings }: Props) => {
   const [, setResponse] = useState("");
+  const socket = useSocket();
 
   const { host, players } = usePlayers();
   const [playerId] = usePlayerIdState("");
@@ -42,18 +43,21 @@ const LobbyPage = ({ gameCode, settings }: Props) => {
 
   // Wait until 500ms after last input before emitting setting update
   const msDebounceDelay = 500;
-  const updateSettings = useCallback((setting: string, value: string) => {
-    debounce((setting: string, value: string) => {
-      if (value.match(/^\d+$/)) {
-        socket.emit(
-          "settings:update",
-          setting,
-          parseInt(value, 10),
-          (response: string) => setResponse(response)
-        );
-      }
-    }, msDebounceDelay)(setting, value);
-  }, []);
+  const updateSettings = useCallback(
+    (setting: string, value: string) => {
+      debounce((setting: string, value: string) => {
+        if (value.match(/^\d+$/)) {
+          socket.emit(
+            "settings:update",
+            setting,
+            parseInt(value, 10),
+            (response: string) => setResponse(response)
+          );
+        }
+      }, msDebounceDelay)(setting, value);
+    },
+    [socket]
+  );
 
   const handleChangeMaxPlayers = (newMaxPlayers: string) => {
     setMaxPlayers(newMaxPlayers);

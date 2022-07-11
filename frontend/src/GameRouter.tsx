@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Router, Switch, Route, Redirect, useParams } from "react-router-dom";
 import { createMemoryHistory } from "history";
 import createPersistedState from "use-persisted-state";
-import socket from "./socket";
 import {
   EndGamePage,
   EndRoundPage,
@@ -15,6 +14,12 @@ import {
 import { useRound } from "./contexts/round";
 import { usePlayers } from "./contexts/players";
 import { usePunchlines } from "./contexts/punchlines";
+import { SocketProvider } from "./contexts/socket";
+import io from "socket.io-client";
+
+const socket = io({
+  autoConnect: false,
+});
 
 export type Settings = {
   roundLimit: number;
@@ -182,41 +187,43 @@ const GameRouter = () => {
   });
 
   return (
-    <Router history={memoryHistory}>
-      <Switch>
-        <Route path="/nickname">
-          <NicknamePage gameCode={gameCode} />
-        </Route>
+    <SocketProvider socket={socket}>
+      <Router history={memoryHistory}>
+        <Switch>
+          <Route path="/nickname">
+            <NicknamePage gameCode={gameCode} />
+          </Route>
 
-        <Route path="/lobby">
-          <LobbyPage gameCode={gameCode} settings={settings} />
-        </Route>
+          <Route path="/lobby">
+            <LobbyPage gameCode={gameCode} settings={settings} />
+          </Route>
 
-        <Route path="/before">
-          <StartRoundPage roundLimit={settings.roundLimit} />
-        </Route>
+          <Route path="/before">
+            <StartRoundPage roundLimit={settings.roundLimit} />
+          </Route>
 
-        <Route path="/players_choose">
-          <SubmitPunchlinePage roundLimit={settings.roundLimit} />
-        </Route>
+          <Route path="/players_choose">
+            <SubmitPunchlinePage roundLimit={settings.roundLimit} />
+          </Route>
 
-        <Route path="/host_chooses">
-          <SelectPunchlinePage roundLimit={settings.roundLimit} />
-        </Route>
+          <Route path="/host_chooses">
+            <SelectPunchlinePage roundLimit={settings.roundLimit} />
+          </Route>
 
-        <Route path="/after">
-          <EndRoundPage roundLimit={settings.roundLimit} />
-        </Route>
+          <Route path="/after">
+            <EndRoundPage roundLimit={settings.roundLimit} />
+          </Route>
 
-        <Route path="/scoreboard">
-          <EndGamePage />
-        </Route>
+          <Route path="/scoreboard">
+            <EndGamePage />
+          </Route>
 
-        <Route path="*">
-          <Redirect to="/nickname" />
-        </Route>
-      </Switch>
-    </Router>
+          <Route path="*">
+            <Redirect to="/nickname" />
+          </Route>
+        </Switch>
+      </Router>
+    </SocketProvider>
   );
 };
 

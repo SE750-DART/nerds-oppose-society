@@ -2,9 +2,9 @@ import React, { useState } from "react";
 import createPersistedState from "use-persisted-state";
 import Button from "../../components/Button";
 import styles from "./style.module.css";
-import socket from "../../socket";
 import { useRound } from "../../contexts/round";
 import { usePlayers } from "../../contexts/players";
+import { useSocket } from "../../contexts/socket";
 
 const usePlayerIdState = createPersistedState("playerId");
 
@@ -14,6 +14,7 @@ const StartRoundPage = ({ roundLimit }: { roundLimit: number }) => {
   const playerIsHost = playerId === host;
   const [, setResponse] = useState("");
   const { roundNumber } = useRound();
+  const socket = useSocket();
 
   return (
     <div className={styles.container}>

@@ -10,8 +10,8 @@ import InputField from "../../components/InputField";
 import Button from "../../components/Button";
 import styles from "./style.module.css";
 import { BrowserHistoryContext } from "../../App";
-import socket from "../../socket";
 import { getRequestErrorMessage, useGet, usePost } from "../../hooks/axios";
+import { useSocket } from "../../contexts/socket";
 
 const usePlayerIdState = createPersistedState("playerId");
 const useTokenState = createPersistedState("token");
@@ -25,6 +25,7 @@ const NicknamePage = ({ gameCode }: Props) => {
   const [playerId, setPlayerId] = usePlayerIdState("");
   const [token, setToken] = useTokenState("");
   const browserHistory = useContext(BrowserHistoryContext);
+  const socket = useSocket();
 
   const [, validateGameCode] = useGet(
     "/api/game/validate",
@@ -64,7 +65,7 @@ const NicknamePage = ({ gameCode }: Props) => {
       // but it does not connect again because playerId and token are falsy
       socket.connect();
     }
-  }, [gameCode, playerId, token]);
+  }, [gameCode, playerId, socket, token]);
 
   useEffect(() => {
     let mounted = true;

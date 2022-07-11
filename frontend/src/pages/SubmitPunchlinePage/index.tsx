@@ -8,14 +8,15 @@ import PunchlineCard from "../../components/PunchlineCard";
 import Button from "../../components/Button";
 import Setup from "../../components/Setup";
 import { useRound } from "../../contexts/round";
-import socket from "../../socket";
 import { usePlayers } from "../../contexts/players";
 import { usePunchlines } from "../../contexts/punchlines";
+import { useSocket } from "../../contexts/socket";
 
 const usePlayerIdState = createPersistedState("playerId");
 
 const SubmitPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
   const [, setResponse] = useState("");
+  const socket = useSocket();
 
   const { host, players } = usePlayers();
   const { punchlines, removePunchline } = usePunchlines();
