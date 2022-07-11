@@ -30,7 +30,7 @@ const NicknamePage = ({ gameCode }: Props) => {
     "/api/game/validate",
     /*
     As `validateGameCode` runs inside a `useEffect()` we need to create the
-    config object with `useMemo()` to prevent necessary re-renders.
+    config object with `useMemo()` to prevent unnecessary re-renders.
      */
     useMemo(
       () => ({
