@@ -1,19 +1,19 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Router, Switch, Route, Redirect, useParams } from "react-router-dom";
+import { Redirect, Route, Router, Switch, useParams } from "react-router-dom";
 import { createMemoryHistory } from "history";
 import createPersistedState from "use-persisted-state";
 import {
   EndGamePage,
   EndRoundPage,
-  NicknamePage,
   LobbyPage,
+  NicknamePage,
   SelectPunchlinePage,
   StartRoundPage,
   SubmitPunchlinePage,
 } from "./pages";
 import { useRound } from "./contexts/round";
 import { usePlayers } from "./contexts/players";
-import { usePunchlines } from "./contexts/punchlines";
+import { PunchlinesAction, usePunchlines } from "./contexts/punchlines";
 import { SocketProvider } from "./contexts/socket";
 import io from "socket.io-client";
 
@@ -53,7 +53,7 @@ const useSetupSockets = ({
     removePlayer,
     incrementPlayerScore,
   } = usePlayers();
-  const { addPunchlines } = usePunchlines();
+  const [, dispatchPunchlines] = usePunchlines();
   const {
     setRoundNumber,
     setSetup,
@@ -105,7 +105,19 @@ const useSetupSockets = ({
   );
 
   // Round
-  const handlePunchlinesAdd = useCallback(addPunchlines, [addPunchlines]);
+  const handlePunchlinesAdd = useCallback(
+    (punchlines: string[]) =>
+      dispatchPunchlines({ type: PunchlinesAction.ADD, punchlines }),
+    [dispatchPunchlines]
+  );
+  const handlePunchlinesRemove = useCallback(
+    (punchlines: string[]) =>
+      dispatchPunchlines({
+        type: PunchlinesAction.REMOVE,
+        punchlines,
+      }),
+    [dispatchPunchlines]
+  );
   const handleRoundNumber = useCallback(setRoundNumber, [setRoundNumber]);
   const handleRoundSetup = useCallback(setSetup, [setSetup]);
   const handleRoundIncrementPlayersChosen = useCallback(
@@ -138,6 +150,7 @@ const useSetupSockets = ({
 
     // Round
     socket.on("punchlines:add", handlePunchlinesAdd);
+    socket.on("punchlines:remove", handlePunchlinesRemove);
     socket.on("round:number", handleRoundNumber);
     socket.on("round:setup", handleRoundSetup);
     socket.on(
