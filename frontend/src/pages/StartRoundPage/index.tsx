@@ -13,7 +13,7 @@ const StartRoundPage = ({ roundLimit }: { roundLimit: number }) => {
   const [playerId] = usePlayerIdState("");
   const playerIsHost = playerId === host;
   const [, setResponse] = useState("");
-  const { roundNumber } = useRound();
+  const [{ roundNumber }] = useRound();
   const socket = useSocket();
 
   return (

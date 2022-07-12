@@ -7,7 +7,7 @@ import ProgressBar from "../../components/ProgressBar";
 import PunchlineCard from "../../components/PunchlineCard";
 import Button from "../../components/Button";
 import Setup from "../../components/Setup";
-import { useRound } from "../../contexts/round";
+import { RoundAction, useRound } from "../../contexts/round";
 import { usePlayers } from "../../contexts/players";
 import { PunchlinesAction, usePunchlines } from "../../contexts/punchlines";
 import { Punchline } from "../../types";
@@ -21,8 +21,7 @@ const SubmitPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
 
   const [{ host, count }] = usePlayers();
   const [punchlines, dispatchPunchlines] = usePunchlines();
-  const { roundNumber, setup, numPlayersChosen, incrementPlayersChosen } =
-    useRound();
+  const [{ roundNumber, setup, numPlayersChosen }, dispatchRound] = useRound();
 
   const [playerId] = usePlayerIdState("");
   const playerIsHost = playerId === host;
@@ -51,7 +50,7 @@ const SubmitPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
       setPunchlineSubmitted(punchlineSelected);
       setPunchlineSelected(undefined);
 
-      incrementPlayersChosen();
+      dispatchRound({ type: RoundAction.INCREMENT_PLAYERS_CHOSEN });
       socket.emit(
         "round:player-choose",
         [punchlineSelected.text],
@@ -60,7 +59,7 @@ const SubmitPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
         }
       );
     }
-  }, [dispatchPunchlines, incrementPlayersChosen, punchlineSelected, socket]);
+  }, [dispatchPunchlines, dispatchRound, punchlineSelected, socket]);
 
   return (
     <>
@@ -74,7 +73,7 @@ const SubmitPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
         header="Scoreboard"
       />
       <div className={styles.container}>
-        <Setup setupText={setup.setup} />
+        <Setup setupText={setup?.setup ?? ""} />
 
         <ProgressBar
           playersChosen={numPlayersChosen}

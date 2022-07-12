@@ -1,184 +1,115 @@
 import React, {
+  Dispatch,
   PropsWithChildren,
-  useCallback,
   useContext,
-  useMemo,
-  useState,
+  useReducer,
 } from "react";
-import { Punchline } from "../types";
+import { Punchline, Setup, Winner } from "../types";
 
-type Setup = {
-  setup: string;
-  type: "PICK_ONE" | "PICK_TWO" | "DRAW_TWO_PICK_THREE";
-};
+export enum RoundAction {
+  NEW_ROUND = "new_round",
+  SET_SETUP = "set_setup",
+  INCREMENT_PLAYERS_CHOSEN = "increment_players_chosen",
+  SET_CHOSEN_PUNCHLINES = "set_chosen_punchlines",
+  MARK_PUNCHLINE_READ = "mark_punchline_read",
+  SET_WINNER = "set_winner",
+}
 
-type Winner = {
-  winningPlayerId: string;
-  winningPunchlines: string[];
-};
+type RoundActionType =
+  | { type: RoundAction.NEW_ROUND; roundNumber: number }
+  | { type: RoundAction.SET_SETUP; setup: Setup }
+  // TODO: Combine NEW_ROUND & SET_SETUP
+  | { type: RoundAction.INCREMENT_PLAYERS_CHOSEN }
+  | { type: RoundAction.SET_CHOSEN_PUNCHLINES; punchlines: string[][] }
+  | { type: RoundAction.MARK_PUNCHLINE_READ; index: number }
+  | {
+      type: RoundAction.SET_WINNER;
+      winningPlayerId: string;
+      winningPunchlines: string[];
+    };
 
-type RoundContextType = {
-  // round:number
+type RoundState = {
   roundNumber: number;
-  setRoundNumber: (roundNumber: number) => void;
-
-  // round:setup
-  setup: Setup;
-  setSetup: (setup: Setup) => void;
-
-  // round:increment-players-chosen
+  setup: Setup | undefined;
   numPlayersChosen: number;
-  incrementPlayersChosen: () => void;
-
-  // round:chosen-punchlines
-  punchlinesChosen: Punchline[];
-  setPunchlinesChosen: (punchlines: string[][]) => void;
-  markPunchlineRead: (index: number) => void;
-
-  // round:host-view
-  hostViewIndex: number;
-  setHostViewIndex: (index: number) => void;
-
-  // round:winner
-  winner: Winner;
-  setWinner: (winningPlayerId: string, winningPunchlines: string[]) => void;
+  chosenPunchlines: Punchline[];
+  winner: Winner | undefined;
 };
+
+const reducer = (state: RoundState, action: RoundActionType): RoundState => {
+  switch (action.type) {
+    case RoundAction.NEW_ROUND: {
+      const { roundNumber } = action;
+      return {
+        roundNumber,
+        setup: undefined,
+        numPlayersChosen: 0,
+        chosenPunchlines: [],
+        winner: undefined,
+      };
+    }
+
+    case RoundAction.SET_SETUP: {
+      const { setup } = action;
+      return { ...state, setup };
+    }
+
+    case RoundAction.INCREMENT_PLAYERS_CHOSEN: {
+      return { ...state, numPlayersChosen: state.numPlayersChosen + 1 };
+    }
+
+    case RoundAction.SET_CHOSEN_PUNCHLINES: {
+      const { punchlines } = action;
+      const chosenPunchlines = punchlines.map((playerPunchlines) => ({
+        text: playerPunchlines[0],
+        viewed: false,
+      }));
+      return { ...state, chosenPunchlines };
+    }
+
+    case RoundAction.MARK_PUNCHLINE_READ: {
+      const { index } = action;
+      const chosenPunchlines = [...state.chosenPunchlines];
+      if (0 <= index && index < chosenPunchlines.length) {
+        chosenPunchlines[index].viewed = true;
+        return { ...state, chosenPunchlines };
+      }
+      return state;
+    }
+
+    case RoundAction.SET_WINNER: {
+      const { winningPlayerId, winningPunchlines } = action;
+      return { ...state, winner: { winningPlayerId, winningPunchlines } };
+    }
+  }
+};
+
+type RoundContextType = [RoundState, Dispatch<RoundActionType>];
 
 const RoundContext = React.createContext<RoundContextType | undefined>(
   undefined
 );
 
 export const RoundProvider = ({ children }: PropsWithChildren<unknown>) => {
-  // round:setup
-  const [setupState, setSetup] = useState<Setup>({
-    setup: "",
-    type: "PICK_ONE",
+  const context = useReducer(reducer, {
+    roundNumber: 0,
+    setup: undefined,
+    numPlayersChosen: 0,
+    chosenPunchlines: [],
+    winner: undefined,
   });
 
-  // round:increment-players-chosen
-  const [numPlayersChosenState, setNumPlayersChosen] = useState(0);
-
-  const incrementPlayersChosen = useCallback(
-    () => setNumPlayersChosen(numPlayersChosenState + 1),
-    [numPlayersChosenState]
-  );
-
-  // round:chosen-punchlines
-  const [punchlinesChosenState, setPunchlinesChosenState] = useState<
-    Punchline[]
-  >([]);
-
-  const setPunchlinesChosen = (punchlines: string[][]) => {
-    const punchlineObjs = punchlines.map((punchlinesOnePlayer) => ({
-      text: punchlinesOnePlayer[0],
-      viewed: false,
-    }));
-    setPunchlinesChosenState(punchlineObjs);
-  };
-
-  const markPunchlineRead = useCallback(
-    (index: number) => {
-      const newPunchlines = [...punchlinesChosenState];
-      newPunchlines[index] = {
-        ...punchlinesChosenState[index],
-        viewed: true,
-      };
-      setPunchlinesChosenState(newPunchlines);
-    },
-    [punchlinesChosenState]
-  );
-
-  // round:host-view
-  const [hostViewIndexState, setHostViewIndex] = useState(0);
-
-  // round:winner
-  const [winnerState, setWinner] = useState<Winner>({
-    winningPlayerId: "",
-    winningPunchlines: [],
-  });
-
-  // round:number
-  const [roundNumberState, setRoundNumberState] = useState(0);
-
-  const reset = useCallback(() => {
-    setRoundNumberState(0);
-    setSetup({
-      setup: "",
-      type: "PICK_ONE",
-    });
-    setNumPlayersChosen(0);
-    setPunchlinesChosen([]);
-    setHostViewIndex(0);
-    setWinner({
-      winningPlayerId: "",
-      winningPunchlines: [],
-    });
-  }, []);
-
-  const setRoundNumber = useCallback(
-    (roundNumber: number) => {
-      if (roundNumber !== roundNumberState) {
-        reset();
-        setRoundNumberState(roundNumber);
-      }
-    },
-    [reset, roundNumberState]
-  );
-
-  // The context value that will be supplied to any descendants of this component.
-  const context = useMemo(
-    () => ({
-      // round:number
-      roundNumber: roundNumberState,
-      setRoundNumber,
-
-      // round:setup
-      setup: setupState,
-      setSetup: (setup: Setup) => setSetup(setup),
-
-      // round:increment-players-chosen
-      numPlayersChosen: numPlayersChosenState,
-      incrementPlayersChosen,
-
-      // round:chosen-punchlines
-      punchlinesChosen: punchlinesChosenState,
-      setPunchlinesChosen,
-      markPunchlineRead,
-
-      // round:host-view
-      hostViewIndex: hostViewIndexState,
-      setHostViewIndex: (index: number) => setHostViewIndex(index),
-
-      // round:winner
-      winner: winnerState,
-      setWinner: (winningPlayerId: string, winningPunchlines: string[]) =>
-        setWinner({ winningPlayerId, winningPunchlines }),
-    }),
-    [
-      hostViewIndexState,
-      incrementPlayersChosen,
-      markPunchlineRead,
-      numPlayersChosenState,
-      punchlinesChosenState,
-      roundNumberState,
-      setRoundNumber,
-      setupState,
-      winnerState,
-    ]
-  );
-
-  // Wraps the given child components in a Provider for the above context.
   return (
     <RoundContext.Provider value={context}>{children}</RoundContext.Provider>
   );
 };
 
 export const useRound = (): RoundContextType => {
-  const round = useContext(RoundContext);
+  const context = useContext(RoundContext);
 
-  if (round === undefined) {
+  if (context === undefined) {
     throw new Error("useRound() must be used within a RoundProvider");
   }
 
-  return round;
+  return context;
 };

@@ -9,3 +9,13 @@ export type Punchline = {
   new?: boolean;
   viewed?: boolean;
 };
+
+export type Setup = {
+  setup: string;
+  type: "PICK_ONE" | "PICK_TWO" | "DRAW_TWO_PICK_THREE";
+};
+
+export type Winner = {
+  winningPlayerId: string;
+  winningPunchlines: string[];
+};
