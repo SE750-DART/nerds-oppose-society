@@ -194,8 +194,8 @@ describe("usePunchlines()", () => {
           wrapper: PunchlinesProvider,
         });
 
-        const [punchlinesInitial] = result.current;
-        expect(punchlinesInitial).toEqual([]);
+        const [initialPunchlines] = result.current;
+        expect(initialPunchlines).toEqual([]);
 
         const [, dispatch] = result.current;
         act(() =>
@@ -207,7 +207,7 @@ describe("usePunchlines()", () => {
 
         const [punchlines] = result.current;
         expect(punchlines).toEqual([]);
-        expect(punchlinesInitial).toBe(punchlines);
+        expect(punchlines).toBe(initialPunchlines);
       });
     });
   });
