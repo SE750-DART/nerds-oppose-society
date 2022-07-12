@@ -42,167 +42,173 @@ describe("usePunchlines()", () => {
     );
   });
 
-  it("dispatch adds multiple punchlines through", () => {
-    const { result } = renderHook(() => usePunchlines(), {
-      wrapper: PunchlinesProvider,
+  describe("dispatch()", () => {
+    describe("ADD", () => {
+      it("adds multiple punchlines through", () => {
+        const { result } = renderHook(() => usePunchlines(), {
+          wrapper: PunchlinesProvider,
+        });
+
+        let [punchlines] = result.current;
+        expect(punchlines).toEqual([]);
+
+        const [, dispatch] = result.current;
+        act(() =>
+          dispatch({
+            type: PunchlinesAction.ADD,
+            punchlines: ["Testing 123", "Testing ABC"],
+          })
+        );
+
+        [punchlines] = result.current;
+        expect(punchlines).toEqual([
+          { text: "Testing 123" },
+          { text: "Testing ABC" },
+        ]);
+      });
+
+      it("adds successive punchlines", () => {
+        const { result } = renderHook(() => usePunchlines(), {
+          wrapper: PunchlinesProvider,
+        });
+
+        let [punchlines] = result.current;
+        expect(punchlines).toEqual([]);
+
+        let [, dispatch] = result.current;
+        act(() =>
+          dispatch({
+            type: PunchlinesAction.ADD,
+            punchlines: ["Testing 123"],
+          })
+        );
+
+        [punchlines] = result.current;
+        expect(punchlines).toEqual([{ text: "Testing 123" }]);
+
+        [, dispatch] = result.current;
+        act(() =>
+          dispatch({ type: PunchlinesAction.ADD, punchlines: ["Testing ABC"] })
+        );
+
+        [punchlines] = result.current;
+        expect(punchlines).toEqual([
+          { text: "Testing 123" },
+          { text: "Testing ABC" },
+        ]);
+      });
+
+      it("does not modify state when adding empty punchlines", () => {
+        const { result } = renderHook(() => usePunchlines(), {
+          wrapper: PunchlinesProvider,
+        });
+
+        const [punchlinesInitial] = result.current;
+        expect(punchlinesInitial).toEqual([]);
+
+        const [, dispatch] = result.current;
+        act(() =>
+          dispatch({
+            type: PunchlinesAction.ADD,
+            punchlines: [],
+          })
+        );
+
+        const [punchlines] = result.current;
+        expect(punchlines).toEqual([]);
+        expect(punchlinesInitial).toBe(punchlines);
+      });
     });
 
-    let [punchlines] = result.current;
-    expect(punchlines).toEqual([]);
+    describe("REMOVE", () => {
+      it("removes multiple punchlines", () => {
+        const { result } = renderHook(() => usePunchlines(), {
+          wrapper: PunchlinesProvider,
+        });
+        setupRemoveTest(result);
 
-    const [, dispatch] = result.current;
-    act(() =>
-      dispatch({
-        type: PunchlinesAction.ADD,
-        punchlines: ["Testing 123", "Testing ABC"],
-      })
-    );
+        const [, dispatch] = result.current;
+        act(() =>
+          dispatch({
+            type: PunchlinesAction.REMOVE,
+            punchlines: ["Testing 123", "Testing ABC"],
+          })
+        );
 
-    [punchlines] = result.current;
-    expect(punchlines).toEqual([
-      { text: "Testing 123" },
-      { text: "Testing ABC" },
-    ]);
-  });
+        const [punchlines] = result.current;
+        expect(punchlines).toEqual([]);
+      });
 
-  it("dispatch adds successive punchlines", () => {
-    const { result } = renderHook(() => usePunchlines(), {
-      wrapper: PunchlinesProvider,
+      it("removes successive punchlines", () => {
+        const { result } = renderHook(() => usePunchlines(), {
+          wrapper: PunchlinesProvider,
+        });
+        setupRemoveTest(result);
+
+        let [, dispatch] = result.current;
+        act(() =>
+          dispatch({
+            type: PunchlinesAction.REMOVE,
+            punchlines: ["Testing ABC"],
+          })
+        );
+
+        let [punchlines] = result.current;
+        expect(punchlines).toEqual([{ text: "Testing 123" }]);
+
+        [, dispatch] = result.current;
+        act(() =>
+          dispatch({
+            type: PunchlinesAction.REMOVE,
+            punchlines: ["Testing 123"],
+          })
+        );
+
+        [punchlines] = result.current;
+        expect(punchlines).toEqual([]);
+      });
+
+      it("does not remove non-existent punchline", () => {
+        const { result } = renderHook(() => usePunchlines(), {
+          wrapper: PunchlinesProvider,
+        });
+        setupRemoveTest(result);
+
+        const [, dispatch] = result.current;
+        act(() =>
+          dispatch({
+            type: PunchlinesAction.REMOVE,
+            punchlines: ["Testing XYZ"],
+          })
+        );
+
+        const [punchlines] = result.current;
+        expect(punchlines).toEqual([
+          { text: "Testing 123" },
+          { text: "Testing ABC" },
+        ]);
+      });
+
+      it("does not modify state when removing empty punchlines", () => {
+        const { result } = renderHook(() => usePunchlines(), {
+          wrapper: PunchlinesProvider,
+        });
+
+        const [punchlinesInitial] = result.current;
+        expect(punchlinesInitial).toEqual([]);
+
+        const [, dispatch] = result.current;
+        act(() =>
+          dispatch({
+            type: PunchlinesAction.REMOVE,
+            punchlines: [],
+          })
+        );
+
+        const [punchlines] = result.current;
+        expect(punchlines).toEqual([]);
+        expect(punchlinesInitial).toBe(punchlines);
+      });
     });
-
-    let [punchlines] = result.current;
-    expect(punchlines).toEqual([]);
-
-    let [, dispatch] = result.current;
-    act(() =>
-      dispatch({
-        type: PunchlinesAction.ADD,
-        punchlines: ["Testing 123"],
-      })
-    );
-
-    [punchlines] = result.current;
-    expect(punchlines).toEqual([{ text: "Testing 123" }]);
-
-    [, dispatch] = result.current;
-    act(() =>
-      dispatch({ type: PunchlinesAction.ADD, punchlines: ["Testing ABC"] })
-    );
-
-    [punchlines] = result.current;
-    expect(punchlines).toEqual([
-      { text: "Testing 123" },
-      { text: "Testing ABC" },
-    ]);
-  });
-
-  it("dispatch does not modify state when adding empty punchlines", () => {
-    const { result } = renderHook(() => usePunchlines(), {
-      wrapper: PunchlinesProvider,
-    });
-
-    const [punchlinesInitial] = result.current;
-    expect(punchlinesInitial).toEqual([]);
-
-    const [, dispatch] = result.current;
-    act(() =>
-      dispatch({
-        type: PunchlinesAction.ADD,
-        punchlines: [],
-      })
-    );
-
-    const [punchlines] = result.current;
-    expect(punchlines).toEqual([]);
-    expect(punchlinesInitial).toBe(punchlines);
-  });
-
-  it("dispatch removes multiple punchlines", () => {
-    const { result } = renderHook(() => usePunchlines(), {
-      wrapper: PunchlinesProvider,
-    });
-    setupRemoveTest(result);
-
-    const [, dispatch] = result.current;
-    act(() =>
-      dispatch({
-        type: PunchlinesAction.REMOVE,
-        punchlines: ["Testing 123", "Testing ABC"],
-      })
-    );
-
-    const [punchlines] = result.current;
-    expect(punchlines).toEqual([]);
-  });
-
-  it("dispatch removes successive punchlines", () => {
-    const { result } = renderHook(() => usePunchlines(), {
-      wrapper: PunchlinesProvider,
-    });
-    setupRemoveTest(result);
-
-    let [, dispatch] = result.current;
-    act(() =>
-      dispatch({
-        type: PunchlinesAction.REMOVE,
-        punchlines: ["Testing ABC"],
-      })
-    );
-
-    let [punchlines] = result.current;
-    expect(punchlines).toEqual([{ text: "Testing 123" }]);
-
-    [, dispatch] = result.current;
-    act(() =>
-      dispatch({
-        type: PunchlinesAction.REMOVE,
-        punchlines: ["Testing 123"],
-      })
-    );
-
-    [punchlines] = result.current;
-    expect(punchlines).toEqual([]);
-  });
-
-  it("dispatch does not remove nonexistent punchline", () => {
-    const { result } = renderHook(() => usePunchlines(), {
-      wrapper: PunchlinesProvider,
-    });
-    setupRemoveTest(result);
-
-    const [, dispatch] = result.current;
-    act(() =>
-      dispatch({
-        type: PunchlinesAction.REMOVE,
-        punchlines: ["Testing XYZ"],
-      })
-    );
-
-    const [punchlines] = result.current;
-    expect(punchlines).toEqual([
-      { text: "Testing 123" },
-      { text: "Testing ABC" },
-    ]);
-  });
-
-  it("dispatch does not modify state when removing empty punchlines", () => {
-    const { result } = renderHook(() => usePunchlines(), {
-      wrapper: PunchlinesProvider,
-    });
-
-    const [punchlinesInitial] = result.current;
-    expect(punchlinesInitial).toEqual([]);
-
-    const [, dispatch] = result.current;
-    act(() =>
-      dispatch({
-        type: PunchlinesAction.REMOVE,
-        punchlines: [],
-      })
-    );
-
-    const [punchlines] = result.current;
-    expect(punchlines).toEqual([]);
-    expect(punchlinesInitial).toBe(punchlines);
   });
 });
