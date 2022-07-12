@@ -9,7 +9,7 @@ import { useSocket } from "../../contexts/socket";
 const usePlayerIdState = createPersistedState("playerId");
 
 const StartRoundPage = ({ roundLimit }: { roundLimit: number }) => {
-  const { host, players } = usePlayers();
+  const [{ host, players }] = usePlayers();
   const [playerId] = usePlayerIdState("");
   const playerIsHost = playerId === host;
   const [, setResponse] = useState("");
@@ -25,7 +25,9 @@ const StartRoundPage = ({ roundLimit }: { roundLimit: number }) => {
         <p className={styles.theManText}>
           {playerIsHost
             ? "You are The Man™."
-            : `${players.find((p) => p.id === host)?.nickname} is The Man™.`}
+            : `${
+                host && players[host] ? players[host] : "No-one"
+              } is The Man™.`}
         </p>
       </div>
 
@@ -41,8 +43,8 @@ const StartRoundPage = ({ roundLimit }: { roundLimit: number }) => {
         </Button>
       ) : (
         <p className={styles.waitingMsg}>
-          Waiting on {players.find((p) => p.id === host)?.nickname} to start the
-          round...
+          Waiting on {host && players[host] ? players[host].nickname : "No-one"}{" "}
+          to start the round...
         </p>
       )}
     </div>

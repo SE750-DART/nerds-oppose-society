@@ -12,7 +12,7 @@ interface PlayerListProps {
 }
 
 const PlayerList = ({ gameState }: PlayerListProps) => {
-  const { host, players } = usePlayers();
+  const [{ host, players, count }] = usePlayers();
   const [playerId] = usePlayerIdState("");
 
   const isHost = (player: PlayerType) => player.id === host;
@@ -26,18 +26,20 @@ const PlayerList = ({ gameState }: PlayerListProps) => {
     showHost = true;
   }
 
+  const playersList = Object.values(players);
+
   return (
     <div className={styles.playerlist}>
-      {players.map((player, index) => (
+      {playersList.map((player, index) => (
         <Player
           key={player.id}
           nickname={player.nickname}
           score={showScores ? player.score : undefined}
           highlight={isMe(player)}
           divider={
-            index + 1 < players.length && // player not last
+            index + 1 < count && // player not last
             !isMe(player) && // player not me
-            !isMe(players[index + 1]) // next player not me
+            !isMe(playersList[index + 1]) // next player not me
           }
           isHost={showHost ? isHost(player) : undefined}
         />

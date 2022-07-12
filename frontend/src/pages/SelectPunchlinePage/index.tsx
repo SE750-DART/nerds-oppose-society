@@ -17,7 +17,7 @@ const SelectPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
   const socket = useSocket();
   const [, setResponse] = useState("");
 
-  const { host, players } = usePlayers();
+  const [{ host, count }] = usePlayers();
   const [playerId] = usePlayerIdState("");
   const playerIsHost = playerId === host;
 
@@ -103,10 +103,7 @@ const SelectPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
         <Setup setupText={setup.setup} />
 
         {waiting && (
-          <ProgressBar
-            playersChosen={numPlayersChosen}
-            playersTotal={players.length}
-          />
+          <ProgressBar playersChosen={numPlayersChosen} playersTotal={count} />
         )}
 
         {punchlines &&
