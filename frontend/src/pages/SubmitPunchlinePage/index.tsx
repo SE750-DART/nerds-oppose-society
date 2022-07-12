@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import createPersistedState from "use-persisted-state";
 import styles from "./style.module.css";
 import Dropdown from "../../components/Dropdown";
@@ -9,7 +9,8 @@ import Button from "../../components/Button";
 import Setup from "../../components/Setup";
 import { useRound } from "../../contexts/round";
 import { usePlayers } from "../../contexts/players";
-import { usePunchlines } from "../../contexts/punchlines";
+import { PunchlinesAction, usePunchlines } from "../../contexts/punchlines";
+import { Punchline } from "../../types";
 import { useSocket } from "../../contexts/socket";
 
 const usePlayerIdState = createPersistedState("playerId");
@@ -19,25 +20,47 @@ const SubmitPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
   const socket = useSocket();
 
   const { host, players } = usePlayers();
-  const { punchlines, removePunchline } = usePunchlines();
+  const [punchlines, dispatchPunchlines] = usePunchlines();
   const { roundNumber, setup, numPlayersChosen, incrementPlayersChosen } =
     useRound();
 
   const [playerId] = usePlayerIdState("");
   const playerIsHost = playerId === host;
 
-  const [punchlineSelected, setPunchlineSelected] = useState("");
-  const [punchlineSubmitted, setPunchlineSubmitted] = useState("");
+  const [punchlineSelected, setPunchlineSelected] = useState<Punchline>();
+  const [punchlineSubmitted, setPunchlineSubmitted] = useState<Punchline>();
 
-  const selectPunchline = (text: string) => {
+  const handleSelect = (punchline: Punchline) => {
     if (punchlineSubmitted) return;
 
-    if (text === punchlineSelected) {
-      setPunchlineSelected("");
+    if (punchline.text === punchlineSelected?.text) {
+      setPunchlineSelected(undefined);
     } else {
-      setPunchlineSelected(text);
+      setPunchlineSelected(punchline);
     }
   };
+
+  const handleSubmit = useCallback(() => {
+    if (punchlineSelected) {
+      // TODO: Remove this to rely on "punchlines:remove" event
+      dispatchPunchlines({
+        type: PunchlinesAction.REMOVE,
+        punchlines: [punchlineSelected.text],
+      });
+
+      setPunchlineSubmitted(punchlineSelected);
+      setPunchlineSelected(undefined);
+
+      incrementPlayersChosen();
+      socket.emit(
+        "round:player-choose",
+        [punchlineSelected.text],
+        (response: string) => {
+          setResponse(response);
+        }
+      );
+    }
+  }, [dispatchPunchlines, incrementPlayersChosen, punchlineSelected]);
 
   return (
     <>
@@ -64,9 +87,9 @@ const SubmitPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
         {!playerIsHost &&
           punchlines.map((punchline) => {
             let punchlineStatus: "available" | "selected" | "submitted";
-            if (punchline.text === punchlineSubmitted) {
+            if (punchline.text === punchlineSubmitted?.text) {
               punchlineStatus = "submitted";
-            } else if (punchline.text === punchlineSelected) {
+            } else if (punchline.text === punchlineSelected?.text) {
               punchlineStatus = "selected";
             } else {
               punchlineStatus = "available";
@@ -76,7 +99,7 @@ const SubmitPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
               <PunchlineCard
                 key={punchline.text}
                 text={punchline.text}
-                handleOnClick={() => selectPunchline(punchline.text)}
+                handleOnClick={() => handleSelect(punchline)}
                 status={punchlineStatus}
                 newCard={punchline.new}
               />
@@ -87,31 +110,14 @@ const SubmitPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
         <div className={styles.bottomBtns}>
           <div className={styles.btnNah}>
             <Button
-              onClick={() => setPunchlineSelected("")}
+              onClick={() => setPunchlineSelected(undefined)}
               variant="secondary"
             >
               Nah
             </Button>
           </div>
           <div className={styles.btnSend}>
-            <Button
-              onClick={() => {
-                setPunchlineSubmitted(punchlineSelected);
-                removePunchline(punchlineSelected);
-                setPunchlineSelected("");
-
-                incrementPlayersChosen();
-                socket.emit(
-                  "round:player-choose",
-                  [punchlineSelected],
-                  (response: string) => {
-                    setResponse(response);
-                  }
-                );
-              }}
-            >
-              Send it
-            </Button>
+            <Button onClick={handleSubmit}>Send it</Button>
           </div>
         </div>
       )}
