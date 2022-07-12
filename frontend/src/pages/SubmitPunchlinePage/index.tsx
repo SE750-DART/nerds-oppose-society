@@ -60,7 +60,7 @@ const SubmitPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
         }
       );
     }
-  }, [dispatchPunchlines, incrementPlayersChosen, punchlineSelected]);
+  }, [dispatchPunchlines, incrementPlayersChosen, punchlineSelected, socket]);
 
   return (
     <>
