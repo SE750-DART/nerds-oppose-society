@@ -19,7 +19,7 @@ const SubmitPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
   const [, setResponse] = useState("");
   const socket = useSocket();
 
-  const { host, players } = usePlayers();
+  const [{ host, count }] = usePlayers();
   const [punchlines, dispatchPunchlines] = usePunchlines();
   const { roundNumber, setup, numPlayersChosen, incrementPlayersChosen } =
     useRound();
@@ -78,7 +78,7 @@ const SubmitPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
 
         <ProgressBar
           playersChosen={numPlayersChosen}
-          playersTotal={players.length - 1}
+          playersTotal={count - 1}
         />
 
         <h5 style={{ margin: `18px 0` }}>

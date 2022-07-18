@@ -23,7 +23,7 @@ const LobbyPage = ({ gameCode, settings }: Props) => {
   const [, setResponse] = useState("");
   const socket = useSocket();
 
-  const { host, players } = usePlayers();
+  const [{ host, count }] = usePlayers();
   const [playerId] = usePlayerIdState("");
   const playerIsHost = playerId === host;
 
@@ -119,7 +119,7 @@ const LobbyPage = ({ gameCode, settings }: Props) => {
       />
       <div className={styles.container}>
         <div className={styles.main}>
-          <h2>Players ({players.length})</h2>
+          <h2>Players ({count})</h2>
           <PlayerList gameState="lobby" />
         </div>
 
@@ -128,7 +128,7 @@ const LobbyPage = ({ gameCode, settings }: Props) => {
             onClick={() =>
               socket.emit("start", (response: string) => setResponse(response))
             }
-            disabled={players.length < MINIMUM_PLAYERS}
+            disabled={count < MINIMUM_PLAYERS}
           >
             Start game
           </Button>

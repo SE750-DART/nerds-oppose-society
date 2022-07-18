@@ -1,11 +1,12 @@
 import React, { useCallback, useEffect } from "react";
-import { usePlayers } from "../contexts/players";
+import { PlayersActions, usePlayers } from "../contexts/players";
 import { PunchlinesAction, usePunchlines } from "../contexts/punchlines";
 import { useRound } from "../contexts/round";
 import { Settings } from "../GameRouter";
 import createPersistedState from "use-persisted-state";
 import { Socket } from "socket.io-client";
 import { MemoryHistory } from "history";
+import { Player } from "../types";
 
 const usePlayerIdState = createPersistedState("playerId");
 const useTokenState = createPersistedState("token");
@@ -18,13 +19,7 @@ export const useSetupSocketHandlers = (
 ) => {
   const [, setPlayerId] = usePlayerIdState("");
   const [, setToken] = useTokenState("");
-  const {
-    setHost,
-    initialisePlayers,
-    addPlayer,
-    removePlayer,
-    incrementPlayerScore,
-  } = usePlayers();
+  const [, dispatchPlayers] = usePlayers();
   const [, dispatchPunchlines] = usePunchlines();
   const {
     setRoundNumber,
@@ -39,10 +34,22 @@ export const useSetupSocketHandlers = (
     (path: string) => memoryHistory.push(path.toLowerCase()),
     [memoryHistory]
   );
-  const handleHost = useCallback(setHost, [setHost]);
-  const handlePlayersInitial = useCallback(initialisePlayers, [
-    initialisePlayers,
-  ]);
+  const handleHost = useCallback(
+    (id: string) =>
+      dispatchPlayers({
+        type: PlayersActions.SET_HOST,
+        id,
+      }),
+    [dispatchPlayers]
+  );
+  const handlePlayersInitial = useCallback(
+    (players: Player[]) =>
+      dispatchPlayers({
+        type: PlayersActions.INITIALISE,
+        players,
+      }),
+    [dispatchPlayers]
+  );
   const handleSettingsInitial = useCallback(setSettings, [setSettings]);
   const handleConnectError = useCallback(() => {
     setPlayerId("");
@@ -50,8 +57,23 @@ export const useSetupSocketHandlers = (
   }, [setPlayerId, setToken]);
 
   // Lobby
-  const handlePlayersAdd = useCallback(addPlayer, [addPlayer]);
-  const handlePlayersRemove = useCallback(removePlayer, [removePlayer]);
+  const handlePlayersAdd = useCallback(
+    (id: string, nickname: string) =>
+      dispatchPlayers({
+        type: PlayersActions.ADD,
+        id,
+        nickname,
+      }),
+    [dispatchPlayers]
+  );
+  const handlePlayersRemove = useCallback(
+    (id: string) =>
+      dispatchPlayers({
+        type: PlayersActions.REMOVE,
+        id,
+      }),
+    [dispatchPlayers]
+  );
   const handleSettingsUpdate = useCallback(
     (setting, value) => {
       let key;
@@ -102,9 +124,12 @@ export const useSetupSocketHandlers = (
   const handleRoundWinner = useCallback(
     (winningPlayerId: string, winningPunchlines: string[]) => {
       setWinner(winningPlayerId, winningPunchlines);
-      incrementPlayerScore(winningPlayerId);
+      dispatchPlayers({
+        type: PlayersActions.INCREMENT_SCORE,
+        id: winningPlayerId,
+      });
     },
-    [incrementPlayerScore, setWinner]
+    [dispatchPlayers, setWinner]
   );
 
   useEffect(() => {
