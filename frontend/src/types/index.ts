@@ -16,6 +16,6 @@ export type Setup = {
 };
 
 export type Winner = {
-  winningPlayerId: string;
+  winningPlayerId: Player["id"];
   winningPunchlines: string[];
 };
