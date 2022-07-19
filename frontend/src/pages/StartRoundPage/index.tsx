@@ -26,7 +26,7 @@ const StartRoundPage = ({ roundLimit }: { roundLimit: number }) => {
           {playerIsHost
             ? "You are The Man™."
             : `${
-                host && players[host] ? players[host] : "No-one"
+                host && players[host] ? players[host].nickname : "No-one"
               } is The Man™.`}
         </p>
       </div>
