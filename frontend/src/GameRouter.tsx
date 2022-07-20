@@ -104,7 +104,7 @@ const GameRouter = () => {
           </Route>
 
           <Route path="/before">
-            <StartRoundPage roundLimit={settings.roundLimit ?? 0} />
+            <StartRoundPage roundLimit={settings.roundLimit} />
           </Route>
 
           <Route path="/players_choose">

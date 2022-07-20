@@ -25,7 +25,7 @@ jobs:
         run: npm set-script prepare ""
 
       - name: Install Node.js dependencies
-        run: npm ci -w=frontend
+        run: npm ci -w=frontend -w=backend
 
       - name: Run linter
         run: npm run lint -w=frontend
