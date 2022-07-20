@@ -4,15 +4,15 @@ import { PunchlinesAction, usePunchlines } from "../contexts/punchlines";
 import { useRound } from "../contexts/round";
 import { Settings } from "../GameRouter";
 import createPersistedState from "use-persisted-state";
-import { Socket } from "socket.io-client";
 import { MemoryHistory } from "history";
 import { Player } from "../types";
+import { SocketType } from "../types/socket";
 
 const usePlayerIdState = createPersistedState("playerId");
 const useTokenState = createPersistedState("token");
 
 export const useSetupSocketHandlers = (
-  socket: Socket,
+  socket: SocketType,
   memoryHistory: MemoryHistory,
   settings: Settings,
   setSettings: React.Dispatch<React.SetStateAction<Settings>>
@@ -50,7 +50,10 @@ export const useSetupSocketHandlers = (
       }),
     [dispatchPlayers]
   );
-  const handleSettingsInitial = useCallback(setSettings, [setSettings]);
+  const handleSettingsInitial = useCallback(
+    (settings: Settings) => setSettings(settings),
+    [setSettings]
+  );
   const handleConnectError = useCallback(() => {
     setPlayerId("");
     setToken("");

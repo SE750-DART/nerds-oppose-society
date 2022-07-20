@@ -19,7 +19,7 @@ export default (
   startGame: (callback: (data: string) => void) => Promise<void>;
   updateSetting: (
     setting: "MAX_PLAYERS" | "ROUND_LIMIT",
-    value: number | undefined,
+    value: number,
     callback: (data: string) => void
   ) => Promise<void>;
 } => {
@@ -49,7 +49,7 @@ export default (
 
   const updateSetting = async (
     setting: "MAX_PLAYERS" | "ROUND_LIMIT",
-    value: number | undefined,
+    value: number,
     callback: (data: string) => void
   ): Promise<void> => {
     try {

@@ -1,10 +1,10 @@
 import React, { PropsWithChildren, useContext } from "react";
-import { Socket } from "socket.io-client";
+import { SocketType } from "../types/socket";
 
-const SocketContext = React.createContext<Socket | undefined>(undefined);
+const SocketContext = React.createContext<SocketType | undefined>(undefined);
 
 interface SocketProviderProps {
-  socket: Socket;
+  socket: SocketType;
 }
 
 export const SocketProvider = ({
@@ -16,7 +16,7 @@ export const SocketProvider = ({
   );
 };
 
-export const useSocket = (): Socket => {
+export const useSocket = (): SocketType => {
   const socket = useContext(SocketContext);
 
   if (socket === undefined) {

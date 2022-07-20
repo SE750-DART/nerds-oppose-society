@@ -13,11 +13,12 @@ import {
 import { SocketProvider } from "./contexts/socket";
 import io from "socket.io-client";
 import { useSetupSocketHandlers } from "./hooks/socket";
+import { SocketType } from "./types/socket";
 import createPersistedState from "use-persisted-state";
 import { BrowserHistoryContext } from "./App";
 import { useGet } from "./hooks/axios";
 
-const socket = io({
+const socket: SocketType = io({
   autoConnect: false,
 });
 
@@ -103,7 +104,7 @@ const GameRouter = () => {
           </Route>
 
           <Route path="/before">
-            <StartRoundPage roundLimit={settings.roundLimit} />
+            <StartRoundPage roundLimit={settings.roundLimit ?? 0} />
           </Route>
 
           <Route path="/players_choose">

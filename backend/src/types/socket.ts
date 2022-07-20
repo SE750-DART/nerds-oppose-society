@@ -6,12 +6,12 @@ export interface ServerToClientEvents {
   navigate: (state: GameState | RoundState) => void;
   host: (host: string) => void;
   "settings:initial": (settings: {
-    roundLimit: number | undefined;
-    maxPlayers: number | undefined;
+    roundLimit: number;
+    maxPlayers: number;
   }) => void;
   "settings:update": (
     setting: "MAX_PLAYERS" | "ROUND_LIMIT",
-    value: number | undefined
+    value: number
   ) => void;
 
   "players:initial": (
@@ -38,7 +38,7 @@ export interface ClientToServerEvents {
   start: (callback: (data: string) => void) => void;
   "settings:update": (
     setting: "MAX_PLAYERS" | "ROUND_LIMIT",
-    value: number | undefined,
+    value: number,
     callback: (data: string) => void
   ) => void;
 
