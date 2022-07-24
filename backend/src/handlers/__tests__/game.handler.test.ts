@@ -29,7 +29,7 @@ describe("Game handler", () => {
     startGame: (callback: (data: string) => void) => Promise<void>;
     updateSetting: (
       setting: "MAX_PLAYERS" | "ROUND_LIMIT",
-      value: number | undefined,
+      value: number,
       callback: (data: string) => void
     ) => Promise<void>;
   };
