@@ -1,8 +1,8 @@
-import { Socket } from "socket.io";
 import { authenticatePlayer } from "../services/player.service";
+import { SocketType } from "../types/socket";
 
 export default async (
-  socket: Socket,
+  socket: SocketType,
   next: (err?: Error) => void
 ): Promise<void> => {
   const { gameCode, playerId, token } = socket.handshake.auth;

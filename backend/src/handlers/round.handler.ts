@@ -1,4 +1,3 @@
-import { Server, Socket } from "socket.io";
 import {
   enterHostChoosesState,
   playerChoosePunchlines as playerChoosePunchlinesService,
@@ -18,10 +17,11 @@ import {
   checkGameEnded,
 } from "../services/game.service";
 import { GameState, SetupType } from "../models";
+import { ServerType, SocketData, SocketType } from "../types/socket";
 
 export default (
-  io: Server,
-  socket: Socket
+  io: ServerType,
+  socket: SocketType
 ): {
   hostStartRound: (callback: (data: string) => void) => void;
   playerChoosePunchlines: (
@@ -35,7 +35,7 @@ export default (
   ) => Promise<void>;
   hostNextRound: (callback: (data: string) => void) => void;
 } => {
-  const { gameCode, playerId } = socket.data;
+  const { gameCode, playerId } = socket.data as SocketData;
 
   const hostStartRound = async (callback: (data: string) => void) => {
     try {
@@ -88,15 +88,14 @@ export default (
       );
 
       socket.to(gameCode).emit("round:increment-players-chosen");
-
       const sockets = (await io
         .in(gameCode)
-        .fetchSockets()) as unknown as Socket[];
+        .fetchSockets()) as unknown as SocketType[];
 
       if (
         sockets
           .filter((socket) => !socket.rooms.has(`${gameCode}:host`))
-          .every((socket) => chosenPlayers.has(socket.data.playerId))
+          .every((socket) => chosenPlayers.has(socket.data.playerId as string))
       ) {
         const chosenPunchlines = await enterHostChoosesState(gameCode);
 

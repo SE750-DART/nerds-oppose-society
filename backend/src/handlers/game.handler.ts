@@ -1,5 +1,4 @@
 import { Game, GameState, Player } from "../models";
-import { Server, Socket } from "socket.io";
 import {
   getGame,
   initialiseNextRound as initialiseNextRoundService,
@@ -11,19 +10,20 @@ import {
 import { ServiceError } from "../util";
 import { RoundState } from "../models/round.model";
 import { MinPlayers } from "../models/settings.model";
+import { ServerType, SocketData, SocketType } from "../types/socket";
 
 export default (
-  io: Server,
-  socket: Socket
+  io: ServerType,
+  socket: SocketType
 ): {
   startGame: (callback: (data: string) => void) => Promise<void>;
   updateSetting: (
     setting: "MAX_PLAYERS" | "ROUND_LIMIT",
-    value: number | undefined,
+    value: number,
     callback: (data: string) => void
   ) => Promise<void>;
 } => {
-  const { gameCode, playerId } = socket.data;
+  const { gameCode, playerId } = socket.data as SocketData;
 
   const startGame = async (callback: (data: string) => void): Promise<void> => {
     try {
@@ -49,7 +49,7 @@ export default (
 
   const updateSetting = async (
     setting: "MAX_PLAYERS" | "ROUND_LIMIT",
-    value: number | undefined,
+    value: number,
     callback: (data: string) => void
   ): Promise<void> => {
     try {
@@ -84,7 +84,7 @@ export default (
 };
 
 export const initialiseNextRound = async (
-  io: Server,
+  io: ServerType,
   gameCode: Game["gameCode"],
   hostId: Player["id"]
 ): Promise<void> => {
@@ -98,7 +98,7 @@ export const initialiseNextRound = async (
   io.to(gameCode).emit("navigate", RoundState.before);
 };
 
-export const emitNavigate = (socket: Socket, game: Game): void => {
+export const emitNavigate = (socket: SocketType, game: Game): void => {
   switch (game.state) {
     case GameState.lobby:
       socket.emit("navigate", GameState.lobby);
@@ -106,34 +106,41 @@ export const emitNavigate = (socket: Socket, game: Game): void => {
   }
 };
 
-export const emitHost = async (io: Server, socket: Socket): Promise<void> => {
-  const host = await getHost(io, socket.data.gameCode);
+export const emitHost = async (
+  io: ServerType,
+  socket: SocketType
+): Promise<void> => {
+  const { gameCode } = socket.data as SocketData;
+  const host = await getHost(io, gameCode);
   socket.emit("host", host);
 };
 
 export const getHost = async (
-  io: Server,
+  io: ServerType,
   gameCode: Game["gameCode"]
 ): Promise<Player["id"] | undefined> => {
   const sockets = await io.in(`${gameCode}:host`).fetchSockets();
   return sockets[0]?.data.playerId;
 };
 
-export const setHost = (io: Server, socket: Socket): void => {
-  const { gameCode } = socket.data;
+export const setHost = (io: ServerType, socket: SocketType): void => {
+  const { gameCode, playerId } = socket.data as SocketData;
   socket.join(`${gameCode}:host`);
-  io.to(gameCode).emit("host", socket.data.playerId);
+  io.to(gameCode).emit("host", playerId);
 };
 
-export const isHost = (socket: Socket, gameCode: Game["gameCode"]): boolean => {
+export const isHost = (
+  socket: SocketType,
+  gameCode: Game["gameCode"]
+): boolean => {
   return socket.rooms.has(`${gameCode}:host`);
 };
 
 export const assignNextHost = async (
-  io: Server,
-  socket: Socket
+  io: ServerType,
+  socket: SocketType
 ): Promise<Player["id"]> => {
-  const { gameCode, playerId } = socket.data;
+  const { gameCode, playerId } = socket.data as SocketData;
   if (isHost(socket, gameCode)) {
     const { activePlayers, socketsByPlayerId } = await getActivePlayers(
       io,
@@ -157,18 +164,18 @@ export const assignNextHost = async (
 };
 
 export const getActivePlayers = async (
-  io: Server,
+  io: ServerType,
   gameCode: Game["gameCode"]
 ): Promise<{
   activePlayers: Player[];
   game: Game;
-  socketsByPlayerId: Map<Player["id"], Socket>;
+  socketsByPlayerId: Map<Player["id"], SocketType>;
 }> => {
   const sockets = await getSockets(io, gameCode);
 
   const game = await getGame(gameCode);
 
-  const socketByPlayerId = new Map<Player["id"], Socket>(
+  const socketByPlayerId = new Map<Player["id"], SocketType>(
     sockets.map((socket) => [socket.data.playerId, socket])
   );
   return {
@@ -181,8 +188,8 @@ export const getActivePlayers = async (
 };
 
 export const getSockets = async (
-  io: Server,
+  io: ServerType,
   gameCode: Game["gameCode"]
-): Promise<Socket[]> => {
-  return (await io.in(gameCode).fetchSockets()) as unknown as Socket[];
+): Promise<SocketType[]> => {
+  return (await io.in(gameCode).fetchSockets()) as unknown as SocketType[];
 };

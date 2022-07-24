@@ -7,6 +7,12 @@ import config from "./config";
 import { Connection, Auth } from "./handlers";
 import routes from "./routes";
 import mongoose from "mongoose";
+import {
+  ClientToServerEvents,
+  InterServerEvents,
+  ServerToClientEvents,
+  SocketData,
+} from "./types/socket";
 
 // Init DB
 // Connect to local running instance of mongodb, on telosdatabase db
@@ -45,7 +51,12 @@ server.listen(config.port, () => {
 });
 
 // Setup Socket.IO
-const io = new IOServer(server, {
+const io = new IOServer<
+  ClientToServerEvents,
+  ServerToClientEvents,
+  InterServerEvents,
+  SocketData
+>(server, {
   cors: {
     origin: config.origin,
   },

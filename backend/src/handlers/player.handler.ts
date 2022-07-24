@@ -3,7 +3,6 @@ import {
   initialisePlayer,
   removePlayer,
 } from "../services/player.service";
-import { Server, Socket } from "socket.io";
 import { GameState } from "../models";
 import {
   assignNextHost,
@@ -14,15 +13,16 @@ import {
 } from "./game.handler";
 import { getGame } from "../services/game.service";
 import { MinPlayers } from "../models/settings.model";
+import { ServerType, SocketData, SocketType } from "../types/socket";
 
 export default (
-  io: Server,
-  socket: Socket
+  io: ServerType,
+  socket: SocketType
 ): {
   playerLeave: () => Promise<void>;
   playerLeaving: () => void;
 } => {
-  const { gameCode, playerId } = socket.data;
+  const { gameCode, playerId } = socket.data as SocketData;
 
   const playerLeaving = async (): Promise<void> => {
     try {
@@ -69,9 +69,12 @@ export default (
   };
 };
 
-export const playerJoin = async (io: Server, socket: Socket): Promise<void> => {
+export const playerJoin = async (
+  io: ServerType,
+  socket: SocketType
+): Promise<void> => {
   try {
-    const { gameCode, playerId } = socket.data;
+    const { gameCode, playerId } = socket.data as SocketData;
 
     const game = await getGame(gameCode);
 

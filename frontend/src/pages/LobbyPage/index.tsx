@@ -44,8 +44,8 @@ const LobbyPage = ({ gameCode, settings }: Props) => {
   // Wait until 500ms after last input before emitting setting update
   const msDebounceDelay = 500;
   const updateSettings = useCallback(
-    (setting: string, value: string) => {
-      debounce((setting: string, value: string) => {
+    (setting: "MAX_PLAYERS" | "ROUND_LIMIT", value: string) => {
+      debounce((setting: "MAX_PLAYERS" | "ROUND_LIMIT", value: string) => {
         if (value.match(/^\d+$/)) {
           socket.emit(
             "settings:update",
