@@ -18,7 +18,7 @@ const EndRoundPage = ({ roundLimit }: { roundLimit: number }) => {
   const [playerId] = usePlayerIdState("");
   const playerIsHost = playerId === host;
 
-  const { roundNumber, setup, winner } = useRound();
+  const [{ roundNumber, setup, winner }] = useRound();
 
   return (
     <div className={styles.container}>
@@ -28,11 +28,11 @@ const EndRoundPage = ({ roundLimit }: { roundLimit: number }) => {
       <div className={styles.endOfRound}>
         <div style={{ margin: `24px 0` }}>
           <h5>The Setup:</h5>
-          <h2>{setup.setup}</h2>
+          <h2>{setup?.setup}</h2>
         </div>
 
         <h5 style={{ marginBottom: `12px` }}>Winning Punchline:</h5>
-        {winner.winningPunchlines.map((punchline) => (
+        {winner?.winningPunchlines.map((punchline) => (
           <PunchlineCard key={punchline} text={punchline} />
         ))}
 

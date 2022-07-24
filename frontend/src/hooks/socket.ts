@@ -1,10 +1,11 @@
 import React, { useCallback, useEffect } from "react";
 import { PlayersActions, usePlayers } from "../contexts/players";
 import { PunchlinesAction, usePunchlines } from "../contexts/punchlines";
-import { useRound } from "../contexts/round";
+import { RoundAction, useRound } from "../contexts/round";
 import { Settings } from "../GameRouter";
 import createPersistedState from "use-persisted-state";
 import { MemoryHistory } from "history";
+import { Setup } from "../types";
 import { Player } from "../types";
 import { SocketType } from "../types/socket";
 
@@ -21,13 +22,7 @@ export const useSetupSocketHandlers = (
   const [, setToken] = useTokenState("");
   const [, dispatchPlayers] = usePlayers();
   const [, dispatchPunchlines] = usePunchlines();
-  const {
-    setRoundNumber,
-    setSetup,
-    incrementPlayersChosen,
-    setPunchlinesChosen,
-    setWinner,
-  } = useRound();
+  const [, dispatchRound] = useRound();
 
   // Connection
   const handleNavigate = useCallback(
@@ -115,24 +110,47 @@ export const useSetupSocketHandlers = (
       }),
     [dispatchPunchlines]
   );
-  const handleRoundNumber = useCallback(setRoundNumber, [setRoundNumber]);
-  const handleRoundSetup = useCallback(setSetup, [setSetup]);
-  const handleRoundIncrementPlayersChosen = useCallback(
-    incrementPlayersChosen,
-    [incrementPlayersChosen]
+  const handleRoundNumber = useCallback(
+    (roundNumber: number) =>
+      dispatchRound({
+        type: RoundAction.NEW_ROUND,
+        roundNumber,
+      }),
+    [dispatchRound]
   );
-  const handleRoundChosenPunchlines = useCallback(setPunchlinesChosen, [
-    setPunchlinesChosen,
-  ]);
+  const handleRoundSetup = useCallback(
+    (setup: Setup) =>
+      dispatchRound({
+        type: RoundAction.SET_SETUP,
+        setup,
+      }),
+    [dispatchRound]
+  );
+  const handleRoundIncrementPlayersChosen = useCallback(
+    () => dispatchRound({ type: RoundAction.INCREMENT_PLAYERS_CHOSEN }),
+    [dispatchRound]
+  );
+  const handleRoundChosenPunchlines = useCallback(
+    (punchlines: string[][]) =>
+      dispatchRound({
+        type: RoundAction.SET_CHOSEN_PUNCHLINES,
+        punchlines,
+      }),
+    [dispatchRound]
+  );
   const handleRoundWinner = useCallback(
     (winningPlayerId: string, winningPunchlines: string[]) => {
-      setWinner(winningPlayerId, winningPunchlines);
+      dispatchRound({
+        type: RoundAction.SET_WINNER,
+        winningPlayerId,
+        winningPunchlines,
+      });
       dispatchPlayers({
         type: PlayersActions.INCREMENT_SCORE,
         id: winningPlayerId,
       });
     },
-    [dispatchPlayers, setWinner]
+    [dispatchPlayers, dispatchRound]
   );
 
   useEffect(() => {

@@ -13,7 +13,7 @@ const StartRoundPage = ({ roundLimit }: { roundLimit: number }) => {
   const [playerId] = usePlayerIdState("");
   const playerIsHost = playerId === host;
   const [, setResponse] = useState("");
-  const { roundNumber } = useRound();
+  const [{ roundNumber }] = useRound();
   const socket = useSocket();
 
   return (
@@ -26,7 +26,7 @@ const StartRoundPage = ({ roundLimit }: { roundLimit: number }) => {
           {playerIsHost
             ? "You are The Man™."
             : `${
-                host && players[host] ? players[host] : "No-one"
+                host && players[host] ? players[host].nickname : "No-one"
               } is The Man™.`}
         </p>
       </div>

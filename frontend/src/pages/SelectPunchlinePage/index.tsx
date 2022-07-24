@@ -8,7 +8,7 @@ import PunchlineCard from "../../components/PunchlineCard";
 import Button from "../../components/Button";
 import Setup from "../../components/Setup";
 import { usePlayers } from "../../contexts/players";
-import { useRound } from "../../contexts/round";
+import { RoundAction, useRound } from "../../contexts/round";
 import { useSocket } from "../../contexts/socket";
 
 const usePlayerIdState = createPersistedState("playerId");
@@ -21,13 +21,10 @@ const SelectPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
   const [playerId] = usePlayerIdState("");
   const playerIsHost = playerId === host;
 
-  const {
-    roundNumber,
-    setup,
-    numPlayersChosen,
-    punchlinesChosen: punchlines,
-    markPunchlineRead,
-  } = useRound();
+  const [
+    { roundNumber, setup, numPlayersChosen, chosenPunchlines: punchlines },
+    dispatchRound,
+  ] = useRound();
 
   const [punchlineSelected, setPunchlineSelected] = useState("");
   const [waiting, setWaiting] = useState(true);
@@ -62,7 +59,7 @@ const SelectPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
         setPunchlineSelected(text);
       }
     } else {
-      markPunchlineRead(index);
+      dispatchRound({ type: RoundAction.MARK_PUNCHLINE_READ, index });
       socket.emit("round:host-view", index, (response: string) => {
         setResponse(response);
       });
@@ -72,13 +69,13 @@ const SelectPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
   useEffect(() => {
     if (!playerIsHost) {
       socket.on("round:host-view", (index: number) => {
-        markPunchlineRead(index);
+        dispatchRound({ type: RoundAction.MARK_PUNCHLINE_READ, index });
       });
     }
     return () => {
       socket.off("round:host-view");
     };
-  });
+  }, [dispatchRound, playerIsHost, socket]);
 
   return (
     <>
@@ -100,7 +97,7 @@ const SelectPunchlinePage = ({ roundLimit }: { roundLimit: number }) => {
           </>
         )}
 
-        <Setup setupText={setup.setup} />
+        <Setup setupText={setup?.setup ?? ""} />
 
         {waiting && (
           <ProgressBar playersChosen={numPlayersChosen} playersTotal={count} />
