@@ -13,16 +13,17 @@ jobs:
 
     steps:
       - name: Check out Git repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: lts/*
+          node-version: 18.x
           cache: "npm"
 
       - name: Disable Husky installer
-        run: npm set-script prepare ""
+        run: |
+          sed -i '/"prepare":/d' package.json
 
       - name: Install Node.js dependencies
         run: npm ci -w=frontend -w=backend
