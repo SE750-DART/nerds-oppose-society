@@ -12,19 +12,32 @@ import { allocatePlayerPunchlines, createGame, getGame } from "../game.service";
 import { v4 as uuid, validate as validateUUID } from "uuid";
 import { GameState } from "../../models";
 import { ErrorType, ServiceError } from "../../util";
+import { MongoMemoryServer } from "mongodb-memory-server";
 
+let mongo: MongoMemoryServer;
 beforeAll(async () => {
-  await mongoose.connect(global.__MONGO_URI__);
+  mongo = await MongoMemoryServer.create();
+  const mongoUri: string = mongo.getUri();
+
+  await mongoose.connect(mongoUri);
 });
 
 afterAll(async () => {
+  jest.setTimeout(20000);
+  await mongo.stop();
   await mongoose.connection.close();
 });
 
 describe("createPlayer Service", () => {
   let gameSpy: jest.SpyInstance;
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    const collections = await mongoose.connection.db.collections();
+
+    for (const collection of collections) {
+      await collection.deleteMany({});
+    }
+
     gameSpy = jest.spyOn(GameServices, "getGame");
   });
 

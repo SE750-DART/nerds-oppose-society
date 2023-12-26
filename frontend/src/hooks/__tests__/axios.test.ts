@@ -1,5 +1,5 @@
 import axios, { AxiosError, AxiosResponse, CanceledError } from "axios";
-import { act, renderHook } from "@testing-library/react-hooks";
+import { act, renderHook } from "@testing-library/react";
 import { getRequestErrorMessage, useGet, usePost } from "../axios";
 
 const mockAxios = jest.mocked(axios);

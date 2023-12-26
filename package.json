@@ -6,8 +6,8 @@
     "test": "npm run test --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
     "lint:fix": "npm run lint:fix --workspaces --if-present",
-    "format": "prettier . --write",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "format": "prettier . --write"
   },
   "repository": {
     "type": "git",

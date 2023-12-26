@@ -9,12 +9,19 @@ import {
 import mongoose from "mongoose";
 import { RoundState } from "../../models/round.model";
 import { createPlayer } from "../player.service";
+import { MongoMemoryServer } from "mongodb-memory-server";
 
+let mongo: MongoMemoryServer;
 beforeAll(async () => {
-  await mongoose.connect(global.__MONGO_URI__);
+  mongo = await MongoMemoryServer.create();
+  const mongoUri: string = mongo.getUri();
+
+  await mongoose.connect(mongoUri);
 });
 
 afterAll(async () => {
+  jest.setTimeout(20000);
+  await mongo.stop();
   await mongoose.connection.close();
 });
 
@@ -22,6 +29,11 @@ describe("enterPlayersChooseState Service", () => {
   let game: Game;
 
   beforeEach(async () => {
+    const collections = await mongoose.connection.db.collections();
+
+    for (const collection of collections) {
+      await collection.deleteMany({});
+    }
     const gameCode = await createGame();
     game = await getGame(gameCode);
 

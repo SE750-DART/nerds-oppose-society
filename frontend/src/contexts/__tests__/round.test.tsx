@@ -1,4 +1,4 @@
-import { act, renderHook, RenderResult } from "@testing-library/react-hooks";
+import { act, renderHook, RenderResult } from "@testing-library/react";
 import { RoundAction, RoundProvider, useRound } from "../round";
 
 describe("useRound()", () => {
