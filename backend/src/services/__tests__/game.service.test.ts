@@ -25,12 +25,19 @@ import { ErrorType, ServiceError } from "../../util";
 import { createPlayer, getPlayer } from "../player.service";
 import { RoundState } from "../../models/round.model";
 import { MaxPlayers } from "../../models/settings.model";
+import { MongoMemoryServer } from "mongodb-memory-server";
 
+let mongo: MongoMemoryServer;
 beforeAll(async () => {
-  await mongoose.connect(global.__MONGO_URI__);
+  mongo = await MongoMemoryServer.create();
+  const mongoUri: string = mongo.getUri();
+
+  await mongoose.connect(mongoUri);
 });
 
 afterAll(async () => {
+  jest.setTimeout(20000);
+  await mongo.stop();
   await mongoose.connection.close();
 });
 
@@ -38,7 +45,12 @@ describe("createGame Service", () => {
   let modelSpy: jest.SpyInstance;
   let codeSpy: jest.SpyInstance;
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    const collections = await mongoose.connection.db.collections();
+
+    for (const collection of collections) {
+      await collection.deleteMany({});
+    }
     modelSpy = jest.spyOn(GameModel.prototype, "save");
     codeSpy = jest.spyOn(Util, "digitShortCode");
   });

@@ -49,7 +49,7 @@ export const removePlayer = async (
       game.discardedPunchlines.push(punchline);
     }
     await game.save();
-    await player.remove();
+    await game.players.remove(playerId);
     await game.save();
   }
 

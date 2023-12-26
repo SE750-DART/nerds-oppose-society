@@ -4,21 +4,33 @@ import { RoundState } from "../round.model";
 import { validate as validateUUID } from "uuid";
 import { MaxPlayers } from "../settings.model";
 import { fail } from "assert";
+import { MongoMemoryServer } from "mongodb-memory-server";
+
+let mongo: MongoMemoryServer;
+beforeAll(async () => {
+  mongo = await MongoMemoryServer.create();
+  const mongoUri: string = mongo.getUri();
+
+  await mongoose.connect(mongoUri);
+});
+
+afterAll(async () => {
+  jest.setTimeout(20000);
+  await mongo.stop();
+  await mongoose.connection.close();
+});
 
 describe("Game Model", () => {
   let gameCode = 420691;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let gameData: any;
 
-  beforeAll(async () => {
-    await mongoose.connect(global.__MONGO_URI__);
-  });
+  beforeEach(async () => {
+    const collections = await mongoose.connection.db.collections();
 
-  afterAll(async () => {
-    await mongoose.connection.close();
-  });
-
-  beforeEach(() => {
+    for (const collection of collections) {
+      await collection.deleteMany({});
+    }
     gameData = {
       gameCode: String(gameCode++),
       setups: [

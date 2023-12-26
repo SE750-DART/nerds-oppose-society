@@ -1,6 +1,6 @@
 import * as PlayerService from "../../services/player.service";
 import Auth from "../auth.handler";
-import { Socket } from "socket.io";
+import { SocketType } from "../../types/socket";
 
 describe("auth Handler", () => {
   let spy: jest.SpyInstance;
@@ -14,7 +14,7 @@ describe("auth Handler", () => {
       },
     },
     data: {},
-  } as unknown as Socket;
+  } as unknown as SocketType;
 
   beforeEach(() => {
     spy = jest.spyOn(PlayerService, "authenticatePlayer");
