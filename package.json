@@ -25,6 +25,7 @@
   },
   "workspaces": [
     "backend",
-    "frontend"
+    "frontend",
+    "frontend-v2"
   ]
 }
