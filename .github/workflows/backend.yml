@@ -22,8 +22,7 @@ jobs:
           cache: "npm"
 
       - name: Disable Husky installer
-        run: |
-          sed -i '/"prepare":/d' package.json
+        run: npm pkg delete scripts.prepare
 
       - name: Install Node.js dependencies
         run: npm ci -w=backend
